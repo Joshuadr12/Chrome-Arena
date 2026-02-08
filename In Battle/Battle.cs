@@ -778,10 +778,10 @@ public class Battle : MonoBehaviour
         {
             foreach (Ability ability in fighterAbilities[cause][effect])
             {
-                sources = ability.cause.source.UnitsPossible
+                sources = ability.cause.source.SelectTargets
                     (this,
                     GetLocation(ability.owner));
-                targets = ability.cause.target.UnitsPossible
+                targets = ability.cause.target.SelectTargets
                     (this,
                     GetLocation(ability.owner));
                 if
