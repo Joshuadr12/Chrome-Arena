@@ -1,10 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using static UnityEngine.GraphicsBuffer;
 
 public class Battle : MonoBehaviour
 {
@@ -866,192 +867,7 @@ public class Battle : MonoBehaviour
                 // Activate the triggers chosen from above.
                 foreach (Trigger t in activeTriggers)
                     if (!t.ability.owner.retreated)
-                    {
-                        Location loc = GetLocation(t.ability.owner);
-                        foreach (Effect effect in t.ability.effects)
-                        {
-                            List<Fighter> targets = effect.target.SelectTargets
-                                (this,
-                                loc,
-                                t.causeSource,
-                                t.causeTarget);
-                            switch (effect.type)
-                            {
-                                case Effect.EffectType.Summon: // TODO: "For Opponent" functionality.
-                                    foreach (int l in effect
-                                        .target
-                                        .SelectLanes(this, loc.lane))
-                                    {
-                                        Lane lane = lanes[l];
-                                        if (loc.isLeft)
-                                        {
-                                            int summonIndex = Mathf.Min
-                                                (loc.index,
-                                                lane.left.Count);
-                                            SummonFighters
-                                                (lane,
-                                                true,
-                                                effect.typeUnits,
-                                                summonIndex,
-                                                false);
-                                            for
-                                                (int i = summonIndex + 1;
-                                                i < lane.left.Count;
-                                                i++)
-                                            {
-                                                Vector3 summonPos = new Vector3
-                                                    (-1 - 2 * i,
-                                                    lane.posY);
-                                                lane
-                                                    .left[i]
-                                                    .GetComponent<Fighter>()
-                                                    .NewPos(summonPos, false);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            int summonIndex = Mathf.Min
-                                                (loc.index,
-                                                lane.right.Count);
-                                            SummonFighters
-                                                (lane,
-                                                false,
-                                                effect.typeUnits,
-                                                summonIndex,
-                                                false);
-                                            for
-                                                (int i = summonIndex + 1;
-                                                i < lane.right.Count;
-                                                i++)
-                                            {
-                                                Vector3 summonPos = new Vector3
-                                                    (1 + 2 * i,
-                                                    lane.posY);
-                                                lane
-                                                    .right[i]
-                                                    .GetComponent<Fighter>()
-                                                    .NewPos(summonPos, false);
-                                            }
-                                        }
-                                    }
-                                    break;
-                                case Effect.EffectType.MoveFront:
-                                    foreach (Fighter f in targets)
-                                    {
-                                        Location targetLoc = GetLocation(f);
-                                        Lane lane = lanes[targetLoc.lane];
-                                        if (targetLoc.index > 0)
-                                        {
-                                            if (targetLoc.isLeft)
-                                            {
-                                                lane.left.Remove(f.gameObject);
-                                                lane.left.Insert(0, f.gameObject);
-                                                for
-                                                    (int i = 0;
-                                                    i < lane.left.Count;
-                                                    i++)
-                                                {
-                                                    Vector3 summonPos = new Vector3
-                                                        (-1 - 2 * i,
-                                                        lane.posY);
-                                                    lane
-                                                        .left[i]
-                                                        .GetComponent<Fighter>()
-                                                        .NewPos(summonPos, false);
-                                                }
-                                            }
-                                            else
-                                            {
-                                                lane.right.Remove(f.gameObject);
-                                                lane.right.Insert(0, f.gameObject);
-                                                for
-                                                    (int i = 0;
-                                                    i < lane.right.Count;
-                                                    i++)
-                                                {
-                                                    Vector3 summonPos = new Vector3
-                                                        (1 + 2 * i,
-                                                        lane.posY);
-                                                    lane
-                                                        .right[i]
-                                                        .GetComponent<Fighter>()
-                                                        .NewPos(summonPos, false);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    break;
-                                case Effect.EffectType.Buff:
-                                    int healthGain = effect.typeInt1;
-                                    int attackGain = effect.typeInt2;
-                                    foreach (Fighter f in targets)
-                                    {
-                                        f.health += healthGain;
-                                        f.attack += attackGain;
-
-                                        GameObject marker = Instantiate
-                                            (buffMarker,
-                                            f.transform.position,
-                                            Quaternion.identity);
-                                        marker.GetComponent<BuffMarker>().health = healthGain;
-                                        marker.GetComponent<BuffMarker>().attack = attackGain;
-                                        if (!GetLocation(f).isLeft)
-                                            marker
-                                                .GetComponent<BuffMarker>()
-                                                .SwitchSides();
-                                    }
-                                    break;
-                                case Effect.EffectType.Damage:
-                                    foreach (Fighter f in targets)
-                                        DealDamage
-                                            (t.ability.owner,
-                                            f,
-                                            effect.typeInt1);
-                                    break;
-                                case Effect.EffectType.GainColor:
-                                    if (t.ability.owner.isLeft ^ effect.forOpponent)
-                                    {
-                                        leftSide.money += effect.typeInt1;
-                                        StarChallenges.tempScore.colorGain += effect.typeInt1;
-                                    }
-                                    else
-                                        rightSide.money += effect.typeInt1;
-                                    break;
-                                case Effect.EffectType.GiveTrait:
-                                    foreach (Fighter f in targets)
-                                    {
-                                        CreateBuffText(f, effect.typeStr.ToUpper());
-                                        switch (effect.typeStr)
-                                        {
-                                            case "block":
-                                                f.block += effect.typeInt1;
-                                                break;
-                                            default:
-                                                Debug.LogError($"Unknown trait {effect.typeStr}");
-                                                break;
-                                        }
-                                    }
-                                    break;
-                                case Effect.EffectType.Retreat:
-                                    foreach (Fighter f in targets)
-                                        if (!f.retreated)
-                                        {
-                                            Location l = GetLocation(f);
-                                            if (l.isLeft)
-                                                leftSide.money += lanes[l.lane]
-                                                    .Retreat(true, l.index);
-                                            else
-                                                rightSide.money += lanes[l.lane]
-                                                    .Retreat(false, l.index);
-                                            lanes[l.lane].fighterRetreated = true;
-                                        }
-                                    break;
-                                default:
-                                    Debug.LogError($"Unknown effect type {effect.type}");
-                                    break;
-                            }
-                        }
-                    }
+                        ActivateEffects(t);
                 PlayDamageSound();
                 yield return Master.SetTimer(1);
 
@@ -1077,6 +893,197 @@ public class Battle : MonoBehaviour
         }
         yield return StartCoroutine(Clean());
         yield return StartCoroutine(CheckLanes());
+    }
+
+    void ActivateEffects(Trigger trigger)
+    {
+        ///<summary>Execute the effects of an ability.</summary>
+
+        Location loc = GetLocation(trigger.ability.owner);
+        foreach (Effect effect in trigger.ability.effects)
+        {
+            List<Fighter> targets = effect.target.SelectTargets
+                (this,
+                loc,
+                trigger.causeSource,
+                trigger.causeTarget);
+            switch (effect.type)
+            {
+                case Effect.EffectType.Summon: // TODO: "For Opponent" functionality.
+                    Location temp;
+                    Lane laneTemp;
+                    foreach (Fighter f in targets)
+                    {
+                        temp = GetLocation(f);
+                        laneTemp = lanes[temp.lane];
+                        if (temp.isLeft)
+                        {
+                            int summonIndex = Mathf.Min
+                                (temp.index,
+                                laneTemp.left.Count);
+                            SummonFighters
+                                (laneTemp,
+                                true,
+                                effect.typeUnits,
+                                summonIndex,
+                                false);
+                            for
+                                (int i = summonIndex + 1;
+                                i < laneTemp.left.Count;
+                                i++)
+                            {
+                                Vector3 summonPos = new Vector3
+                                    (-1 - 2 * i,
+                                    laneTemp.posY);
+                                laneTemp
+                                    .left[i]
+                                    .GetComponent<Fighter>()
+                                    .NewPos(summonPos, false);
+                            }
+                        }
+                        else
+                        {
+                            int summonIndex = Mathf.Min
+                                (temp.index,
+                                laneTemp.right.Count);
+                            SummonFighters
+                                (laneTemp,
+                                false,
+                                effect.typeUnits,
+                                summonIndex,
+                                false);
+                            for
+                                (int i = summonIndex + 1;
+                                i < laneTemp.right.Count;
+                                i++)
+                            {
+                                Vector3 summonPos = new Vector3
+                                    (1 + 2 * i,
+                                    laneTemp.posY);
+                                laneTemp
+                                    .right[i]
+                                    .GetComponent<Fighter>()
+                                    .NewPos(summonPos, false);
+                            }
+                        }
+                    }
+                    break;
+                case Effect.EffectType.MoveFront:
+                    foreach (Fighter f in targets)
+                    {
+                        Location targetLoc = GetLocation(f);
+                        Lane lane = lanes[targetLoc.lane];
+                        if (targetLoc.index > 0)
+                        {
+                            if (targetLoc.isLeft)
+                            {
+                                lane.left.Remove(f.gameObject);
+                                lane.left.Insert(0, f.gameObject);
+                                for
+                                    (int i = 0;
+                                    i < lane.left.Count;
+                                    i++)
+                                {
+                                    Vector3 summonPos = new Vector3
+                                        (-1 - 2 * i,
+                                        lane.posY);
+                                    lane
+                                        .left[i]
+                                        .GetComponent<Fighter>()
+                                        .NewPos(summonPos, false);
+                                }
+                            }
+                            else
+                            {
+                                lane.right.Remove(f.gameObject);
+                                lane.right.Insert(0, f.gameObject);
+                                for
+                                    (int i = 0;
+                                    i < lane.right.Count;
+                                    i++)
+                                {
+                                    Vector3 summonPos = new Vector3
+                                        (1 + 2 * i,
+                                        lane.posY);
+                                    lane
+                                        .right[i]
+                                        .GetComponent<Fighter>()
+                                        .NewPos(summonPos, false);
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case Effect.EffectType.Buff:
+                    int healthGain = effect.typeInt1;
+                    int attackGain = effect.typeInt2;
+                    foreach (Fighter f in targets)
+                    {
+                        f.health += healthGain;
+                        f.attack += attackGain;
+
+                        GameObject marker = Instantiate
+                            (buffMarker,
+                            f.transform.position,
+                            Quaternion.identity);
+                        marker.GetComponent<BuffMarker>().health = healthGain;
+                        marker.GetComponent<BuffMarker>().attack = attackGain;
+                        if (!GetLocation(f).isLeft)
+                            marker
+                                .GetComponent<BuffMarker>()
+                                .SwitchSides();
+                    }
+                    break;
+                case Effect.EffectType.Damage:
+                    foreach (Fighter f in targets)
+                        DealDamage
+                            (trigger.ability.owner,
+                            f,
+                            effect.typeInt1);
+                    break;
+                case Effect.EffectType.GainColor:
+                    if (trigger.ability.owner.isLeft ^ effect.forOpponent)
+                    {
+                        leftSide.money += effect.typeInt1;
+                        StarChallenges.tempScore.colorGain += effect.typeInt1;
+                    }
+                    else
+                        rightSide.money += effect.typeInt1;
+                    break;
+                case Effect.EffectType.GiveTrait:
+                    foreach (Fighter f in targets)
+                    {
+                        CreateBuffText(f, effect.typeStr.ToUpper());
+                        switch (effect.typeStr)
+                        {
+                            case "block":
+                                f.block += effect.typeInt1;
+                                break;
+                            default:
+                                Debug.LogError($"Unknown trait {effect.typeStr}");
+                                break;
+                        }
+                    }
+                    break;
+                case Effect.EffectType.Retreat:
+                    foreach (Fighter f in targets)
+                        if (!f.retreated)
+                        {
+                            Location l = GetLocation(f);
+                            if (l.isLeft)
+                                leftSide.money += lanes[l.lane]
+                                    .Retreat(true, l.index);
+                            else
+                                rightSide.money += lanes[l.lane]
+                                    .Retreat(false, l.index);
+                            lanes[l.lane].fighterRetreated = true;
+                        }
+                    break;
+                default:
+                    Debug.LogError($"Unknown effect type {effect.type}");
+                    break;
+            }
+        }
     }
 
     IEnumerator Step()
