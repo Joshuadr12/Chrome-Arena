@@ -52,18 +52,6 @@ public class AbilityTarget : ScriptableObject
         /// <param name="causeSource">The source of the cause that activated the ability.</param>
         /// <param name="causeTarget">The target of the cause that activated the ability.</param>
 
-        Fighter referenceF;
-        if (causeTarget && causeTarget.isArtifact)
-        {
-            referenceF = causeTarget;
-            reference = new Location();
-            reference.lane = 0;
-            reference.isLeft = referenceF.isLeft;
-            reference.index = 0;
-        }
-        else
-            referenceF = battle.GetFighter(reference);
-
         List<Fighter> result = new List<Fighter>();
         List<Fighter> possible = new List<Fighter>();
         List<int> lanes = SelectLanes(battle, reference.lane);
@@ -73,38 +61,42 @@ public class AbilityTarget : ScriptableObject
             List<Fighter> result = new List<Fighter>();
 
             // When the reference fighter is left.
-            if (referenceF.isLeft)
+            if (reference.isLeft)
             {
                 if (alliesAhead)
                 {
-                    for (int i = 0; i < reference.index; i++)
+                    for (int i = 0;
+                        i < Math.Min(reference.index,
+                        battle.lanes[lane].left.Count);
+                        i++)
                         result.Add(battle
-                            .lanes[reference.lane]
+                            .lanes[lane]
                             .left[i]
                             .GetComponent<Fighter>());
                 }
-                if (alliesHere)
+                if (alliesHere
+                    && (reference.index < battle.lanes[lane].left.Count))
                     result.Add(battle
-                        .lanes[reference.lane]
+                        .lanes[lane]
                         .left[reference.index]
                         .GetComponent<Fighter>());
                 if (alliesBehind)
                 {
                     for (int i = reference.index + 1;
-                        i < battle.lanes[reference.lane].left.Count;
+                        i < battle.lanes[lane].left.Count;
                         i++)
                         result.Add(battle
-                            .lanes[reference.lane]
+                            .lanes[lane]
                             .left[i]
                             .GetComponent<Fighter>());
                 }
                 if (enemies)
                 {
                     for (int i = 0;
-                        i < battle.lanes[reference.lane].right.Count;
+                        i < battle.lanes[lane].right.Count;
                         i++)
                         result.Add(battle
-                            .lanes[reference.lane]
+                            .lanes[lane]
                             .right[i]
                             .GetComponent<Fighter>());
                 }
@@ -115,34 +107,38 @@ public class AbilityTarget : ScriptableObject
             {
                 if (alliesAhead)
                 {
-                    for (int i = 0; i < reference.index; i++)
+                    for (int i = 0;
+                        i < Math.Min(reference.index,
+                        battle.lanes[lane].right.Count);
+                        i++)
                         result.Add(battle
-                            .lanes[reference.lane]
+                            .lanes[lane]
                             .right[i]
                             .GetComponent<Fighter>());
                 }
-                if (alliesHere)
+                if (alliesHere
+                    && (reference.index < battle.lanes[lane].right.Count))
                     result.Add(battle
-                        .lanes[reference.lane]
+                        .lanes[lane]
                         .right[reference.index]
                         .GetComponent<Fighter>());
                 if (alliesBehind)
                 {
                     for (int i = reference.index + 1;
-                        i < battle.lanes[reference.lane].right.Count;
+                        i < battle.lanes[lane].right.Count;
                         i++)
                         result.Add(battle
-                            .lanes[reference.lane]
+                            .lanes[lane]
                             .right[i]
                             .GetComponent<Fighter>());
                 }
                 if (enemies)
                 {
                     for (int i = 0;
-                        i < battle.lanes[reference.lane].left.Count;
+                        i < battle.lanes[lane].left.Count;
                         i++)
                         result.Add(battle
-                            .lanes[reference.lane]
+                            .lanes[lane]
                             .left[i]
                             .GetComponent<Fighter>());
                 }
@@ -152,13 +148,12 @@ public class AbilityTarget : ScriptableObject
         }
 
         // When the lane selector is "Any," fighters from all lanes are combined for one selection.
-        Debug.Log($"Owner = {battle.GetFighter(reference).unit.name}; Lane selector = {laneSelector}.");
         if (laneSelector == LaneSelector.Any)
         {
             foreach (int lane in lanes)
                 foreach (Fighter f in GetFightersFromLane(lane))
                     result.Add(f);
-            result = SelectFightersFromList(battle, reference, result);
+            result = SelectFightersFromList(battle, reference, result, causeSource, causeTarget);
         }
 
         // Otherwise, an individual selection is made for each selected lane.
@@ -167,9 +162,9 @@ public class AbilityTarget : ScriptableObject
             foreach (int lane in lanes)
             {
                 foreach (Fighter f in SelectFightersFromList
-                    (battle,
-                    reference,
-                    GetFightersFromLane(lane)))
+                    (battle, reference,
+                    GetFightersFromLane(lane),
+                    causeSource, causeTarget))
                     result.Add(f);
             }
         }
@@ -192,7 +187,6 @@ public class AbilityTarget : ScriptableObject
         /// <param name="reference">The location of the ability.</param>
         /// <param name="list">The list of fighters to reference.</param>
 
-        Debug.Log(list.Count);
         // If the selection does not allow dead fighters, remove them from the list.
         if (!allowDead)
         {
@@ -255,7 +249,9 @@ public class AbilityTarget : ScriptableObject
                     n > 0;
                     n--)
                 {
-                    temp = list[UnityEngine.Random.Range(0, list.Count)];
+                    do
+                        temp = list[UnityEngine.Random.Range(0, list.Count)];
+                    while (result.Contains(temp));
                     result.Add(temp);
                     list.Remove(temp);
                 }
@@ -332,10 +328,7 @@ public class AbilityTarget : ScriptableObject
             result.Add(reference);
         for (int l = 0; l < battle.lanes.Count; l++)
             if (useOtherLanes && l != reference)
-            {
-                Debug.Log(l);
                 result.Add(l);
-            }
 
         // Select which lanes.
         switch (laneSelector)
