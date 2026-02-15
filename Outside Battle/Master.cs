@@ -100,6 +100,8 @@ public class Master : MonoBehaviour
         data.musicVolume = saveData.musicVolume;
         data.sfxVolume = saveData.sfxVolume;
         data.character = FindUnit(saveData.character);
+        if (data.character == null)
+            data.character = newData.character;
         data.day = saveData.day;
 
         data.defaultSquads.Clear();
@@ -138,12 +140,17 @@ public class Master : MonoBehaviour
             squad.artifact = FindArtifact(squadData.artifact);
 
             squad.units.Clear();
+            Unit u;
             foreach (Player.SquadData.LineData l in squadData.lines)
             {
                 line = new Line();
                 line.units = new List<Unit>();
                 foreach (string unit in l.units)
-                    line.units.Add(FindUnit(unit));
+                {
+                    u = FindUnit(unit);
+                    if (u != null)
+                        line.units.Add(FindUnit(unit));
+                }
                 squad.units.Add(line);
             }
         }

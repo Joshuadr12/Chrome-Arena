@@ -101,9 +101,7 @@ public class MainMenu : MonoBehaviour
         colours = Master.TranslateCollections
             (randomUnit.colours);
         do
-        {
             randomColour = colours[Random.Range(0, colours.Count)];
-        }
         // TODO: Remove the second condition when all colors are added.
         while ((randomColour == "neutral")
         || !Master.colours.ContainsKey(randomColour));
@@ -136,6 +134,8 @@ public class MainMenu : MonoBehaviour
         {
             save = saves[saveFiles[n]];
             unit = Master.FindUnit(save.character);
+            if (unit == null)
+                unit = Master.newData.character;
             saveCharacters[n].ChangeUnit(unit);
             displaySprite = saveCharacters[n].animator.GetComponent<SortingGroup>();
             displaySprite.sortingOrder = 10001;

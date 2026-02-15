@@ -65,7 +65,7 @@ public class LevelSelect : MonoBehaviour
         else
         {
             Master.leftSquads.Clear();
-            for (int i = 0; i < 6; i += 2)
+            for (int i = 0; i < 3; i++)
             {
                 Master.data.squads[i].startMoney = Master.levelSelected.squadSize;
                 Master.leftSquads.Add(Master.data.squads[i]);

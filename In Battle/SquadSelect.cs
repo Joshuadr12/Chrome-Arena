@@ -362,7 +362,9 @@ public class SquadSelect : MonoBehaviour
             {
                 Master.data.level[0]++;
                 foreach (Player.ResourceQuantity resource in Master.data.income)
-                    resource.quantity += 20;
+                {
+                    resource.quantity += (Master.data.level[0] > 10) ? 40 : 20;
+                }
             }
         }
         levelText.text = $"Level {oldLevel[0]}";
