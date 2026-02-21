@@ -168,6 +168,17 @@ public class Master : MonoBehaviour
             g.SetActive(false);
         menu.SetActive(true);
     }
+    public static void OpenMenu
+        (GameObject menu,
+        GameObject objectToDisable)
+    {
+        /// <summary>Enable and disable the given items.</summary>
+        /// <param name="menu">The menu to enable.</param>
+        /// <param name="objectsToDisable">The objects to disable.</param>
+
+        objectToDisable.SetActive(false);
+        menu.SetActive(true);
+    }
     public static void CloseMenu
         (GameObject menu,
         List<GameObject> objectsToEnable)
@@ -179,6 +190,17 @@ public class Master : MonoBehaviour
         menu.SetActive(false);
         foreach (GameObject g in objectsToEnable)
             g.SetActive(true);
+    }
+    public static void CloseMenu
+        (GameObject menu,
+        GameObject objectToEnable)
+    {
+        /// <summary>Enable and disable the given items.</summary>
+        /// <param name="menu">The menu to disable.</param>
+        /// <param name="objectsToDisable">The objects to enable.</param>
+
+        menu.SetActive(false);
+        objectToEnable.SetActive(true);
     }
 
     public static void RenderResourceQuantity(Image obj, Player.ResourceQuantity resource)

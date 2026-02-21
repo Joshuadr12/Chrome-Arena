@@ -16,10 +16,24 @@ public class LevelSelect : MonoBehaviour
     [SerializeField] TMP_Text dayText;
     [SerializeField] List<Image> resourceDisplay;
 
+
     //Start is called before the first frame update.
     void Start()
     {
+        Master.levelSelected = null;
         RenderResources();
+    }
+
+    //Update is called once per frame.
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (Master.levelSelected == null)
+                Master.GotoScene("MainMenu");
+            else
+                CancelLevel();
+        }
     }
 
     public void RenderResources()
@@ -79,6 +93,7 @@ public class LevelSelect : MonoBehaviour
     {
         /// <summary>Close the setup menu and return to level selection.</summary>
 
+        Master.levelSelected = null;
         Master.CloseMenu(squadMenu, buttons);
     }
 }

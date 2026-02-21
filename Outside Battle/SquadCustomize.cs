@@ -25,6 +25,8 @@ public class SquadCustomize : MonoBehaviour
     [SerializeField] GameObject squadSelectUI, squadCustomizeUI, dialoguePanel;
     [SerializeField] TMP_Text unitText, keywordText;
 
+    [HideInInspector] public int menuLayer = 0;
+
     GameObject textBox;
     Artifact artifactActive;
 
@@ -44,6 +46,20 @@ public class SquadCustomize : MonoBehaviour
         unitText.text = unitDescription;
         keywordText.text = unitKeywords;
         textBox.SetActive(unitDescription != "");
+
+        // Press 'Escape' to leave the current menu.
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (chooseArtifact)
+            {
+                chooseArtifact = false;
+                unitOptions.UpdateUnitOptions("basic", squadActive.colour);
+            }
+            else if (squadActive != null)
+                EndCustomize();
+            else
+                GotoScene("LevelSelect");
+        }
 
         if (Input.GetMouseButtonUp(0))
             selectedUnit = null;
@@ -197,8 +213,7 @@ public class SquadCustomize : MonoBehaviour
         ///<summary>End the customization process and return to the select squad menu.</summary>
 
         squadActive = null;
-        squadCustomizeUI.SetActive(false);
-        squadSelectUI.SetActive(true);
+        Master.CloseMenu(squadCustomizeUI, squadSelectUI);
         UpdateSquadButtons();
     }
 

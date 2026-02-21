@@ -34,6 +34,13 @@ public class Settings : MonoBehaviour
         unitOptions.UpdateUnitOptions("basic", canBeBig: false);
     }
 
+    //Update is called once per frame.
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            LevelSelect();
+    }
+
     public void LevelSelect()
     {
         Master.Save();

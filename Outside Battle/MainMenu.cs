@@ -13,16 +13,16 @@ public class MainMenu : MonoBehaviour
 
     [Header("Background"), SerializeField] SpriteRenderer background;
     [SerializeField] GameObject backgroundFighter;
-    [Header("Credits"), SerializeField] GameObject credits;
-    [SerializeField] List<GameObject> objectsToDisable;
     [Header("Save Files"), SerializeField] List<string> saveFiles;
     [SerializeField] List<UnitDisplay> saveCharacters;
     [SerializeField] List<TMP_Text> saveDescriptions;
     [SerializeField] List<Button> deleteButtons;
     [Header("Miscellaneous"), SerializeField]
     AudioSource music;
+    [SerializeField] GameObject mainPanel, saveFilePanel, baseSavePanel, deleteSavePanel, creditsPanel;
 
     [HideInInspector] public string deleteSelection { get; set; }
+    [HideInInspector] public int menuLayer { get; set; }
 
     Dictionary<string, PlayerData> saves = new Dictionary<string, PlayerData>();
     List<string> unitCollections = new List<string>();
@@ -49,6 +49,8 @@ public class MainMenu : MonoBehaviour
         foreach (string co in Master.unitSets.Keys)
             unitCollections.Add(co);
         InvokeRepeating("SpawnFighter", 0, 0.1f);
+
+        menuLayer = 0;
     }
 
     // Update is called once per frame.
@@ -76,6 +78,22 @@ public class MainMenu : MonoBehaviour
                 transform.GetChild(f).parent = null;
                 Destroy(displayTrans.gameObject);
                 f--;
+            }
+        }
+
+        // Press 'Escape' to close the current menu.
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (menuLayer == 1)
+            {
+                creditsPanel.SetActive(false);
+                Master.CloseMenu(saveFilePanel, mainPanel);
+                menuLayer = 0;
+            }
+            else if (menuLayer == 2)
+            {
+                Master.CloseMenu(deleteSavePanel, baseSavePanel);
+                menuLayer = 1;
             }
         }
     }

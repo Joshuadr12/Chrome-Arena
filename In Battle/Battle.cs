@@ -441,11 +441,15 @@ public class Battle : MonoBehaviour
 
             target.health -= damage;
             if (target.health > 0)
-                TriggerAbilities(Cause.CauseType.Nonlethal, source, target);
+                TriggerAbilities(Cause.CauseType.Nonlethal,
+                    source.isArtifact ? null : source,
+                    target);
             else
             {
                 target.Die();
-                TriggerAbilities(Cause.CauseType.Death, source, target);
+                TriggerAbilities(Cause.CauseType.Death,
+                    source.isArtifact ? null : source,
+                    target);
             }
 
             // Create a damage marker.

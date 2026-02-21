@@ -193,12 +193,20 @@ public class SquadSelect : MonoBehaviour
     void Update()
     {
         // Leave the battle.
-        if (Input.GetKeyDown(KeyCode.Escape)
-            && (leftChoice == null)
-            && !resultsPanel.gameObject.activeSelf)
-            retreatWarning.SetActive(true);
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (leftChoice != null)
+            {
+                leftChoice = null;
+                PlaySound(cancelAudio);
+            }
+            else if (resultsBody.activeSelf)
+                Leave();
+            else if (!gameOver)
+                retreatWarning.SetActive(!retreatWarning.activeSelf);
+        }
+
         // When the battle is over.
-        else if (gameOver)
+        if (gameOver)
         {
             countdown.enabled = true;
             countdown.text = "Escape to Play Again";
@@ -218,11 +226,6 @@ public class SquadSelect : MonoBehaviour
     {
         /// <summary>Manage choice canceling.</summary>
 
-        if (Input.GetKeyDown(cancelKey))
-        {
-            leftChoice = null;
-            PlaySound(cancelAudio);
-        }
         instructions.gameObject.SetActive(leftChoice != null);
         instructions.text = cancelPrompt;
     }
@@ -309,6 +312,7 @@ public class SquadSelect : MonoBehaviour
     {
         leftDisplay.Die();
         resultsText.text = loseMessage;
+        gameOver = true;
         StartCoroutine(BattleResults(true));
     }
 
