@@ -29,6 +29,7 @@ public class Unit : ScriptableObject
     [Tooltip("A list of units to reference when describing what this unit does.")] public List<Unit> keywordUnits;
     [Header("Skeleton")]
     public bool useSkeleton = true;
+    public List<SpriteSet> bodySet;
     public Appearance appearance;
     public int attackId;
     public int abilityId;
@@ -216,22 +217,22 @@ public class Appearance
     public GameObject model;
     public List<SpriteSet> itemSet, eyeSet, hairSet, bodySet,
         clothSet, armorSet, pantSet, weaponSet, backSet, horseSet;
+}
 
-    [Serializable]
-    public class SpriteSet
+[Serializable]
+public class SpriteSet
+{
+    /// <summary>
+    /// Stores information for a single sprite renderer for a unit display.
+    /// </summary>
+
+    public Sprite sprite;
+    public Color color = Color.white;
+
+    public void UpdateRenderer(SpriteRenderer renderer)
     {
-        /// <summary>
-        /// Stores information for a single sprite renderer for a unit display.
-        /// </summary>
-
-        public Sprite sprite;
-        public Color color = Color.white;
-
-        public void UpdateRenderer(SpriteRenderer renderer)
-        {
-            renderer.sprite = sprite;
-            renderer.color = color;
-        }
+        renderer.sprite = sprite;
+        renderer.color = color;
     }
 }
 

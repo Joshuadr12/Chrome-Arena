@@ -60,12 +60,33 @@ public class UnitDisplay : MonoBehaviour
     }
 
     void UpdateSpriteSet
-        (List<Appearance.SpriteSet> reference,
+        (List<SpriteSet> reference,
         List<SpriteRenderer> list)
     {
         for
             (int s = 0;
             s < Mathf.Min(reference.Count, list.Count);
+            s++)
+        {
+            if (list[s] != null)
+            {
+                list[s].sprite = reference[s].sprite;
+                list[s].color = colour.renderColour
+                    ? Color.Lerp
+                        (reference[s].color,
+                        colour.physicalColour,
+                        0.5f)
+                    : reference[s].color;
+            }
+        }
+    }
+    void UpdateSpriteSet
+        (List<SpriteSet> reference,
+        SpriteRenderer[] list)
+    {
+        for
+            (int s = 0;
+            s < Mathf.Min(reference.Count, list.Length);
             s++)
         {
             if (list[s] != null)
@@ -114,18 +135,24 @@ public class UnitDisplay : MonoBehaviour
 
         if (unit != null)
         {
-            UpdateSpriteSet(unit.appearance.itemSet, sprites._itemList);
-            UpdateSpriteSet(unit.appearance.eyeSet, sprites._eyeList);
-            UpdateSpriteSet(unit.appearance.hairSet, sprites._hairList);
-            UpdateSpriteSet(unit.appearance.bodySet, sprites._bodyList);
-            UpdateSpriteSet(unit.appearance.clothSet, sprites._clothList);
-            UpdateSpriteSet(unit.appearance.armorSet, sprites._armorList);
-            UpdateSpriteSet(unit.appearance.pantSet, sprites._pantList);
-            UpdateSpriteSet(unit.appearance.weaponSet, sprites._weaponList);
-            UpdateSpriteSet(unit.appearance.backSet, sprites._backList);
+            if (unit.bodySet.Count > 0)
+                UpdateSpriteSet(unit.bodySet,
+                    gameObject.GetComponentsInChildren<SpriteRenderer>());
+            else
+            {
+                UpdateSpriteSet(unit.appearance.itemSet, sprites._itemList);
+                UpdateSpriteSet(unit.appearance.eyeSet, sprites._eyeList);
+                UpdateSpriteSet(unit.appearance.hairSet, sprites._hairList);
+                UpdateSpriteSet(unit.appearance.bodySet, sprites._bodyList);
+                UpdateSpriteSet(unit.appearance.clothSet, sprites._clothList);
+                UpdateSpriteSet(unit.appearance.armorSet, sprites._armorList);
+                UpdateSpriteSet(unit.appearance.pantSet, sprites._pantList);
+                UpdateSpriteSet(unit.appearance.weaponSet, sprites._weaponList);
+                UpdateSpriteSet(unit.appearance.backSet, sprites._backList);
 
-            if (horseSprites)
-                UpdateSpriteSet(unit.appearance.horseSet, horseSprites._spList);
+                if (horseSprites)
+                    UpdateSpriteSet(unit.appearance.horseSet, horseSprites._spList);
+            }
         }
     }
 }

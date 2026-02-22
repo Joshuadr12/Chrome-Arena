@@ -46,6 +46,7 @@ public class Fighter : UnitDisplay
     new void Start()
     {
         base.Start();
+        SetScale();
         healthSprite = healthImage.sprite;
 
         if (isArtifact)
@@ -152,22 +153,27 @@ public class Fighter : UnitDisplay
 
         // Transform
         isLeft = !isLeft;
-        if (isLeft)
-        {
-            transform.localScale = new Vector3(-1, 1, 1) * offsetScale;
-            statCanvas.localScale = new Vector3(-1, 1, 1) * offsetScale * 0.01f;
-        }
-        else
-        {
-            transform.localScale = Vector3.one * offsetScale;
-            statCanvas.localScale = Vector3.one * offsetScale * 0.01f;
-        }
-        transform.localScale *= unit.bodySize;
+        SetScale();
 
         // Health/Attack display
         Vector3 temp = healthText.transform.parent.position;
         healthText.transform.parent.position = attackText.transform.parent.position;
         attackText.transform.parent.position = temp;
+    }
+
+    public void SetScale()
+    {
+        if (isLeft)
+        {
+            transform.localScale = Vector3.one * offsetScale;
+            statCanvas.localScale = Vector3.one * offsetScale * 0.01f;
+        }
+        else
+        {
+            transform.localScale = new Vector3(-1, 1, 1) * offsetScale;
+            statCanvas.localScale = new Vector3(-1, 1, 1) * offsetScale * 0.01f;
+        }
+        transform.localScale *= unit.bodySize;
     }
 
     public void NewPos
