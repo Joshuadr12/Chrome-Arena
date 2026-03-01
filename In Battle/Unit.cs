@@ -29,6 +29,7 @@ public class Unit : ScriptableObject
     [Tooltip("A list of units to reference when describing what this unit does.")] public List<Unit> keywordUnits;
     [Header("Skeleton")]
     public bool useSkeleton = true;
+    public GameObject model;
     public List<SpriteSet> bodySet;
     public Appearance appearance;
     public int attackId;

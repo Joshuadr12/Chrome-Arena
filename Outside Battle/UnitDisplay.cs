@@ -110,13 +110,13 @@ public class UnitDisplay : MonoBehaviour
         /// <summary>Change the unit when necessary.</summary>
         /// <param name="newUnit">The new unit to change into.</param>
         /// <param name="newColour">The new colour to change into; null if the color doesn't change.</param>
-        
+
         if (newUnit)
         {
             unit = newUnit;
             if (model)
                 Destroy(model);
-            model = Instantiate(unit.appearance.model, transform);
+            model = Instantiate(unit.model, transform);
             animator = model.GetComponent<Animator>();
             sprites = model.transform.GetComponentInChildren<SPUM_SpriteList>();
             horseSprites = model.transform.GetComponentInChildren<SPUM_HorseSpriteList>();
@@ -137,7 +137,7 @@ public class UnitDisplay : MonoBehaviour
         {
             if (unit.bodySet.Count > 0)
                 UpdateSpriteSet(unit.bodySet,
-                    gameObject.GetComponentsInChildren<SpriteRenderer>());
+                    model.GetComponentsInChildren<SpriteRenderer>());
             else
             {
                 UpdateSpriteSet(unit.appearance.itemSet, sprites._itemList);

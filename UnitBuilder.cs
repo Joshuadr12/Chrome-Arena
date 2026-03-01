@@ -52,7 +52,6 @@ public class UnitBuilder : MonoBehaviour
         list.Clear();
         foreach (SpriteRenderer renderer in reference)
         {
-            print(renderer.gameObject.name);
             SpriteSet set = new SpriteSet();
             set.sprite = renderer.sprite;
             set.color = renderer.color;
