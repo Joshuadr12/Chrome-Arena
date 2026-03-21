@@ -42,21 +42,23 @@ public class UnitDisplay : MonoBehaviour
             : Master.data.battleSpeed);
     }
 
-    public void SetAnimation(int id = -1)
+    public void SetAnimation(int id = -1, string str = "Idle")
     {
         animator.SetInteger("misc", id);
+        animator.Play(str);
     }
     public void SetMoveAnimation(bool move = false)
     {
         animator.SetBool("moving", move);
-        if (move)
-            SetAnimation();
+        SetAnimation(str: move ? "Move" : "Idle");
     }
     public void Die(bool isDead = true)
     {
         SetAnimation();
         SetMoveAnimation();
         animator.SetBool("dead", isDead);
+        if (isDead)
+            animator.Play("Die");
     }
 
     void UpdateSpriteSet

@@ -34,6 +34,8 @@ public class Unit : ScriptableObject
     public Appearance appearance;
     public int attackId;
     public int abilityId;
+    public string attackString = "Attack_0";
+    public string abilityString = "Skill_0";
     [Header("Spritesheet")]
     public Sprite[] idle;
     public Sprite[] move, abilityAnim, attackAnim, die;

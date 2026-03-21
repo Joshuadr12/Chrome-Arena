@@ -107,7 +107,7 @@ public class Fighter : UnitDisplay
         {
             transform.position = newPos;
             if (animator.GetBool("moving"))
-                SetMoveAnimation(false);
+                SetMoveAnimation();
         }
     }
 
@@ -139,12 +139,20 @@ public class Fighter : UnitDisplay
 
     public void SetAttackAnimation(bool attack)
     {
-        SetAnimation(attack ? unit.attackId : -1);
+        //SetAnimation(attack ? unit.attackId : -1);
+        if (attack)
+            SetAnimation(unit.attackId, unit.attackString);
+        else
+            SetAnimation();
     }
 
     public void SetAbilityAnimation(bool ability)
     {
-        SetAnimation(ability ? unit.abilityId : -1);
+        //SetAnimation(ability ? unit.abilityId : -1);
+        if (ability)
+            SetAnimation(unit.abilityId, unit.abilityString);
+        else
+            SetAnimation();
     }
 
     public void SwitchSides()
