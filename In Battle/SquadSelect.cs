@@ -136,12 +136,12 @@ public class SquadSelect : MonoBehaviour
             // Die animation on game over.
             if (countTimer > 0)
             {
-                rightDisplay.Die();
+                rightDisplay.SetAnimation(UnitDisplay.AnimState.Die);
                 resultsText.text = winMessage;
             }
             else
             {
-                leftDisplay.Die();
+                leftDisplay.SetAnimation(UnitDisplay.AnimState.Die);
                 resultsText.text = loseMessage;
             }
             StartCoroutine(BattleResults());
@@ -310,7 +310,7 @@ public class SquadSelect : MonoBehaviour
 
     public void Retreat()
     {
-        leftDisplay.Die();
+        leftDisplay.SetAnimation(UnitDisplay.AnimState.Die);
         resultsText.text = loseMessage;
         gameOver = true;
         StartCoroutine(BattleResults(true));

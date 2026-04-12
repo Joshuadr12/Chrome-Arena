@@ -17,7 +17,17 @@ public class UnitDisplay : MonoBehaviour
     [Tooltip("Leave 0 for a random speed.")] public float animSpeed;
     public float offsetScale = 1;
 
+    public enum AnimState
+    {
+        Idle,
+        Move,
+        Attack,
+        Ability,
+        Die
+    }
+
     // Miscellaneous variables.
+    [HideInInspector] public AnimState state = AnimState.Idle;
     [HideInInspector] public Animator animator;
     [HideInInspector] public SPUM_SpriteList sprites;
     [HideInInspector] public SPUM_HorseSpriteList horseSprites;
@@ -37,51 +47,40 @@ public class UnitDisplay : MonoBehaviour
     {
         // Update the animator speed.
         animator.speed = 0.5f *
-            (!useBattleSpeed || (!animator.GetBool("dead") && animator.GetInteger("misc") < 0)
+            (!useBattleSpeed || state == AnimState.Idle
             ? animSpeed
             : Master.data.battleSpeed);
     }
 
-    public void SetAnimation(int id = -1, string str = "Idle")
+    public void SetAnimation(AnimState newState = AnimState.Idle)
     {
-        animator.SetInteger("misc", id);
-        animator.Play(str);
-    }
-    public void SetMoveAnimation(bool move = false)
-    {
-        animator.SetBool("moving", move);
-        SetAnimation(str: move ? "Move" : "Idle");
-    }
-    public void Die(bool isDead = true)
-    {
-        SetAnimation();
-        SetMoveAnimation();
-        animator.SetBool("dead", isDead);
-        if (isDead)
-            animator.Play("Die");
-    }
-
-    void UpdateSpriteSet
-        (List<SpriteSet> reference,
-        List<SpriteRenderer> list)
-    {
-        for
-            (int s = 0;
-            s < Mathf.Min(reference.Count, list.Count);
-            s++)
+        if (state != AnimState.Die)
         {
-            if (list[s] != null)
+            state = newState;
+            switch (state)
             {
-                list[s].sprite = reference[s].sprite;
-                list[s].color = colour.renderColour
-                    ? Color.Lerp
-                        (reference[s].color,
-                        colour.physicalColour,
-                        0.5f)
-                    : reference[s].color;
+                case AnimState.Idle:
+                    animator.Play("Idle");
+                    break;
+                case AnimState.Move:
+                    animator.Play("Move");
+                    break;
+                case AnimState.Attack:
+                    animator.Play(unit.attackString);
+                    break;
+                case AnimState.Ability:
+                    animator.Play(unit.abilityString);
+                    break;
+                case AnimState.Die:
+                    animator.Play("Die");
+                    break;
+                default:
+                    Debug.LogWarning($"Unknown animation state: {state}");
+                    break;
             }
         }
     }
+
     void UpdateSpriteSet
         (List<SpriteSet> reference,
         SpriteRenderer[] list)
@@ -136,25 +135,7 @@ public class UnitDisplay : MonoBehaviour
         }
 
         if (unit != null)
-        {
-            if (unit.bodySet.Count > 0)
-                UpdateSpriteSet(unit.bodySet,
-                    model.GetComponentsInChildren<SpriteRenderer>());
-            else
-            {
-                UpdateSpriteSet(unit.appearance.itemSet, sprites._itemList);
-                UpdateSpriteSet(unit.appearance.eyeSet, sprites._eyeList);
-                UpdateSpriteSet(unit.appearance.hairSet, sprites._hairList);
-                UpdateSpriteSet(unit.appearance.bodySet, sprites._bodyList);
-                UpdateSpriteSet(unit.appearance.clothSet, sprites._clothList);
-                UpdateSpriteSet(unit.appearance.armorSet, sprites._armorList);
-                UpdateSpriteSet(unit.appearance.pantSet, sprites._pantList);
-                UpdateSpriteSet(unit.appearance.weaponSet, sprites._weaponList);
-                UpdateSpriteSet(unit.appearance.backSet, sprites._backList);
-
-                if (horseSprites)
-                    UpdateSpriteSet(unit.appearance.horseSet, horseSprites._spList);
-            }
-        }
+            UpdateSpriteSet(unit.bodySet,
+                model.GetComponentsInChildren<SpriteRenderer>());
     }
 }

@@ -92,7 +92,7 @@ public class DialogueScene : MonoBehaviour
             while (!Input.GetMouseButtonDown(0))
                 yield return null;
             foreach (Fighter actor in actors)
-                actor.SetAnimation(-1);
+                actor.SetAnimation();
 
             yield return StartCoroutine(ExecuteScene(e, true));
 
@@ -211,10 +211,10 @@ public class DialogueScene : MonoBehaviour
                     actor.NewPos(Vector3.right * offscreenPos);
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Attack:
-                    actor.SetAttackAnimation(true);
+                    actor.SetAnimation(UnitDisplay.AnimState.Attack);
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Ability:
-                    actor.SetAbilityAnimation(true);
+                    actor.SetAnimation(UnitDisplay.AnimState.Ability);
                     break;
                 default:
                     Debug.LogWarning($"Unknown actor behavior: {action.behavior}");

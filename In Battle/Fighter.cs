@@ -58,7 +58,7 @@ public class Fighter : UnitDisplay
         }
         else
         {
-            SetMoveAnimation(true);
+            SetAnimation(AnimState.Move);
             foreach (Ability a in unit.abilities)
                 AddAbility(a);
         }
@@ -106,8 +106,8 @@ public class Fighter : UnitDisplay
         else
         {
             transform.position = newPos;
-            if (animator.GetBool("moving"))
-                SetMoveAnimation();
+            if (state == AnimState.Move)
+                SetAnimation();
         }
     }
 
@@ -135,24 +135,6 @@ public class Fighter : UnitDisplay
             Battle
                 .fighterAbilities[a.cause.type][a.effects[0].type]
                 .Add(newAbility);
-    }
-
-    public void SetAttackAnimation(bool attack)
-    {
-        //SetAnimation(attack ? unit.attackId : -1);
-        if (attack)
-            SetAnimation(unit.attackId, unit.attackString);
-        else
-            SetAnimation();
-    }
-
-    public void SetAbilityAnimation(bool ability)
-    {
-        //SetAnimation(ability ? unit.abilityId : -1);
-        if (ability)
-            SetAnimation(unit.abilityId, unit.abilityString);
-        else
-            SetAnimation();
     }
 
     public void SwitchSides()
@@ -202,8 +184,7 @@ public class Fighter : UnitDisplay
         // Decide whether or not to switch to the move sprite state.
         if
             (animate
-            && !animator.GetBool("dead")
             && ((newPos - oldPos).magnitude >= 0.5f))
-            SetMoveAnimation(true);
+            SetAnimation(AnimState.Move);
     }
 }

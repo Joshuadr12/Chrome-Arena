@@ -133,7 +133,7 @@ public class MainMenu : MonoBehaviour
             transform);
         displayComp = fighter.GetComponent<UnitDisplay>();
         displayComp.ChangeUnit(randomUnit, randomColour);
-        displayComp.SetMoveAnimation(true);
+        displayComp.SetAnimation(UnitDisplay.AnimState.Move);
 
         // Arrange the sprites according to their y-position.
         displaySprite = displayComp

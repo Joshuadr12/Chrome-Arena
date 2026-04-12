@@ -446,7 +446,7 @@ public class Battle : MonoBehaviour
                     target);
             else
             {
-                target.Die();
+                target.SetAnimation(UnitDisplay.AnimState.Die);
                 TriggerAbilities(Cause.CauseType.Death,
                     source.isArtifact ? null : source,
                     target);
@@ -865,7 +865,7 @@ public class Battle : MonoBehaviour
             {
                 // Activate the ability animations.
                 foreach (Trigger t in activeTriggers)
-                    t.ability.owner.SetAbilityAnimation(true);
+                    t.ability.owner.SetAnimation(UnitDisplay.AnimState.Ability);
                 yield return Master.SetTimer(1);
 
                 // Activate the triggers chosen from above.
@@ -882,9 +882,9 @@ public class Battle : MonoBehaviour
                     if (f != null)
                     {
                         if (f.health <= 0)
-                            f.Die();
+                            f.SetAnimation(UnitDisplay.AnimState.Die);
                         else
-                            f.SetAbilityAnimation(false);
+                            f.SetAnimation();
                     }
                 }
             }
@@ -1144,7 +1144,7 @@ public class Battle : MonoBehaviour
                         (new Vector3(-0.5f, l.posY),
                         false,
                         true);
-                    leftFighter.SetAttackAnimation(true);
+                    leftFighter.SetAnimation(UnitDisplay.AnimState.Attack);
                 }
 
                 rightFighter = l.right[0].GetComponent<Fighter>();
@@ -1171,7 +1171,7 @@ public class Battle : MonoBehaviour
                         (new Vector3(0.5f, l.posY),
                         false,
                         true);
-                    rightFighter.SetAttackAnimation(true);
+                    rightFighter.SetAnimation(UnitDisplay.AnimState.Attack);
                 }
             }
         }
@@ -1210,9 +1210,9 @@ public class Battle : MonoBehaviour
             if (l.Fighting())
             {
                 l.left[0].GetComponent<Fighter>()
-                    .SetAttackAnimation(false);
+                    .SetAnimation();
                 l.right[0].GetComponent<Fighter>()
-                    .SetAttackAnimation(false);
+                    .SetAnimation();
             }
         }
 
@@ -1248,8 +1248,7 @@ public class Battle : MonoBehaviour
                 }
                 else
                 {
-                    // f.SetAnimation();
-                    f.Die(false);
+                    f.SetAnimation();
                     f.NewPos(new Vector3(-1 - 2 * n, lane.posY));
                     if (lane.fighterRetreated)
                     {
@@ -1273,8 +1272,7 @@ public class Battle : MonoBehaviour
                 }
                 else
                 {
-                    //f.SetAnimation();
-                    f.Die(false);
+                    f.SetAnimation();
                     f.NewPos(new Vector3(1 + 2 * n, lane.posY));
                     n++;
                 }
