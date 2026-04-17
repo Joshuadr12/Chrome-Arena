@@ -93,12 +93,8 @@ public class UnitDisplay : MonoBehaviour
             if (list[s] != null)
             {
                 list[s].sprite = reference[s].sprite;
-                list[s].color = colour.renderColour
-                    ? Color.Lerp
-                        (reference[s].color,
-                        colour.physicalColour,
-                        0.5f)
-                    : reference[s].color;
+                list[s].color = reference[s].color;
+                list[s].material = colour.material;
             }
         }
     }

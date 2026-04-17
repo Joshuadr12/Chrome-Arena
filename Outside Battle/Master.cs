@@ -470,7 +470,7 @@ public class Colour
     // Variables.
     public string name;
     public Color physicalColour = Color.white;
-    public bool renderColour = true;
+    public Material material;
     public bool whiteText;
     public float red, yellow, blue, white, black;
     //public List<Unit> playableUnits, extraUnits;

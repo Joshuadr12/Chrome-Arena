@@ -154,7 +154,7 @@ public class MainMenu : MonoBehaviour
             unit = Master.FindUnit(save.character);
             if (unit == null)
                 unit = Master.newData.character;
-            saveCharacters[n].ChangeUnit(unit);
+            saveCharacters[n].ChangeUnit(unit, "neutral");
             displaySprite = saveCharacters[n].animator.GetComponent<SortingGroup>();
             displaySprite.sortingOrder = 10001;
             deleteButtons[n].interactable = save.events.Contains("intro");
