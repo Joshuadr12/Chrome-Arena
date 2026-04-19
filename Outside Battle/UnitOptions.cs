@@ -57,6 +57,8 @@ public class UnitOptions : MonoBehaviour
                     artifactOptionButtons[buttonIndex]
                         .gameObject.SetActive(true);
                     artifactOptionButtons[buttonIndex].sprite = artifact.sprite;
+                    artifactOptionButtons[buttonIndex].material = Master
+                        .colours[colour].material;
                     unitOptionButtons[buttonIndex]
                         .gameObject.SetActive(false);
                     buttonIndex++;

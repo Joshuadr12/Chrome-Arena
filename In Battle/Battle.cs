@@ -90,6 +90,11 @@ public class Battle : MonoBehaviour
             rightSide.colour,
             true);
 
+        artifactSelectImage.material = Master
+            .colours[leftSide.colour].material;
+        artifactDeselectImage.material = Master
+            .colours[leftSide.colour].material;
+
         // Abilities and triggers
         fighterAbilities = new Dictionary<Cause.CauseType, Dictionary<Effect.EffectType, List<Ability>>>();
         foreach (Cause.CauseType cause in Master.abilityCauses)

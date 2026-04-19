@@ -150,6 +150,8 @@ public class SquadCustomize : MonoBehaviour
         chooseArtifact = false;
         artifactActive = squadActive.artifact;
         artifactImage.sprite = artifactActive.sprite;
+        artifactImage.material = Master
+            .colours[squadActive.colour].material;
         nameInput.text = squadActive.squadName;
 
         // Line panels
