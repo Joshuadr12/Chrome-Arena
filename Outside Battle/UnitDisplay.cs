@@ -29,8 +29,6 @@ public class UnitDisplay : MonoBehaviour
     // Miscellaneous variables.
     [HideInInspector] public AnimState state = AnimState.Idle;
     [HideInInspector] public Animator animator;
-    [HideInInspector] public SPUM_SpriteList sprites;
-    [HideInInspector] public SPUM_HorseSpriteList horseSprites;
     [HideInInspector] public Colour colour;
 
     GameObject model;
@@ -115,8 +113,6 @@ public class UnitDisplay : MonoBehaviour
                 Destroy(model);
             model = Instantiate(unit.model, transform);
             animator = model.GetComponent<Animator>();
-            sprites = model.transform.GetComponentInChildren<SPUM_SpriteList>();
-            horseSprites = model.transform.GetComponentInChildren<SPUM_HorseSpriteList>();
         }
 
         if (newColour != null)

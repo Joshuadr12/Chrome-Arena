@@ -9,8 +9,6 @@ public class UnitBuilder : MonoBehaviour
     /// </summary>
 
     public GameObject body;
-    public SPUM_SpriteList spriteList;
-    public SPUM_HorseSpriteList horseList;
     public Unit unit;
 
     // Start is called before the first frame update
