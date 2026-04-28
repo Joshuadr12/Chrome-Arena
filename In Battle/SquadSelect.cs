@@ -208,8 +208,7 @@ public class SquadSelect : MonoBehaviour
         // When the battle is over.
         if (gameOver)
         {
-            countdown.enabled = true;
-            countdown.text = "Escape to Play Again";
+            countdown.enabled = false;
             instructions.gameObject.SetActive(false);
         }
         else
