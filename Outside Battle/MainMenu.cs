@@ -11,8 +11,7 @@ public class MainMenu : MonoBehaviour
     /// Manages the main menu.
     /// </summary>
 
-    [Header("Background"), SerializeField] SpriteRenderer background;
-    [SerializeField] GameObject backgroundFighter;
+    [Header("Background"), SerializeField] GameObject backgroundFighter;
     [Header("Save Files"), SerializeField] List<string> saveFiles;
     [SerializeField] List<UnitDisplay> saveCharacters;
     [SerializeField] List<TMP_Text> saveDescriptions;
@@ -56,9 +55,6 @@ public class MainMenu : MonoBehaviour
     // Update is called once per frame.
     void Update()
     {
-        // Expanding the background causes an illusion of movement.
-        background.size += Vector2.right * Time.deltaTime;
-
         // Update the fighters' properties in the background.
         for (int f = 0; f < transform.childCount; f++)
         {
