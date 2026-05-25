@@ -10,6 +10,7 @@ public class Terrain : ScriptableObject
     [Range(0, 10)] public float decorDensity;
     public int decorFrames = 2;
     [Tooltip("The wind speed in m/s.")] public float minWind, maxWind;
+    [Tooltip("The acceleration of wind speed change in m/s2.")] public float windAcceleration = 1f;
 
     public List<Sprite> GetRandomDecor()
     {

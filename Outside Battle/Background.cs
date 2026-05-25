@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class Background : MonoBehaviour
 {
-    public Terrain terrain;
-    public GameObject windObj;
-    public Transform windParent;
+    public static float windTimer = 0, windDirection;
 
-    float windSpeed = 0;
+    public Terrain terrain;
+
+    float windSpeed, newSpeed;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -22,28 +22,28 @@ public class Background : MonoBehaviour
             decor.GetComponent<SpriteRenderer>().sortingOrder = Mathf.RoundToInt(decorPos.y * -999);
         }
 
-        if (terrain.maxWind > 0)
-            ChangeWindSpeed();
+        windTimer = 0;
+        windDirection = Random.value * Mathf.PI * 2;
+        windSpeed = Random.Range(terrain.minWind, terrain.maxWind);
+        newSpeed = windSpeed;
+        Invoke("ChangeWindSpeed", Random.Range(10f, 30f));
     }
 
     // Update is called once per frame
     void Update()
     {
-        foreach (CircleCollider2D wind in windParent.GetComponentsInChildren<CircleCollider2D>())
-            wind.radius += Time.deltaTime * 2;
+        if (Mathf.Abs(newSpeed - windSpeed) <= 0.1f)
+            windSpeed = newSpeed;
+        else
+            windSpeed += Time.deltaTime * terrain.windAcceleration
+                * Mathf.Sign(newSpeed - windSpeed);
+
+        windTimer += Time.deltaTime * windSpeed;
     }
 
     void ChangeWindSpeed()
     {
-        CancelInvoke("CreateWind");
-        windSpeed = Random.Range(terrain.minWind, terrain.maxWind);
-        Invoke("CreateWind", 1);
-        Invoke("ChangeWindSpeed", 10);
-    }
-
-    void CreateWind()
-    {
-        Instantiate(windObj, Vector2.right * 20, Quaternion.identity, windParent);
-        Invoke("CreateWind", 1);
+        newSpeed = Random.Range(terrain.minWind, terrain.maxWind);
+        Invoke("ChangeWindSpeed", Random.Range(10f, 30f));
     }
 }
