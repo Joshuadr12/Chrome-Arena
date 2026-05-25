@@ -120,7 +120,7 @@ public class Battle : MonoBehaviour
             lanes.Add(newLane);
         }
 
-        PaintParticle.paintDepth = 0;
+        Particle.paintDepth = 0;
         source = GetComponent<AudioSource>();
         source.volume = Master.data.sfxVolume;
         cameraPos = cam.transform.position;
@@ -352,11 +352,11 @@ public class Battle : MonoBehaviour
         float offsetX = UnityEngine.Random.value - 0.5f;
         float offsetY = UnityEngine.Random.value - 0.5f;
         Vector3 particleOffset = new Vector3(offsetX, offsetY, 0);
-        PaintParticle particle = Instantiate
+        Particle particle = Instantiate
             (obj,
             target.transform.position + particleOffset,
             Quaternion.identity)
-            .GetComponent<PaintParticle>();
+            .GetComponent<Particle>();
         particle.size = size;
         particle.baseColor = target.colour.physicalColour;
         particle.offColor = source.colour.physicalColour;

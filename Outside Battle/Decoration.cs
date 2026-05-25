@@ -9,6 +9,7 @@ public class Decoration : MonoBehaviour
     int spriteIndex = 0;
     float windOffset;
     SpriteRenderer renderer;
+    Particle particle;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -25,5 +26,18 @@ public class Decoration : MonoBehaviour
     {
         spriteIndex = Mathf.FloorToInt((Background.windTimer + windOffset) % sprites.Count);
         renderer.sprite = sprites[spriteIndex];
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == 3)
+        {
+            particle = collision.GetComponent<Particle>();
+            if (particle != null && particle.isPaint)
+            {
+                renderer.material = particle.decorMaterial;
+                renderer.color = particle.lerp;
+            }
+        }
     }
 }
