@@ -471,8 +471,8 @@ public class Colour
     public string name;
     public Color physicalColour = Color.white;
     public Material material;
-    public bool whiteText;
-    public float red, yellow, blue, white, black;
+    public bool whiteText, createPaint = true;
+    public float red, yellow, blue;
     //public List<Unit> playableUnits, extraUnits;
 
     public float Advantage(Colour other)
@@ -483,8 +483,6 @@ public class Colour
         float total = red * (other.yellow - other.blue);
         total += yellow * (other.blue - other.red);
         total += blue * (other.red - other.yellow);
-        // Gray is not advantageous against itself.
-        total += Mathf.Abs(white * other.black - black * other.white);
         return total;
     }
 }

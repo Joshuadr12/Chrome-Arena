@@ -386,9 +386,8 @@ public class Battle : MonoBehaviour
 
         // Check for critical hits.
         float advantage = source.colour.Advantage(target.colour);
-        if ((source.morph && !target.morph)
-            || ((source.morph || !target.morph)
-            && UnityEngine.Random.value <= advantage))
+        if (UnityEngine.Random.value <= advantage
+            || source.OverrideAdvantage() > target.OverrideAdvantage())
         {
             multi++;
             if (source.isLeft)
@@ -465,11 +464,13 @@ public class Battle : MonoBehaviour
             marker.GetComponent<DamageMarker>().damage = damage;
             marker.GetComponent<DamageMarker>().isCritical = isCritical;
 
-            CreateParticle
-                (paintParticle,
-                Math.Min(damage, 5),
-                source,
-                target);
+            if (source.colour.createPaint
+                && target.colour.createPaint)
+                CreateParticle
+                    (paintParticle,
+                    Math.Min(damage, 5),
+                    source,
+                    target);
 
             // Miscellaneous
             cameraShake += damage;
@@ -1087,6 +1088,14 @@ public class Battle : MonoBehaviour
                                     .Retreat(false, l.index);
                             lanes[l.lane].fighterRetreated = true;
                         }
+                    break;
+                case Effect.EffectType.Bleach:
+                    foreach (Fighter f in targets)
+                    {
+                        CreateBuffText(f, "BLEACHED");
+                        f.bleached = true;
+                        f.ChangeUnit(newColour: "neutral");
+                    }
                     break;
                 default:
                     Debug.LogError($"Unknown effect type {effect.type}");

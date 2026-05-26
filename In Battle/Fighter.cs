@@ -32,7 +32,7 @@ public class Fighter : UnitDisplay
     [HideInInspector] public int agile, block, armor;
     [HideInInspector] public bool antiAgile, antiBlock;
     [HideInInspector] public bool morph, combo, hasCombo = false;
-    [HideInInspector] public bool slow, steady;
+    [HideInInspector] public bool slow, steady, bleached;
     [HideInInspector] public float moveTime;
     [HideInInspector] public List<Ability> abilities = new List<Ability>();
 
@@ -118,6 +118,18 @@ public class Fighter : UnitDisplay
                 Battle
                     .fighterAbilities[a.cause.type][a.effects[0].type]
                     .Remove(a);
+    }
+
+    public int OverrideAdvantage()
+    {
+        /// <summary>Used to determine if the fighter overrides color advantage; derived from Morph and Bleach.</summary>
+
+        int result = 0;
+        if (morph)
+            result++;
+        if (bleached)
+            result--;
+        return result;
     }
 
     public void AddAbility(Ability a)

@@ -98,15 +98,15 @@ public class UnitDisplay : MonoBehaviour
     }
 
     public void ChangeUnit
-        (Unit newUnit,
+        (Unit newUnit = null,
         string newColour = null,
         bool canBeBig = false)
     {
         /// <summary>Change the unit when necessary.</summary>
-        /// <param name="newUnit">The new unit to change into.</param>
+        /// <param name="newUnit">The new unit to change into; null if the unit doesn't change.</param>
         /// <param name="newColour">The new colour to change into; null if the color doesn't change.</param>
 
-        if (newUnit)
+        if (newUnit != null)
         {
             unit = newUnit;
             if (model)

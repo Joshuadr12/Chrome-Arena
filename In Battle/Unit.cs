@@ -163,7 +163,8 @@ public class Effect
         MoveFront,
         GainColor,
         GiveTrait,
-        Retreat
+        Retreat,
+        Bleach
     }
 
     // Variables.
@@ -204,6 +205,8 @@ public class Effect
                 return (typeStr != "") && (typeInt1 != 0);
             case EffectType.Retreat:
                 return true;
+            case EffectType.Bleach:
+                return !battle.GetFighter(reference).bleached;
             default:
                 Debug.LogError($"Unknown effect type {type}");
                 return false;
