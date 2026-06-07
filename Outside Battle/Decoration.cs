@@ -25,7 +25,13 @@ public class Decoration : MonoBehaviour
     void Update()
     {
         spriteIndex = Mathf.FloorToInt((Background.windTimer + windOffset) % sprites.Count);
-        renderer.sprite = sprites[spriteIndex];
+        try
+        {
+            renderer.sprite = sprites[spriteIndex];
+        }
+        catch
+        {
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

@@ -206,7 +206,7 @@ public class Effect
             case EffectType.Retreat:
                 return true;
             case EffectType.Bleach:
-                return !battle.GetFighter(reference).bleached;
+                return true;
             default:
                 Debug.LogError($"Unknown effect type {type}");
                 return false;

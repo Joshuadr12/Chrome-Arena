@@ -38,7 +38,7 @@ public class AbilityTarget : ScriptableObject
 
     [Header("Miscellaneous")]
     [Tooltip("Includes non-fighter entities such as artifacts; always leave false for effect targets.")] public bool allowNull;
-    public bool allowDead;
+    public bool allowDead, excludeBleached;
 
     public List<Fighter> SelectTargets
         (Battle battle,
@@ -53,7 +53,6 @@ public class AbilityTarget : ScriptableObject
         /// <param name="causeTarget">The target of the cause that activated the ability.</param>
 
         List<Fighter> result = new List<Fighter>();
-        List<Fighter> possible = new List<Fighter>();
         List<int> lanes = SelectLanes(battle, reference.lane);
 
         List<Fighter> GetFightersFromLane(int lane)
@@ -153,7 +152,8 @@ public class AbilityTarget : ScriptableObject
             foreach (int lane in lanes)
                 foreach (Fighter f in GetFightersFromLane(lane))
                     result.Add(f);
-            result = SelectFightersFromList(battle, reference, result, causeSource, causeTarget);
+            result = SelectFightersFromList(battle, reference, result,
+                causeSource, causeTarget);
         }
 
         // Otherwise, an individual selection is made for each selected lane.
@@ -187,16 +187,14 @@ public class AbilityTarget : ScriptableObject
         /// <param name="reference">The location of the ability.</param>
         /// <param name="list">The list of fighters to reference.</param>
 
-        // If the selection does not allow dead fighters, remove them from the list.
-        if (!allowDead)
-        {
-            List<Fighter> corpses = new List<Fighter>();
-            foreach (Fighter f in list)
-                if (f.health <= 0)
-                    corpses.Add(f);
-            foreach (Fighter f in corpses)
-                list.Remove(f);
-        }
+        // Remove fighters from the list under special conditions.
+        List<Fighter> discards = new List<Fighter>();
+        foreach (Fighter f in list)
+            if ((!allowDead && f.health <= 0)
+                || (excludeBleached && f.bleached))
+                discards.Add(f);
+        foreach (Fighter f in discards)
+            list.Remove(f);
 
         List<Fighter> result = new List<Fighter>();
         Fighter fighter;
