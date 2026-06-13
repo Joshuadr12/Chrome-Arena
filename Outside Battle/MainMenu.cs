@@ -175,7 +175,7 @@ public class MainMenu : MonoBehaviour
 
         Master.LoadData(saves[saveFile]);
         Master.saveFile = saveFile;
-        Master.GotoScene("LevelSelect");
+        Master.GotoScene("Town");
     }
 
     public void Quit()

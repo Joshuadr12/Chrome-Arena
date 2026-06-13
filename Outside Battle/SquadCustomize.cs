@@ -58,7 +58,7 @@ public class SquadCustomize : MonoBehaviour
             else if (squadActive != null)
                 EndCustomize();
             else
-                GotoScene("LevelSelect");
+                GotoScene("Town");
         }
 
         if (Input.GetMouseButtonUp(0))

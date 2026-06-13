@@ -30,7 +30,7 @@ public class LevelSelect : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if (Master.levelSelected == null)
-                Master.GotoScene("MainMenu");
+                BackToTown();
             else
                 CancelLevel();
         }
@@ -95,5 +95,10 @@ public class LevelSelect : MonoBehaviour
 
         Master.levelSelected = null;
         Master.CloseMenu(squadMenu, buttons);
+    }
+
+    public void BackToTown()
+    {
+        Master.GotoScene("Town");
     }
 }
