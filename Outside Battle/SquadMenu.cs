@@ -16,7 +16,7 @@ public class SquadMenu : MonoBehaviour
     [SerializeField] List<TMP_Dropdown> squadChoices;
     [SerializeField, Tooltip("The parent object of the squad size settings.")] Transform squadSizeList;
     [SerializeField, Tooltip("Do not include the first star; it is always FREE.")] List<TMP_Text> starRequirements;
-    [SerializeField] Button goButton;
+    [SerializeField] Button attackButton;
     [SerializeField] TMP_Text levelTitle;
     [SerializeField] List<UnitDisplay> enemyImages;
     [SerializeField] List<Image> artifactImages;
@@ -117,13 +117,13 @@ public class SquadMenu : MonoBehaviour
     {
         Master.RenderSquadDropdowns(squadChoices, squadsChosen, squadAmounts);
 
-        goButton.interactable = true;
+        attackButton.interactable = true;
         TMP_Text[] squadAmountText = squadSizeList.GetComponentsInChildren<TMP_Text>();
         for (int i = 0; i < squadAmountText.Length; i++)
         {
             squadAmountText[i].text = squadAmounts[i].ToString();
             if (squadAmounts[i] <= 0)
-                goButton.interactable = false;
+                attackButton.interactable = false;
         }
     }
 

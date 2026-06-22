@@ -38,13 +38,13 @@ public class Settings : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
-            LevelSelect();
+            BackToTown();
     }
 
-    public void LevelSelect()
+    public void BackToTown()
     {
         Master.Save();
-        Master.GotoScene("LevelSelect");
+        Master.GotoScene("Town");
     }
 
     public void MusicVolume()

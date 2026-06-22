@@ -531,7 +531,7 @@ public class SquadSelect : MonoBehaviour
         foreach (AudioSource a in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
             Destroy(a.gameObject);
         began = false;
-        SceneManager.LoadScene("LevelSelect");
+        SceneManager.LoadScene("Town");
     }
 
     public SquadStatus FindPreciseMatch(bool invert)
