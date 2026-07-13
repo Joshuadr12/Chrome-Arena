@@ -13,8 +13,7 @@ public class Master : MonoBehaviour
     /// </summary>
 
     // Global variables.
-    public static bool testMode;
-    public static string saveFile = "test.json";
+    public static string saveFile = "save1";
     public static Player data, newData;
     public static Dictionary<string, Colour> colours = new Dictionary<string, Colour>();
     public static Dictionary<string, List<string>> colourSets = new Dictionary<string, List<string>>();
@@ -77,7 +76,6 @@ public class Master : MonoBehaviour
             foreach (Artifact artifact in artifactSet)
                 artifacts.Add(artifact);
 
-            testMode = testing;
             data = playerData;
             newData = backupData;
             if (testing)
