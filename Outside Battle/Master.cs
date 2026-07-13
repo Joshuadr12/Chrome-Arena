@@ -28,11 +28,13 @@ public class Master : MonoBehaviour
     public static bool masterExecuted = false;
     public static Color bronzeColor;
     public static Color goldColor;
+    public static GameObject ambiance = null;
 
     // Serialized variables for the editor.
     [SerializeField] bool testing;
     [SerializeField] Color bronzeStarColor, goldStarColor;
     [SerializeField] Player playerData, backupData;
+    [SerializeField] AudioSource audioSource;
     [SerializeField] Colour[] colourSet;
     [SerializeField] ColourCollection[] colourCollections;
     [SerializeField] UnitCollection[] unitCollections;
@@ -44,6 +46,7 @@ public class Master : MonoBehaviour
     //Start is called before the first frame update.
     void Start()
     {
+        // Initialize master settings.
         if (!masterExecuted)
         {
             bronzeColor = bronzeStarColor;
@@ -84,6 +87,18 @@ public class Master : MonoBehaviour
             abilityEffects = effectOrder;
             keywords = keywordSet;
             masterExecuted = true;
+        }
+
+        // Set ambiance.
+        if (audioSource != null)
+        {
+            if (ambiance == null)
+            {
+                ambiance = audioSource.gameObject;
+                DontDestroyOnLoad(audioSource.gameObject);
+            }
+            else
+                Destroy(audioSource.gameObject);
         }
     }
 
@@ -457,6 +472,15 @@ public class Master : MonoBehaviour
         /// <param name="sceneName">The scene to load.</param>
 
         SceneManager.LoadScene(sceneName);
+    }
+
+    public static void StopAmbiance()
+    {
+        if (ambiance != null)
+        {
+            Destroy(ambiance);
+            ambiance = null;
+        }
     }
 }
 
