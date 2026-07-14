@@ -86,7 +86,7 @@ public class Battle : MonoBehaviour
         rightArtifact.isArtifact = true;
         rightArtifact.hasArtifact = rightSide.artifact;
         rightArtifact.ChangeUnit
-            (Master.levelSelected.opponentDisplay,
+            (Master.battleSelected.opponentDisplay,
             rightSide.colour,
             true);
 

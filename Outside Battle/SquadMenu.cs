@@ -45,10 +45,10 @@ public class SquadMenu : MonoBehaviour
         RenderSquads();
 
         // Display the enemy units.
-        levelTitle.text = Master.levelSelected.levelName;
+        levelTitle.text = Master.battleSelected.battleName;
         unitsFound.Clear();
-        FindEnemies(Master.levelSelected.mustHaves);
-        FindEnemies(Master.levelSelected.extraSquads);
+        FindEnemies(Master.battleSelected.mustHaves);
+        FindEnemies(Master.battleSelected.extraSquads);
         index = 0;
         foreach (List<Unit> collection in Master.unitSets.Values)
             foreach (Unit unit in collection)
@@ -74,8 +74,8 @@ public class SquadMenu : MonoBehaviour
 
         // Display the enemy artifacts.
         artifactsFound.Clear();
-        FindArtifacts(Master.levelSelected.mustHaves);
-        FindArtifacts(Master.levelSelected.extraSquads);
+        FindArtifacts(Master.battleSelected.mustHaves);
+        FindArtifacts(Master.battleSelected.extraSquads);
         index = 0;
         foreach (Artifact artifact in Master.artifacts)
             if
@@ -97,15 +97,15 @@ public class SquadMenu : MonoBehaviour
             starHeader[i].color = i < Master.GetStars()
                 ? Master.goldColor
                 : Color.black;
-        starRequirements[0].text = $"FAIR: {Master.levelSelected.squadSize} squad size";
-        starRequirements[1].text = $"UNFAIR: {Master.levelSelected.unfairSquadSize} squad size";
+        starRequirements[0].text = $"FAIR: {Master.battleSelected.squadSize} squad size";
+        starRequirements[1].text = $"UNFAIR: {Master.battleSelected.unfairSquadSize} squad size";
         starRequirements[2].text = Master
-            .levelSelected
+            .battleSelected
             .starChallenges
             .challenges[0]
             .GetDescription();
         starRequirements[3].text = Master
-            .levelSelected
+            .battleSelected
             .starChallenges
             .challenges[1]
             .GetDescription();
@@ -180,10 +180,10 @@ public class SquadMenu : MonoBehaviour
         SquadSelect.fairStars = 2;
         foreach (int amount in squadAmounts)
         {
-            if (amount > Master.levelSelected.squadSize
+            if (amount > Master.battleSelected.squadSize
                 && SquadSelect.fairStars > 0)
                 SquadSelect.fairStars = 0;
-            else if (amount > Master.levelSelected.unfairSquadSize
+            else if (amount > Master.battleSelected.unfairSquadSize
                 && SquadSelect.fairStars > 1)
                 SquadSelect.fairStars = 1;
         }

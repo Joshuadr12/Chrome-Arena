@@ -4,8 +4,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
-public class LevelSelect : MonoBehaviour
+public class BattleSelect : MonoBehaviour
 {
     /// <summary>
     /// Manages the level selection menu.
@@ -13,14 +14,14 @@ public class LevelSelect : MonoBehaviour
 
     [SerializeField] List<GameObject> buttons;
     [SerializeField] GameObject squadMenu;
-    [SerializeField] TMP_Text dayText;
+    [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
     [SerializeField] List<Image> resourceDisplay;
 
 
     //Start is called before the first frame update.
     void Start()
     {
-        Master.levelSelected = null;
+        Master.battleSelected = null;
         RenderResources();
     }
 
@@ -29,10 +30,10 @@ public class LevelSelect : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (Master.levelSelected == null)
+            if (Master.battleSelected == null)
                 BackToTown();
             else
-                CancelLevel();
+                CancelBattle();
         }
     }
 
@@ -42,7 +43,7 @@ public class LevelSelect : MonoBehaviour
 
         Image resourceImage;
         int index = 0;
-        dayText.text = "Day " + Master.data.day.ToString();
+        weekText.text = "Week " + Master.data.week.ToString();
 
         foreach (Player.ResourceQuantity resource in Master.data.resources)
         {
@@ -63,14 +64,14 @@ public class LevelSelect : MonoBehaviour
         }
     }
 
-    public void SelectLevel(Level level)
+    public void SelectBattle(BattleLevel battle)
     {
-        /// <summary>Open the menu to set up for the selected level, or begin immediately if it's a tutorial.</summary>
-        /// <param name="level">The level selected.</param>
+        /// <summary>Open the menu to set up for the selected battle, or begin immediately if it's a tutorial.</summary>
+        /// <param name="battle">The battle selected.</param>
 
-        Master.levelSelected = level;
+        Master.battleSelected = battle;
 
-        // When the level is a tutorial.
+        // When the battle is a tutorial.
         if (Master.FinishedTutorial())
         {
             Master.OpenMenu(squadMenu, buttons);
@@ -81,7 +82,7 @@ public class LevelSelect : MonoBehaviour
             Master.leftSquads.Clear();
             for (int i = 0; i < 3; i++)
             {
-                Master.data.squads[i].startMoney = Master.levelSelected.squadSize;
+                Master.data.squads[i].startMoney = Master.battleSelected.squadSize;
                 Master.leftSquads.Add(Master.data.squads[i]);
             }
             SquadSelect.fairStars = 1;
@@ -89,11 +90,11 @@ public class LevelSelect : MonoBehaviour
         }
     }
 
-    public void CancelLevel()
+    public void CancelBattle()
     {
-        /// <summary>Close the setup menu and return to level selection.</summary>
+        /// <summary>Close the setup menu and return to battle selection.</summary>
 
-        Master.levelSelected = null;
+        Master.battleSelected = null;
         Master.CloseMenu(squadMenu, buttons);
     }
 

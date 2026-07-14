@@ -12,15 +12,15 @@ public class Player : ScriptableObject
     /// </summary>
 
     public float battleSpeed = 1, musicVolume = 1, sfxVolume = 1;
-    public int day;
+    [FormerlySerializedAs("day")] public int week;
     [Tooltip("The unit representing the player that displays in battle.")] public Unit character;
     public List<int> defaultSquads = new List<int>();
     [Tooltip("The resources that the player has at the start of each day.")] public List<ResourceQuantity> income;
     public List<ResourceQuantity> resources;
     [FormerlySerializedAs("totalSquads")] public List<Squad> squads;
-    public List<LevelStatus> stars;
+    public List<BattleStars> stars;
     public List<string> events;
-    public int[] level;
+    public int level, starsLeftover;
 
     public void AddResource(string colour, int amount)
     {
@@ -29,9 +29,9 @@ public class Player : ScriptableObject
                 resources[i].quantity += amount;
     }
 
-    public void NextDay()
+    public void NextWeek()
     {
-        Master.data.day++;
+        Master.data.week++;
         resources.Clear();
         foreach (ResourceQuantity gain in income)
             resources.Add(new ResourceQuantity(gain.colour, gain.quantity));
@@ -51,30 +51,15 @@ public class Player : ScriptableObject
     }
 
     [Serializable]
-    public class LevelStatus
+    public class BattleStars
     {
-        public string levelId;
+        [FormerlySerializedAs("levelId")] public string battleId;
         public int stars;
 
-        public LevelStatus(string levelId, int stars)
+        public BattleStars(string battleId, int stars)
         {
-            this.levelId = levelId;
+            this.battleId = battleId;
             this.stars = stars;
-        }
-    }
-
-    [Serializable]
-    public class SquadData
-    {
-        // TODO: Contruction methods
-
-        public string title, colour, artifact;
-        public List<LineData> lines = new List<LineData>();
-
-        [Serializable]
-        public class LineData
-        {
-            public List<string> units = new List<string>();
         }
     }
 }

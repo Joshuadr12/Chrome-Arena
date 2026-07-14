@@ -22,7 +22,7 @@ public class Master : MonoBehaviour
     public static List<Cause.CauseType> abilityCauses = new List<Cause.CauseType>();
     public static List<Effect.EffectType> abilityEffects = new List<Effect.EffectType>();
     public static List<Keyword> keywords = new List<Keyword>();
-    public static Level levelSelected;
+    public static BattleLevel battleSelected;
     public static List<Squad> leftSquads = new List<Squad>();
     public static bool masterExecuted = false;
     public static Color bronzeColor;
@@ -105,7 +105,7 @@ public class Master : MonoBehaviour
         SaveData.Save(data, saveFile);
     }
 
-    public static void LoadData(PlayerData saveData)
+    public static void LoadData(PlayerData_0_3_2 saveData)
     {
         /// <summary>Load the given save data.</summary>
 
@@ -115,34 +115,36 @@ public class Master : MonoBehaviour
         data.character = FindUnit(saveData.character);
         if (data.character == null)
             data.character = newData.character;
-        data.day = saveData.day;
+        data.week = saveData.week;
 
         data.defaultSquads.Clear();
         foreach (int i in saveData.defaultSquads)
             data.defaultSquads.Add(i);
 
         data.income.Clear();
-        foreach (Player.ResourceQuantity colour in saveData.income)
-            data.income.Add(colour);
+        foreach (KeyValuePair<string, int> colour in saveData.income)
+            data.income.Add(new Player.ResourceQuantity
+                (colour.Key, colour.Value));
 
         data.resources.Clear();
-        foreach (Player.ResourceQuantity colour in saveData.resources)
-            data.resources.Add(colour);
+        foreach (KeyValuePair<string, int> colour in saveData.resources)
+            data.resources.Add(new Player.ResourceQuantity
+                (colour.Key, colour.Value));
 
         data.stars.Clear();
-        foreach (Player.LevelStatus star in saveData.stars)
-            data.stars.Add(star);
+        foreach (KeyValuePair<string, int> status in saveData.stars)
+            data.stars.Add(new Player.BattleStars
+                (status.Key, status.Value));
 
         data.events.Clear();
         foreach (string e in saveData.events)
             data.events.Add(e);
 
-        data.level = new int[2];
-        data.level[0] = saveData.level[0];
-        data.level[1] = saveData.level[1];
+        data.level = saveData.level;
+        data.starsLeftover = saveData.starsLeftover;
 
         Squad squad;
-        Player.SquadData squadData;
+        PlayerData_0_3_2.SquadData squadData;
         Line line;
         for (int s = 0; s < data.squads.Count; s++)
         {
@@ -154,11 +156,11 @@ public class Master : MonoBehaviour
 
             squad.units.Clear();
             Unit u;
-            foreach (Player.SquadData.LineData l in squadData.lines)
+            foreach (List<string> l in squadData.lines)
             {
                 line = new Line();
                 line.units = new List<Unit>();
-                foreach (string unit in l.units)
+                foreach (string unit in l)
                 {
                     u = FindUnit(unit);
                     if (u != null)
@@ -243,41 +245,41 @@ public class Master : MonoBehaviour
 
     public static int GetStars()
     {
-        foreach (Player.LevelStatus star in data.stars)
-            if (star.levelId == levelSelected.levelId)
+        foreach (Player.BattleStars star in data.stars)
+            if (star.battleId == battleSelected.battleId)
                 return star.stars;
         return 0;
     }
     public static int GetStars(string levelId)
     {
-        foreach (Player.LevelStatus star in data.stars)
-            if (star.levelId == levelId)
+        foreach (Player.BattleStars star in data.stars)
+            if (star.battleId == levelId)
                 return star.stars;
         return 0;
     }
-    public static int GetStars(Level level)
+    public static int GetStars(BattleLevel level)
     {
-        foreach (Player.LevelStatus star in data.stars)
-            if (star.levelId == level.levelId)
+        foreach (Player.BattleStars star in data.stars)
+            if (star.battleId == level.battleId)
                 return star.stars;
         return 0;
     }
 
     public static void SetStars(string levelId, int stars)
     {
-        foreach (Player.LevelStatus star in data.stars)
-            if (star.levelId == levelId)
+        foreach (Player.BattleStars star in data.stars)
+            if (star.battleId == levelId)
             {
                 star.stars = stars;
                 return;
             }
-        data.stars.Add(new Player.LevelStatus(levelId, stars));
+        data.stars.Add(new Player.BattleStars(levelId, stars));
     }
 
     public static int[] GetLevel()
     {
         int totalStars = 0;
-        foreach (Player.LevelStatus star in data.stars)
+        foreach (Player.BattleStars star in data.stars)
             totalStars += star.stars;
 
         int[] result = new int[2] { 0, 0 };
@@ -293,7 +295,7 @@ public class Master : MonoBehaviour
 
     public static void NextDay()
     {
-        data.NextDay();
+        data.NextWeek();
         Save();
     }
 
@@ -332,7 +334,7 @@ public class Master : MonoBehaviour
             {
                 if (squadAmounts.Count <= 0)
                     for (int i = 0; i < squadsChosen.Count; i++)
-                        squadAmounts.Add(levelSelected.squadSize);
+                        squadAmounts.Add(battleSelected.squadSize);
                 foreach (Player.ResourceQuantity resource in data.resources)
                     if (resource.colour == squad.colour)
                         squadAmounts[drop] = Math.Min
@@ -580,7 +582,7 @@ public class RequirementSet
                 case RequireType.RoundsDone:
                     return SquadSelect.roundsDone == scoreNeeded;
                 case RequireType.LevelSelected:
-                    return Master.levelSelected.levelId == identifier;
+                    return Master.battleSelected.battleId == identifier;
                 default:
                     Debug.LogWarning($"Unknown requirement type: {type}");
                     return false;

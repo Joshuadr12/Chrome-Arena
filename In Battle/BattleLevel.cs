@@ -5,15 +5,16 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [CreateAssetMenu(menuName = "Chrome Arena/Level")]
-public class Level : ScriptableObject
+public class BattleLevel : ScriptableObject
 {
     /// <summary>
     /// Represents a level or battle.
     /// </summary>
 
     // Variables.
-    public string levelId;
-    [FormerlySerializedAs("name")] public string levelName;
+    [FormerlySerializedAs("levelId")] public string battleId;
+    [FormerlySerializedAs("name"), FormerlySerializedAs("levelName")]
+        public string battleName;
     public Unit opponentDisplay;
     public RequirementSet requirements;
     [Header("Difficulty and Stars")]

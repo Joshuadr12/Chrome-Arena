@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System;
+using UnityEngine.Serialization;
 
 public class Town : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class Town : MonoBehaviour
     /// Manages the town.
     /// </summary>
 
-    [SerializeField] TMP_Text dayText;
+    [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
     [SerializeField] List<Image> resourceDisplay;
     [SerializeField] List<ButtonRequirement> buttonsToEnable;
 
@@ -39,7 +40,7 @@ public class Town : MonoBehaviour
 
         Image resourceImage;
         int index = 0;
-        dayText.text = "Day " + Master.data.day.ToString();
+        weekText.text = "Week " + Master.data.week.ToString();
 
         foreach (Player.ResourceQuantity resource in Master.data.resources)
         {
@@ -60,9 +61,9 @@ public class Town : MonoBehaviour
         }
     }
 
-    public void NextDay()
+    public void NextWeek()
     {
-        Master.data.NextDay();
+        Master.data.NextWeek();
         Master.Save();
         RenderResources();
     }

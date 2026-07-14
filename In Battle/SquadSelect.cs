@@ -61,7 +61,7 @@ public class SquadSelect : MonoBehaviour
             (Master.data.character,
             "neutral", true);
         rightDisplay.ChangeUnit
-            (Master.levelSelected.opponentDisplay,
+            (Master.battleSelected.opponentDisplay,
             "neutral", true);
 
         // Disable used squads.
@@ -93,10 +93,10 @@ public class SquadSelect : MonoBehaviour
         {
             // Music
             music = Instantiate(battleMusic).GetComponent<AudioSource>();
-            if (Master.levelSelected.settings.specialMusic)
+            if (Master.battleSelected.settings.specialMusic)
             {
                 music.clip = Master
-                    .levelSelected
+                    .battleSelected
                     .settings
                     .specialMusic;
                 music.Play();
@@ -106,7 +106,7 @@ public class SquadSelect : MonoBehaviour
 
             // Squads
             List<Squad> squads = Master
-                .levelSelected
+                .battleSelected
                 .ChooseSquads();
             for (int s = 0; s < squads.Count; s++)
             {
@@ -344,29 +344,29 @@ public class SquadSelect : MonoBehaviour
 
             // Check star challenges.
             foreach (StarChallenges.Challenge challenge
-                in Master.levelSelected.starChallenges.challenges)
+                in Master.battleSelected.starChallenges.challenges)
                 UpdateStarText(challenge.GetDescription(true),
                     challenge.IsCompleted(StarChallenges.totalScore));
         }
         if (stars > oldStars)
-            Master.SetStars(Master.levelSelected.levelId, stars);
+            Master.SetStars(Master.battleSelected.battleId, stars);
 
         // Update level.
         int[] oldLevel = new int[2]
-            { Master.data.level[0],
-            Master.data.level[1] };
+            { Master.data.level,
+            Master.data.starsLeftover };
         int[] newLevel = Master.GetLevel();
         if ((newLevel[0] > oldLevel[0])
             || (newLevel[0] == oldLevel[0]
             && newLevel[1] > oldLevel[1]))
         {
-            Master.data.level[1] = newLevel[1];
-            while (Master.data.level[0] < newLevel[0])
+            Master.data.starsLeftover = newLevel[1];
+            while (Master.data.level < newLevel[0])
             {
-                Master.data.level[0]++;
+                Master.data.level++;
                 foreach (Player.ResourceQuantity resource in Master.data.income)
                 {
-                    resource.quantity += (Master.data.level[0] > 10) ? 40 : 20;
+                    resource.quantity += (Master.data.level > 10) ? 40 : 20;
                 }
             }
         }
