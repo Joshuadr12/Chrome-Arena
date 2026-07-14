@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-[CreateAssetMenu(menuName = "Chrome Arena/Level")]
+[CreateAssetMenu(menuName = "Chrome Arena/Battle")]
 public class BattleLevel : ScriptableObject
 {
     /// <summary>

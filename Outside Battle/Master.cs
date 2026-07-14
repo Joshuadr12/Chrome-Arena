@@ -131,6 +131,16 @@ public class Master : MonoBehaviour
             data.resources.Add(new Player.ResourceQuantity
                 (colour.Key, colour.Value));
 
+        data.upgrades.Clear();
+        foreach (KeyValuePair<string, int> upgrade in saveData.upgrades)
+            data.upgrades.Add(new Player.UpgradeQuantity
+                (upgrade.Key, upgrade.Value));
+
+        data.units.Clear();
+        foreach (KeyValuePair<string, List<string>> unit in saveData.units)
+            data.units.Add(new Player.UnitColours
+                (unit.Key, unit.Value));
+
         data.stars.Clear();
         foreach (KeyValuePair<string, int> status in saveData.stars)
             data.stars.Add(new Player.BattleStars
@@ -142,6 +152,8 @@ public class Master : MonoBehaviour
 
         data.level = saveData.level;
         data.starsLeftover = saveData.starsLeftover;
+        data.upgradePoints = saveData.upgradePoints;
+        data.researchPoints = saveData.researchPoints;
 
         Squad squad;
         PlayerData_0_3_2.SquadData squadData;

@@ -15,12 +15,14 @@ public class Player : ScriptableObject
     [FormerlySerializedAs("day")] public int week;
     [Tooltip("The unit representing the player that displays in battle.")] public Unit character;
     public List<int> defaultSquads = new List<int>();
+    [FormerlySerializedAs("totalSquads")] public List<Squad> squads;
     [Tooltip("The resources that the player has at the start of each day.")] public List<ResourceQuantity> income;
     public List<ResourceQuantity> resources;
-    [FormerlySerializedAs("totalSquads")] public List<Squad> squads;
+    public List<UpgradeQuantity> upgrades;
+    public List<UnitColours> units;
     public List<BattleStars> stars;
     public List<string> events;
-    public int level, starsLeftover;
+    public int level, starsLeftover, upgradePoints, researchPoints;
 
     public void AddResource(string colour, int amount)
     {
@@ -47,6 +49,32 @@ public class Player : ScriptableObject
         {
             this.colour = colour;
             this.quantity = quantity;
+        }
+    }
+
+    [Serializable]
+    public class UpgradeQuantity
+    {
+        public string upgradeId;
+        public int quantity;
+
+        public UpgradeQuantity(string upgradeId, int quantity)
+        {
+            this.upgradeId = upgradeId;
+            this.quantity = quantity;
+        }
+    }
+
+    [Serializable]
+    public class UnitColours
+    {
+        public string unitName;
+        public List<string> colours;
+
+        public UnitColours(string unit, List<string> colours)
+        {
+            unitName = unit;
+            this.colours = colours;
         }
     }
 

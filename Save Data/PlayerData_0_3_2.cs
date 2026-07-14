@@ -18,9 +18,11 @@ public class PlayerData_0_3_2
     public List<SquadData> squads = new List<SquadData>();
     public Dictionary<string, int> income = new Dictionary<string, int>(),
         resources = new Dictionary<string, int>();
+    public Dictionary<string, int> upgrades = new Dictionary<string, int>();
+    public Dictionary<string, List<string>> units = new Dictionary<string, List<string>>();
     public Dictionary<string, int> stars = new Dictionary<string, int>();
     public List<string> events = new List<string>();
-    public int level, starsLeftover;
+    public int level, starsLeftover, upgradePoints, researchPoints;
 
     public PlayerData_0_3_2(Player player)
     {
@@ -45,6 +47,14 @@ public class PlayerData_0_3_2
         foreach (Player.ResourceQuantity colour in player.resources)
             resources.Add(colour.colour, colour.quantity);
 
+        upgrades.Clear();
+        foreach (Player.UpgradeQuantity upgrade in player.upgrades)
+            upgrades.Add(upgrade.upgradeId, upgrade.quantity);
+
+        units.Clear();
+        foreach (Player.UnitColours unit in player.units)
+            units.Add(unit.unitName, unit.colours);
+
         stars.Clear();
         foreach (Player.BattleStars star in player.stars)
             stars.Add(star.battleId, star.stars);
@@ -55,6 +65,8 @@ public class PlayerData_0_3_2
 
         level = player.level;
         starsLeftover = player.starsLeftover;
+        upgradePoints = player.upgradePoints;
+        researchPoints = player.researchPoints;
 
         SquadData squad;
         squads.Clear();
