@@ -20,6 +20,7 @@ public class Master : MonoBehaviour
     public static Dictionary<string, List<string>> colourSets = new Dictionary<string, List<string>>();
     public static Dictionary<string, List<Unit>> unitSets = new Dictionary<string, List<Unit>>();
     public static List<Artifact> artifacts = new List<Artifact>();
+    public static Dictionary<string, List<Upgrade>> upgrades = new Dictionary<string, List<Upgrade>>();
     public static List<Cause.CauseType> abilityCauses = new List<Cause.CauseType>();
     public static List<Effect.EffectType> abilityEffects = new List<Effect.EffectType>();
     public static List<Keyword> keywords = new List<Keyword>();
@@ -39,6 +40,7 @@ public class Master : MonoBehaviour
     [SerializeField] ColourCollection[] colourCollections;
     [SerializeField] UnitCollection[] unitCollections;
     [SerializeField] Artifact[] artifactSet;
+    [SerializeField] Collection[] upgradeCollections;
     [SerializeField, Tooltip("The order in which to activate simultaneous abilities based on their causes")] List<Cause.CauseType> causeOrder;
     [SerializeField, Tooltip("The order in which to activate simultaneous abilities based on their effects")] List<Effect.EffectType> effectOrder;
     [SerializeField] List<Keyword> keywordSet;
@@ -76,6 +78,14 @@ public class Master : MonoBehaviour
             // Add given artifacts to the static list.
             foreach (Artifact artifact in artifactSet)
                 artifacts.Add(artifact);
+
+            // Add given upgrade collections to the static list.
+            foreach (Collection collection in upgradeCollections)
+            {
+                upgrades.Add(collection.name, new List<Upgrade>());
+                foreach (Upgrade upgrade in collection.upgrades)
+                    upgrades[collection.name].Add(upgrade);
+            }
 
             data = playerData;
             newData = backupData;

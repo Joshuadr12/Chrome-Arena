@@ -12,8 +12,8 @@ public class UpgradeManager : MonoBehaviour
     public GameObject upgradeButton;
     public TMP_Text requirementsText;
     public Button confirmButton;
+    public AudioSource upgradeSoundSource;
     public AudioClip upgradeSound;
-    public List<Collection> collections;
 
     string collectionName;
     List<Upgrade> upgrades = new List<Upgrade>();
@@ -53,9 +53,9 @@ public class UpgradeManager : MonoBehaviour
 
         // Gather upgrades under the given collection.
         upgrades.Clear();
-        foreach (Collection collection in collections)
-            if (collection.name == collectionName)
-                foreach (Upgrade upgrade in collection.upgrades)
+        foreach (string collection in Master.upgrades.Keys)
+            if (collection == collectionName)
+                foreach (Upgrade upgrade in Master.upgrades[collection])
                     if (upgrade.revealRequirement.RequirementsMet()
                         && Master.data.TimesUpgraded(upgrade) < upgrade.layers.Count)
                         upgrades.Add(upgrade);
@@ -116,18 +116,27 @@ public class UpgradeManager : MonoBehaviour
 
     public void MakeUpgrade()
     {
-        GetComponent<AudioSource>().PlayOneShot(upgradeSound);
+        // Make the changes in the data.
+        upgradeSoundSource.PlayOneShot(upgradeSound);
         Master.data.upgradePoints -= layerActive.upgradeCost;
         Master.data.MakeUpgrade(upgradeActive);
         Master.Save();
-        RefreshMenu();
-    }
 
-    [Serializable]
-    public class Collection
-    {
-        public string name;
-        public GameObject building;
-        public List<Upgrade> upgrades;
+        // Close the upgrade panel or show the new building.
+        if (upgradeActive.isBuilding)
+        {
+            gameObject.SetActive(false);
+            FindFirstObjectByType<Town>()
+                .RenderResources(upgradeActive.upgradeId);
+        }
+        else
+            RefreshMenu();
     }
+}
+
+[Serializable]
+public class Collection
+{
+    public string name;
+    public List<Upgrade> upgrades;
 }

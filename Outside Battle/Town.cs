@@ -1,10 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
-using System;
 using UnityEngine.Serialization;
 
 public class Town : MonoBehaviour
@@ -14,6 +14,7 @@ public class Town : MonoBehaviour
     /// </summary>
 
     [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
+    [SerializeField] GameObject buildingParticles;
     [SerializeField] List<Image> resourceDisplay;
     [SerializeField] List<ButtonRequirement> buttonsToEnable;
 
@@ -31,12 +32,13 @@ public class Town : MonoBehaviour
             Master.GotoScene("MainMenu");
     }
 
-    public void RenderResources()
+    public void RenderResources(string justUpgraded = "")
     {
         /// <summary>Update the conditionally active buttons, then update the resources section with the current day and resources.</summary>
+        /// <param name="justUpgraded">If a new building was just built, enter the upgrade ID to create particle effects at the building.</param>
 
         foreach (ButtonRequirement button in buttonsToEnable)
-            button.RenderObject();
+            RenderObject(button, justUpgraded);
 
         Image resourceImage;
         int index = 0;
@@ -61,6 +63,13 @@ public class Town : MonoBehaviour
         }
     }
 
+    public void RenderObject(ButtonRequirement obj, string justUpgraded = "")
+    {
+        obj.obj.SetActive(obj.requirements.RequirementsMet());
+        if (obj.obj.name == justUpgraded)
+            Instantiate(buildingParticles, obj.obj.transform);
+    }
+
     public void NextWeek()
     {
         Master.data.NextWeek();
@@ -70,13 +79,8 @@ public class Town : MonoBehaviour
 }
 
 [Serializable]
-public class ButtonRequirement
+public struct ButtonRequirement
 {
-    [SerializeField] GameObject obj;
-    [SerializeField] RequirementSet requirements;
-
-    public void RenderObject()
-    {
-        obj.SetActive(requirements.RequirementsMet());
-    }
+    public GameObject obj;
+    public RequirementSet requirements;
 }
