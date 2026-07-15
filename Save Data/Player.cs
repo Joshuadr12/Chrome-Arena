@@ -39,6 +39,34 @@ public class Player : ScriptableObject
             resources.Add(new ResourceQuantity(gain.colour, gain.quantity));
     }
 
+    public int TimesUpgraded(Upgrade upgrade)
+    {
+        foreach (UpgradeQuantity u in upgrades)
+            if (u.upgradeId == upgrade.upgradeId)
+                return u.quantity;
+        return 0;
+    }
+    public int TimesUpgraded(string upgradeId)
+    {
+        foreach (UpgradeQuantity u in upgrades)
+            if (u.upgradeId == upgradeId)
+                return u.quantity;
+        return 0;
+    }
+
+    public void MakeUpgrade(Upgrade upgrade)
+    {
+        foreach (UpgradeQuantity u in upgrades)
+        {
+            if (u.upgradeId == upgrade.upgradeId)
+            {
+                u.quantity++;
+                return;
+            }
+        }
+        upgrades.Add(new UpgradeQuantity(upgrade.upgradeId, 1));
+    }
+
     [Serializable]
     public class ResourceQuantity
     {

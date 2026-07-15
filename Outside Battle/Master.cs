@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -568,33 +569,74 @@ public class RequirementSet
         return result >= requirementsNeeded;
     }
 
+    public string GetDescription()
+    {
+        string result = "";
+        foreach (Requirement requirement in requirements)
+            if (!requirement.IsMet())
+                result += requirement.GetDescription() + "\n";
+        return result.Trim();
+    }
+
     [Serializable]
     public class Requirement
     {
         public enum RequireType
         {
-            StarsFromLevel,
+            StarsFromBattle,
             Event,
             RoundsDone,
-            LevelSelected
+            BattleSelected,
+            Upgrade,
+            Level,
+            Rank
         }
 
         public RequireType type;
         public string identifier;
         public int scoreNeeded = 1;
+        public string overrideDescription;
+
+        public string GetDescription()
+        {
+            if (overrideDescription != "")
+                return overrideDescription;
+
+            switch (type)
+            {
+                case RequireType.StarsFromBattle:
+                    return scoreNeeded == 1
+                        ? $"Clear {identifier}."
+                        : $"Clear {identifier} with {scoreNeeded} stars.";
+                case RequireType.Upgrade:
+                    return $"Upgrade {identifier}.";
+                case RequireType.Level:
+                    return $"Reach Level {scoreNeeded}.";
+                case RequireType.Rank:
+                    return $"Reach Rank {scoreNeeded}.";
+                default:
+                    return "???";
+            }
+        }
 
         public bool IsMet()
         {
             switch (type)
             {
-                case RequireType.StarsFromLevel:
+                case RequireType.StarsFromBattle:
                     return Master.GetStars(identifier) >= scoreNeeded;
                 case RequireType.Event:
                     return Master.data.events.Contains(identifier);
                 case RequireType.RoundsDone:
                     return SquadSelect.roundsDone == scoreNeeded;
-                case RequireType.LevelSelected:
+                case RequireType.BattleSelected:
                     return Master.battleSelected.battleId == identifier;
+                case RequireType.Upgrade:
+                    return Master.data.TimesUpgraded(identifier) >= scoreNeeded;
+                case RequireType.Level:
+                    return Master.data.level >= scoreNeeded;
+                case RequireType.Rank:
+                    return Master.data.TimesUpgraded("rank") >= scoreNeeded;
                 default:
                     Debug.LogWarning($"Unknown requirement type: {type}");
                     return false;

@@ -364,10 +364,9 @@ public class SquadSelect : MonoBehaviour
             while (Master.data.level < newLevel[0])
             {
                 Master.data.level++;
+                Master.data.upgradePoints++;
                 foreach (Player.ResourceQuantity resource in Master.data.income)
-                {
                     resource.quantity += (Master.data.level > 10) ? 40 : 20;
-                }
             }
         }
         levelText.text = $"Level {oldLevel[0]}";
