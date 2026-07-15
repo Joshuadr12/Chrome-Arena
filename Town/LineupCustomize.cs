@@ -12,8 +12,8 @@ public class LineupCustomize : MonoBehaviour
 
     public List<UnitDisplay> unitImages;
 
-    [HideInInspector] public string colour;
     List<Unit> units = new List<Unit>();
+    List<string> colours = new List<string>();
     UnitDisplay display;
 
     void RenderUnits()
@@ -26,8 +26,15 @@ public class LineupCustomize : MonoBehaviour
             display.gameObject.SetActive(u < units.Count);
             display.ChangeUnit
                 (u < units.Count ? units[u] : null,
-                colour);
+                u < colours.Count ? colours[u] : "neutral");
         }
+    }
+
+    public void SetColourAll()
+    {
+        colours.Clear();
+        foreach (Unit u in units)
+            colours.Add(SquadCustomize.squadActive.colour);
     }
 
     public void LoadLine(Line line)
@@ -39,6 +46,7 @@ public class LineupCustomize : MonoBehaviour
         if (line != null)
             foreach (Unit unit in line.units)
                 units.Add(unit);
+        SetColourAll();
         RenderUnits();
     }
     public void ClearLine()
@@ -63,9 +71,15 @@ public class LineupCustomize : MonoBehaviour
 
     public void UnitHoverEnter(int index)
     {
-        if ((index < units.Count)
-            && !SquadCustomize.chooseArtifact)
+        if (index < units.Count)
+        {
+            if (!SquadCustomize.chooseArtifact)
             SquadCustomize.UpdateUnitDescriptions(units[index]);
+
+            if (FindAnyObjectByType<ResearchManager>())
+                FindAnyObjectByType<ResearchManager>()
+                    .UnitHoverEnter(units[index]);
+        }
     }
 
     public void UnitHoverExit()
@@ -79,11 +93,40 @@ public class LineupCustomize : MonoBehaviour
         if (!SquadCustomize.chooseArtifact)
         {
             if (index < units.Count)
+            {
                 units[index] = SquadCustomize.selectedUnit;
+                if (SquadCustomize.squadActive != null)
+                    colours[index] = SquadCustomize.squadActive.colour;
+                else if (Master.colourActive != "")
+                    colours[index] = Master.colourActive;
+            }
             else
+            {
                 units.Add(SquadCustomize.selectedUnit);
+                if (SquadCustomize.squadActive != null)
+                    colours.Add(SquadCustomize.squadActive.colour);
+                else if (Master.colourActive != "")
+                    colours.Add(Master.colourActive);
+                else
+                    colours.Add("neutral");
+            }
+
             RenderUnits();
             UnitHoverEnter(index);
         }
+    }
+    public void Drop(Unit unit)
+    {
+        units.Clear();
+        colours.Clear();
+        units.Add(unit);
+        if (SquadCustomize.squadActive != null)
+            colours.Add(SquadCustomize.squadActive.colour);
+        else if (Master.colourActive != "")
+            colours.Add(Master.colourActive);
+        else
+            colours.Add("neutral");
+
+        RenderUnits();
     }
 }

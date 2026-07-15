@@ -29,6 +29,7 @@ public class Master : MonoBehaviour
     public static bool masterExecuted = false;
     public static Color bronzeColor;
     public static Color goldColor;
+    public static string colourActive = "";
     public static GameObject ambiance = null;
 
     // Serialized variables for the editor.

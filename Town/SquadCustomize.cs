@@ -157,13 +157,10 @@ public class SquadCustomize : MonoBehaviour
 
         // Line panels
         for (int u = 0; u < lineupButtons.Count; u++)
-        {
-            lineupButtons[u].colour = squadActive.colour;
             lineupButtons[u].LoadLine
                 (u < squadActive.units.Count
                 ? squadActive.units[u]
                 : null);
-        }
 
         unitOptions.UpdateUnitOptions("basic", squadActive.colour);
         dialoguePanel.SetActive(true);

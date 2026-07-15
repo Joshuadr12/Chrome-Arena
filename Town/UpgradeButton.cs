@@ -5,9 +5,9 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Button))]
 public class UpgradeButton : MonoBehaviour
 {
-    public TMP_Text titleText;
-    public Image image;
-    public TMP_Text description;
+    [SerializeField] TMP_Text titleText;
+    [SerializeField] Image image;
+    [SerializeField] TMP_Text description;
 
     [HideInInspector] public Upgrade upgrade;
 

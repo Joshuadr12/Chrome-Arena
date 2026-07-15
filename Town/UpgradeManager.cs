@@ -7,13 +7,13 @@ using UnityEngine.UI;
 
 public class UpgradeManager : MonoBehaviour
 {
-    public TMP_Text headerText, upgradePointText;
-    public RectTransform panelRect;
-    public GameObject upgradeButton;
-    public TMP_Text requirementsText;
-    public Button confirmButton;
-    public AudioSource upgradeSoundSource;
-    public AudioClip upgradeSound;
+    [SerializeField] TMP_Text headerText, upgradePointText;
+    [SerializeField] RectTransform panelRect;
+    [SerializeField] GameObject upgradeButton;
+    [SerializeField] TMP_Text requirementsText;
+    [SerializeField] Button confirmButton;
+    [SerializeField] AudioSource upgradeSoundSource;
+    [SerializeField] AudioClip upgradeSound;
 
     string collectionName;
     List<Upgrade> upgrades = new List<Upgrade>();
