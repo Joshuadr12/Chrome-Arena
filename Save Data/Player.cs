@@ -67,6 +67,22 @@ public class Player : ScriptableObject
         upgrades.Add(new UpgradeQuantity(upgrade.upgradeId, 1));
     }
 
+    public bool NewUnitColour(UnitColour unit)
+    {
+        foreach (UnitColours u in units)
+        {
+            if (u.unitName == unit.unit.name)
+            {
+                return u.NewColour(unit.colour);
+            }
+        }
+
+        UnitColours newUnit = new UnitColours(unit.unit.name, new List<string>());
+        newUnit.colours.Add(unit.colour);
+        units.Add(newUnit);
+        return true;
+    }
+
     [Serializable]
     public class ResourceQuantity
     {
@@ -103,6 +119,16 @@ public class Player : ScriptableObject
         {
             unitName = unit;
             this.colours = colours;
+        }
+
+        public bool NewColour(string colour)
+        {
+            if (!colours.Contains(colour))
+            {
+                colours.Add(colour);
+                return true;
+            }
+            return false;
         }
     }
 

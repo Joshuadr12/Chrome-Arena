@@ -15,7 +15,10 @@ public class Unit : ScriptableObject
     // Variables.
     [Header("Stats")]
     public List<string> colours = new List<string>(){ "all" };
-    public bool playable = true;
+    [Tooltip("The units that can be unlocked when research is conducted with this unit.")] public List<Unit> research;
+    public bool playable = true, isStarter;
+    public float bodySize = 1;
+    [Header("Battle")]
     public int health = 1;
     public int attack = 1;
     public int price = 1;
@@ -36,8 +39,6 @@ public class Unit : ScriptableObject
     [Header("Spritesheet")]
     public Sprite[] idle;
     public Sprite[] move, abilityAnim, attackAnim, die;
-    [Header("Miscellaneous")]
-    public float bodySize = 1;
 
     public string GetDescription()
     {

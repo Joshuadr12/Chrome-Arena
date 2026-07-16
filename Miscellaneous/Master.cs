@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -317,7 +318,7 @@ public class Master : MonoBehaviour
         return result;
     }
 
-    public static void NextDay()
+    public static void NextWeek()
     {
         data.NextWeek();
         Save();
@@ -390,7 +391,7 @@ public class Master : MonoBehaviour
                 : state);
     }
 
-    public static List<string> TranslateCollections(List<string> collections)
+    public static List<string> TranslateCollections(List<string> collections, bool includeNeutral = true)
     {
         /// <summary>Returns all colours under the given list of colour collections.</summary>
 
@@ -420,7 +421,7 @@ public class Master : MonoBehaviour
                 result.Add(collection);
         }
         // Neutral includes all units.
-        if (!result.Contains("neutral"))
+        if (includeNeutral && !result.Contains("neutral"))
             result.Add("neutral");
         return result;
     }
@@ -488,6 +489,48 @@ public class Master : MonoBehaviour
             yield return new WaitForEndOfFrame();
             duration -= Time.deltaTime * (applyBattlespeed ? data.battleSpeed : 1);
         }
+    }
+
+    public static int ChooseRandom(List<float> weights)
+    {
+        /// <summary>
+        /// Chooses a random weight from the given list and returns its index. Higher weights are more likely to be chosen.
+        /// </summary>
+
+        float sum = 0;
+        foreach (float weight in weights)
+            sum += weight;
+
+        float choice = UnityEngine.Random.value * sum;
+        for (int i = 0; i < weights.Count; i++)
+        {
+            if (choice <= weights[i])
+                return i;
+            choice -= weights[i];
+        }
+        return 0;
+    }
+
+    public static int ChooseRandom(List<int> weights)
+    {
+        /// <summary>
+        /// Chooses a random weight from the given list and returns its index. Higher weights are more likely to be chosen.
+        /// </summary>
+
+        int sum = 0;
+        foreach (int weight in weights)
+            sum += weight;
+        if (sum <= 0)
+            return 0;
+
+        int choice = UnityEngine.Random.Range(0, sum);
+        for (int i = 0; i < weights.Count; i++)
+        {
+            if (choice < weights[i])
+                return i;
+            choice -= weights[i];
+        }
+        return 0;
     }
 
     public static void GotoScene(string sceneName)
@@ -562,6 +605,34 @@ public class Keyword
 }
 
 [Serializable]
+public class UnitColour
+{
+    public Unit unit;
+    public string colour;
+
+    public UnitColour(Unit unit)
+    {
+        this.unit = unit;
+        if (SquadCustomize.squadActive != null)
+            colour = SquadCustomize.squadActive.colour;
+        else if (Master.colourActive != "")
+            colour = Master.colourActive;
+        else
+            colour = "neutral";
+    }
+    public UnitColour(Unit unit, string colour)
+    {
+        this.unit = unit;
+        this.colour = colour;
+    }
+
+    public string GetString()
+    {
+        return $"{colour.FirstCharacterToUpper()} {unit.name}";
+    }
+}
+
+[Serializable]
 public class RequirementSet
 {
     /// <summary>
@@ -569,7 +640,7 @@ public class RequirementSet
     /// </summary>
 
     public List<Requirement> requirements;
-    public int requirementsNeeded = 1;
+    public int requirementsNeeded;
 
     public bool RequirementsMet()
     {

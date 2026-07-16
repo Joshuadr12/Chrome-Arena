@@ -130,4 +130,10 @@ public class UnitDisplay : MonoBehaviour
             UpdateSpriteSet(unit.bodySet,
                 model.GetComponentsInChildren<SpriteRenderer>());
     }
+    public void ChangeUnit
+        (UnitColour newUnit,
+        bool canBeBig = false)
+    {
+        ChangeUnit(newUnit.unit, newUnit.colour, canBeBig);
+    }
 }
