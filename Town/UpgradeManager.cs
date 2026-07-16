@@ -8,8 +8,7 @@ using UnityEngine.UI;
 public class UpgradeManager : MonoBehaviour
 {
     [SerializeField] TMP_Text headerText, upgradePointText;
-    [SerializeField] RectTransform panelRect;
-    [SerializeField] GameObject upgradeButton;
+    [SerializeField] ScrollPanel scrollPanel;
     [SerializeField] TMP_Text requirementsText;
     [SerializeField] Button confirmButton;
     [SerializeField] AudioSource upgradeSoundSource;
@@ -60,21 +59,15 @@ public class UpgradeManager : MonoBehaviour
                         && Master.data.TimesUpgraded(upgrade) < upgrade.layers.Count)
                         upgrades.Add(upgrade);
 
-        // Destroy pre-existing upgrade buttons.
-        foreach (UpgradeButton button in buttons)
-            Destroy(button.gameObject);
-        buttons.Clear();
-
         // Update the upgrade panel.
+        List<GameObject> newButtons = scrollPanel.Populate(upgrades.Count);
         UpgradeButton newButton;
-        foreach (Upgrade upgrade in upgrades)
+        for (int i = 0; i < newButtons.Count; i++)
         {
-            newButton = Instantiate(upgradeButton, panelRect)
-                .GetComponent<UpgradeButton>();
-            newButton.upgrade = upgrade;
+            newButton = newButtons[i].GetComponent<UpgradeButton>();
+            newButton.upgrade = upgrades[i];
             buttons.Add(newButton);
         }
-        panelRect.sizeDelta = new Vector2(upgrades.Count * 305 + 5, 0);
 
         // Update the requirements text and confirm button.
         upgradeActive = null;

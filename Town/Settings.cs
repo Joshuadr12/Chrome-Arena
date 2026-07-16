@@ -75,12 +75,4 @@ public class Settings : MonoBehaviour
     {
         unitOptions.UpdateUnitOptions(unitOptions.collections[index], canBeBig: false);
     }
-
-    public void SelectCharacter(int index)
-    {
-        /// <summary>Select and change the player's display unit, then return to the level selection menu.</summary>
-        /// <param name="unit">The unit to select.</param>
-
-        Master.data.character = unitOptions.GetUnit(index);
-    }
 }

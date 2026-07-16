@@ -107,11 +107,11 @@ public class SquadCustomize : MonoBehaviour
             unitKeywords += u.KeywordDescription() + "\n";
     }
 
-    public void Drag(int index)
+    public void Drag(Unit unit)
     {
         if (!chooseArtifact)
         {
-            selectedUnit = unitOptions.GetUnit(index);
+            selectedUnit = unit;
             UnitHoverExit();
         }
     }
@@ -182,11 +182,11 @@ public class SquadCustomize : MonoBehaviour
         }
     }
 
-    public void SelectArtifact(int index)
+    public void SelectArtifact(Artifact artifact)
     {
         if (chooseArtifact)
         {
-            artifactActive = unitOptions.GetArtifact(index);
+            artifactActive = artifact;
             artifactImage.sprite = artifactActive.sprite;
             chooseArtifact = false;
             unitOptions.UpdateUnitOptions("basic", squadActive.colour);
@@ -224,12 +224,12 @@ public class SquadCustomize : MonoBehaviour
             squadActive.colour);
     }
 
-    public void UnitHoverEnter(int index)
+    public void UnitHoverEnter(Unit unit, Artifact artifact)
     {
-        if (chooseArtifact)
-            UpdateArtifactDescriptions(unitOptions.GetArtifact(index));
+        if (chooseArtifact && artifact != null)
+            UpdateArtifactDescriptions(artifact);
         else
-            UpdateUnitDescriptions(unitOptions.GetUnit(index));
+            UpdateUnitDescriptions(unit);
     }
 
     public void UnitHoverExit()

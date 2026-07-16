@@ -10,7 +10,7 @@ public class LineupCustomize : MonoBehaviour
     /// Manages a single line of units to be customized.
     /// </summary>
 
-    public List<UnitDisplay> unitImages;
+    public List<CharacterButton> unitButtons;
 
     [HideInInspector] public List<UnitColour> units = new List<UnitColour>();
     UnitDisplay display;
@@ -19,13 +19,19 @@ public class LineupCustomize : MonoBehaviour
     {
         /// <summary>Re-render the units on the buttons.</summary>
 
-        for (int u = 0; u < unitImages.Count; u++)
+        int buttonIndex = 0;
+        foreach (UnitColour u in units)
         {
-            display = unitImages[u];
-            display.gameObject.SetActive(u < units.Count);
-            display.ChangeUnit
-                (u < units.Count ? units[u].unit : null,
-                u < units.Count ? units[u].colour : "neutral");
+            if (buttonIndex < unitButtons.Count)
+            {
+                unitButtons[buttonIndex].SetUnit(u);
+                buttonIndex++;
+            }
+        }
+        while (buttonIndex < unitButtons.Count)
+        {
+            unitButtons[buttonIndex].SetUnit(null, null);
+            buttonIndex++;
         }
     }
 
@@ -33,6 +39,7 @@ public class LineupCustomize : MonoBehaviour
     {
         foreach (UnitColour u in units)
             u.colour = SquadCustomize.squadActive.colour;
+        RenderUnits();
     }
 
     public void LoadLine(Line line)
@@ -66,17 +73,14 @@ public class LineupCustomize : MonoBehaviour
         return result;
     }
 
-    public void UnitHoverEnter(int index)
+    public void UnitHoverEnter(Unit unit)
     {
-        if (index < units.Count)
-        {
-            if (!SquadCustomize.chooseArtifact)
-            SquadCustomize.UpdateUnitDescriptions(units[index].unit);
+        if (!SquadCustomize.chooseArtifact)
+        SquadCustomize.UpdateUnitDescriptions(unit);
 
-            if (FindAnyObjectByType<ResearchManager>())
-                FindAnyObjectByType<ResearchManager>()
-                    .UnitHoverEnter(units[index].unit);
-        }
+        if (FindAnyObjectByType<ResearchManager>())
+            FindAnyObjectByType<ResearchManager>()
+                .UnitHoverEnter(unit);
     }
 
     public void UnitHoverExit()
@@ -101,7 +105,7 @@ public class LineupCustomize : MonoBehaviour
                 units.Add(new UnitColour(SquadCustomize.selectedUnit));
 
             RenderUnits();
-            UnitHoverEnter(index);
+            UnitHoverEnter(SquadCustomize.selectedUnit);
         }
     }
     public void Drop(Unit unit)

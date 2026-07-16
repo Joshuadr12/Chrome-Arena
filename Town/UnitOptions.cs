@@ -7,8 +7,7 @@ public class UnitOptions : MonoBehaviour
 {
     public List<string> collections;
     public List<TMP_Text> collectionLabels;
-    public List<UnitDisplay> unitOptionButtons;
-    public List<Image> artifactOptionButtons;
+    public List<CharacterButton> unitOptionButtons;
 
     [HideInInspector] public List<Unit> unitOptions = new List<Unit>();
     [HideInInspector] public List<Artifact> artifactOptions = new List<Artifact>();
@@ -44,31 +43,20 @@ public class UnitOptions : MonoBehaviour
             }
 
             // Artifact options.
-            artifactOptions.Clear();
+            artifactOptions = Master.GetArtifacts(colour);
             buttonIndex = 0;
-            foreach (Artifact artifact in Master.GetArtifacts(colour))
+            foreach (Artifact a in artifactOptions)
             {
-                if (buttonIndex < artifactOptionButtons.Count)
+                if (buttonIndex < unitOptionButtons.Count)
                 {
-                    artifactOptions.Add(artifact);
-                    artifactOptionButtons[buttonIndex]
-                        .transform.parent
-                        .gameObject.SetActive(true);
-                    artifactOptionButtons[buttonIndex]
-                        .gameObject.SetActive(true);
-                    artifactOptionButtons[buttonIndex].sprite = artifact.sprite;
-                    artifactOptionButtons[buttonIndex].material = Master
-                        .colours[colour].material;
                     unitOptionButtons[buttonIndex]
-                        .gameObject.SetActive(false);
+                        .SetArtifact(artifactOptions[buttonIndex], colour);
                     buttonIndex++;
                 }
             }
             while (buttonIndex < unitOptionButtons.Count)
             {
-                artifactOptionButtons[buttonIndex]
-                    .transform.parent
-                    .gameObject.SetActive(false);
+                unitOptionButtons[buttonIndex].Disable();
                 buttonIndex++;
             }
         }
@@ -97,30 +85,20 @@ public class UnitOptions : MonoBehaviour
             }
 
             // Unit options.
-            unitOptions.Clear();
+            unitOptions = Master.GetUnits(collection, colour);
             buttonIndex = 0;
-            foreach (Unit u in Master.GetUnits(collection, colour))
+            foreach (Unit u in unitOptions)
             {
                 if (buttonIndex < unitOptionButtons.Count
                     && (u.bodySize <= 1 || canBeBig))
                 {
-                    unitOptions.Add(u);
-                    unitOptionButtons[buttonIndex]
-                        .transform.parent
-                        .gameObject.SetActive(true);
-                    unitOptionButtons[buttonIndex]
-                        .gameObject.SetActive(true);
-                    unitOptionButtons[buttonIndex].ChangeUnit(u, colour);
-                    artifactOptionButtons[buttonIndex]
-                        .gameObject.SetActive(false);
+                    unitOptionButtons[buttonIndex].SetUnit(u, colour);
                     buttonIndex++;
                 }
             }
             while (buttonIndex < unitOptionButtons.Count)
             {
-                unitOptionButtons[buttonIndex]
-                    .transform.parent
-                    .gameObject.SetActive(false);
+                unitOptionButtons[buttonIndex].Disable();
                 buttonIndex++;
             }
         }

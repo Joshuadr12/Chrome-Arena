@@ -65,7 +65,7 @@ public class ResearchManager : MonoBehaviour
         gameObject.SetActive(true);
         Master.colourActive = "red";
         lineupPanel.LoadLine(null);
-        unitOptions.UpdateUnitOptions("basic", Master.colourActive, false);
+        unitOptions.UpdateUnitOptions("basic", Master.colourActive);
 
         RefreshMenu();
     }
@@ -86,17 +86,17 @@ public class ResearchManager : MonoBehaviour
     public void SelectColour(string colour)
     {
         Master.colourActive = colour;
-        unitOptions.UpdateUnitOptions("basic", colour, false);
+        unitOptions.UpdateUnitOptions("basic", colour);
     }
 
-    public void SelectUnit(int index)
+    public void SelectUnit(Unit unit)
     {
-        lineupPanel.Drop(unitOptions.GetUnit(index));
+        lineupPanel.Drop(unit);
     }
 
-    public void Drag(int index)
+    public void Drag(Unit unit)
     {
-        SquadCustomize.selectedUnit = unitOptions.GetUnit(index);
+        SquadCustomize.selectedUnit = unit;
         Vector3 cursorPos = Camera.main
                 .ScreenToWorldPoint(Input.mousePosition);
 
@@ -150,6 +150,12 @@ public class ResearchManager : MonoBehaviour
         // Start displaying the results.
         Master.OpenMenu(resultsPanel, mainPanel);
         unitDisplayed = -1;
+        NextResult();
+    }
+
+    public void SkipResults()
+    {
+        unitDisplayed = results.Count;
         NextResult();
     }
 
