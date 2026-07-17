@@ -16,7 +16,7 @@ public class Unit : ScriptableObject
     [Header("Stats")]
     public List<string> colours = new List<string>(){ "all" };
     [Tooltip("The units that can be unlocked when research is conducted with this unit.")] public List<Unit> research;
-    public bool playable = true, isStarter;
+    public bool isStarter;
     public float bodySize = 1;
     [Header("Battle")]
     public int health = 1;

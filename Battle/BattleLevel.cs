@@ -77,7 +77,7 @@ public class BattleSettings
     /// </summary>
 
     // Variables.
-    public AudioClip specialMusic;
+    [FormerlySerializedAs("specialMusic")] public AudioClip music;
     public bool allowArtifacts = true;
     //public int rounds = 3;
     public int lanes = 5;

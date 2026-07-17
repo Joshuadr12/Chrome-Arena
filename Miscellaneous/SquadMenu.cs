@@ -188,7 +188,6 @@ public class SquadMenu : MonoBehaviour
                 SquadSelect.fairStars = 1;
         }
 
-        Master.StopAmbiance();
         Master.GotoScene("SquadSelect");
     }
 }

@@ -5,13 +5,13 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(AudioSource))]
 public class UpgradeManager : MonoBehaviour
 {
     [SerializeField] TMP_Text headerText, upgradePointText;
     [SerializeField] ScrollPanel scrollPanel;
     [SerializeField] TMP_Text requirementsText;
     [SerializeField] Button confirmButton;
-    [SerializeField] AudioSource upgradeSoundSource;
     [SerializeField] AudioClip upgradeSound;
 
     string collectionName;
@@ -23,13 +23,14 @@ public class UpgradeManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        GetComponent<AudioSource>().volume = Master.data.sfxVolume;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Escape) && Town.menuLayer > 0)
+            CloseMenu();
     }
 
     public void OpenMenu(string collectionId)
@@ -40,6 +41,7 @@ public class UpgradeManager : MonoBehaviour
         
         // Open and refresh the menu.
         gameObject.SetActive(true);
+        Town.menuLayer++;
         RefreshMenu();
     }
 
@@ -110,7 +112,7 @@ public class UpgradeManager : MonoBehaviour
     public void MakeUpgrade()
     {
         // Make the changes in the data.
-        upgradeSoundSource.PlayOneShot(upgradeSound);
+        GetComponent<AudioSource>().PlayOneShot(upgradeSound);
         Master.data.upgradePoints -= layerActive.upgradeCost;
         Master.data.MakeUpgrade(upgradeActive);
         Master.Save();
@@ -118,12 +120,18 @@ public class UpgradeManager : MonoBehaviour
         // Close the upgrade panel or show the new building.
         if (upgradeActive.isBuilding)
         {
-            gameObject.SetActive(false);
             FindFirstObjectByType<Town>()
                 .RenderResources(upgradeActive.upgradeId);
+            CloseMenu();
         }
         else
             RefreshMenu();
+    }
+
+    public void CloseMenu()
+    {
+        gameObject.SetActive(false);
+        Town.menuLayer--;
     }
 }
 

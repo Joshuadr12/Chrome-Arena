@@ -30,7 +30,7 @@ public class Master : MonoBehaviour
     public static Color bronzeColor;
     public static Color goldColor;
     public static string colourActive = "";
-    public static GameObject ambiance = null;
+    public static AudioSource backgroundMusic = null;
 
     // Serialized variables for the editor.
     [SerializeField] bool testing;
@@ -50,8 +50,13 @@ public class Master : MonoBehaviour
     void Start()
     {
         // Initialize master settings.
-        if (!masterExecuted)
+        if (masterExecuted)
+            audioSource.Stop();
+        else
         {
+            backgroundMusic = audioSource;
+            DontDestroyOnLoad(audioSource.gameObject);
+
             bronzeColor = bronzeStarColor;
             goldColor = goldStarColor;
 
@@ -99,16 +104,15 @@ public class Master : MonoBehaviour
             masterExecuted = true;
         }
 
-        // Set ambiance.
-        if (audioSource != null)
+        RefreshMusic(audioSource.clip);
+    }
+
+    public static void RefreshMusic(AudioClip clip)
+    {
+        if (backgroundMusic != null && backgroundMusic.clip != clip)
         {
-            if (ambiance == null)
-            {
-                ambiance = audioSource.gameObject;
-                DontDestroyOnLoad(audioSource.gameObject);
-            }
-            else
-                Destroy(audioSource.gameObject);
+            backgroundMusic.clip = clip;
+            backgroundMusic.Play();
         }
     }
 
@@ -123,6 +127,7 @@ public class Master : MonoBehaviour
 
         data.battleSpeed = saveData.battleSpeed;
         data.musicVolume = saveData.musicVolume;
+        backgroundMusic.volume = data.musicVolume;
         data.sfxVolume = saveData.sfxVolume;
         data.character = FindUnit(saveData.character);
         if (data.character == null)
@@ -435,11 +440,8 @@ public class Master : MonoBehaviour
             if ((collection == "all") || (co == collection))
             {
                 foreach (Unit unit in unitSets[co])
-                    if ((colour == "all")
-                        || TranslateCollections(unit.colours)
-                        .Contains(colour))
-                        if (unit.playable)
-                            result.Add(unit);
+                    if (data.HasUnitColour(unit, colour))
+                        result.Add(unit);
             }
         }
         return result;
@@ -538,15 +540,6 @@ public class Master : MonoBehaviour
         /// <param name="sceneName">The scene to load.</param>
 
         SceneManager.LoadScene(sceneName);
-    }
-
-    public static void StopAmbiance()
-    {
-        if (ambiance != null)
-        {
-            Destroy(ambiance);
-            ambiance = null;
-        }
     }
 }
 

@@ -16,9 +16,8 @@ public class MainMenu : MonoBehaviour
     [SerializeField] List<UnitDisplay> saveCharacters;
     [SerializeField] List<TMP_Text> saveDescriptions;
     [SerializeField] List<Button> deleteButtons;
-    [Header("Miscellaneous"), SerializeField]
-    AudioSource music;
-    [SerializeField] GameObject mainPanel, saveFilePanel, baseSavePanel, deleteSavePanel, creditsPanel;
+    [Header("Miscellaneous"), SerializeField] GameObject mainPanel;
+    [SerializeField] GameObject saveFilePanel, baseSavePanel, deleteSavePanel, creditsPanel;
 
     [HideInInspector] public string deleteSelection { get; set; }
     [HideInInspector] public int menuLayer { get; set; }
@@ -40,7 +39,6 @@ public class MainMenu : MonoBehaviour
     void Start()
     {
         // Load the save files.
-        music.volume = Master.data.musicVolume;
         foreach (string save in saveFiles)
             saves.Add(save, SaveData.Load(save));
 
@@ -108,8 +106,7 @@ public class MainMenu : MonoBehaviour
             randomUnit = collection[Random.Range
                 (0,
                 collection.Count)];
-        } while ((randomUnit.bodySize > 1)
-        || !randomUnit.playable);
+        } while (randomUnit.bodySize > 1);
 
         // Pick a colour.
         colours = Master.TranslateCollections

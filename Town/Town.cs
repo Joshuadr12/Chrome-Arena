@@ -13,6 +13,8 @@ public class Town : MonoBehaviour
     /// Manages the town.
     /// </summary>
 
+    public static int menuLayer;
+
     [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
     [SerializeField] GameObject buildingParticles;
     [SerializeField] List<Image> resourceDisplay;
@@ -22,13 +24,15 @@ public class Town : MonoBehaviour
     //Start is called before the first frame update.
     void Start()
     {
+        Master.backgroundMusic.volume = Master.data.musicVolume;
+        menuLayer = 0;
         RenderResources();
     }
 
     //Update is called once per frame.
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && menuLayer == 0)
             Master.GotoScene("MainMenu");
     }
 

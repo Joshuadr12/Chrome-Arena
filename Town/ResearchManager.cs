@@ -24,6 +24,7 @@ public class ResearchManager : MonoBehaviour
     [SerializeField] ScrollPanel allResultsScroll;
 
     GameObject textBox;
+    bool showingAllResults = false;
     int unitDisplayed;
     List<UnitColour> results = new List<UnitColour>(),
         newResults = new List<UnitColour>();
@@ -32,11 +33,27 @@ public class ResearchManager : MonoBehaviour
     void Start()
     {
         textBox = unitText.transform.parent.gameObject;
+        GetComponent<AudioSource>().volume = Master.data.sfxVolume;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Escape) && Town.menuLayer > 0)
+        {
+            if (Town.menuLayer == 1)
+                CloseMenu();
+            else if (FindFirstObjectByType<UpgradeManager>()
+                && FindFirstObjectByType<UpgradeManager>()
+                .gameObject.activeSelf)
+                FindFirstObjectByType<UpgradeManager>()
+                    .CloseMenu();
+            else if (showingAllResults)
+                LeaveResults();
+            else
+                SkipResults();
+        }
+
         // Drag and drop unit
         if (Input.GetMouseButtonUp(0))
             SquadCustomize.selectedUnit = null;
@@ -65,9 +82,10 @@ public class ResearchManager : MonoBehaviour
     {
         // Update the unit options.
         gameObject.SetActive(true);
+        Town.menuLayer = 1;
+        showingAllResults = false;
         Master.colourActive = "red";
         lineupPanel.LoadLine(null);
-        unitOptions.UpdateUnitOptions("basic", Master.colourActive);
 
         RefreshMenu();
     }
@@ -83,6 +101,8 @@ public class ResearchManager : MonoBehaviour
         researchSlider.value = 1;
         researchSlider.maxValue = Mathf.Max(Master.data.researchPoints, 1);
         researchCostText.text = "Research 1 time";
+
+        unitOptions.UpdateUnitOptions("basic", Master.colourActive);
     }
 
     public void SelectColour(string colour)
@@ -112,7 +132,6 @@ public class ResearchManager : MonoBehaviour
         keywordText.text = SquadCustomize.unitKeywords;
         textBox.SetActive(true);
     }
-
     public void UnitHoverEnter(Unit unit)
     {
         SquadCustomize.UpdateUnitDescriptions(unit);
@@ -120,7 +139,6 @@ public class ResearchManager : MonoBehaviour
         keywordText.text = SquadCustomize.unitKeywords;
         textBox.SetActive(true);
     }
-
     public void UnitHoverExit()
     {
         SquadCustomize.unitDescription = "";
@@ -152,6 +170,7 @@ public class ResearchManager : MonoBehaviour
         RefreshMenu();
 
         // Start displaying the results.
+        Town.menuLayer = 2;
         Master.OpenMenu(resultsPanel, mainPanel);
         Master.CloseMenu(allResultsPanel, oneResultPanel);
         unitDisplayed = -1;
@@ -173,6 +192,7 @@ public class ResearchManager : MonoBehaviour
             if (newResults.Count > 0)
             {
                 Master.OpenMenu(allResultsPanel, oneResultPanel);
+                showingAllResults = true;
                 List<GameObject> newButtons = allResultsScroll.Populate(newResults.Count);
                 CharacterButton button;
                 for (int i = 0; i < newResults.Count; i++)
@@ -206,6 +226,8 @@ public class ResearchManager : MonoBehaviour
     public void LeaveResults()
     {
         Master.CloseMenu(resultsPanel, mainPanel);
+        showingAllResults = false;
+        Town.menuLayer = 1;
     }
 
     public void CloseMenu()
@@ -214,6 +236,7 @@ public class ResearchManager : MonoBehaviour
         Master.colourActive = "";
         researchButton.interactable = false;
         gameObject.SetActive(false);
+        Town.menuLayer = 0;
     }
 
     public static UnitColour GetResearchUnit(UnitColour unit)

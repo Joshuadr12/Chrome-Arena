@@ -50,8 +50,8 @@ public class Settings : MonoBehaviour
     public void MusicVolume()
     {
         Master.data.musicVolume = musicSlider.value;
-        if (Master.ambiance)
-            Master.ambiance.GetComponent<AudioSource>().volume = musicSlider.value;
+        Master.backgroundMusic.GetComponent<AudioSource>().volume
+            = musicSlider.value;
     }
 
     public void SFXVolume()

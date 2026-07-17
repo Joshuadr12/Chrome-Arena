@@ -54,6 +54,16 @@ public class Player : ScriptableObject
         return 0;
     }
 
+    public bool HasUnitColour (Unit unit, string colour)
+    {
+        foreach (UnitColours u in units)
+            if (u.unitName == unit.name)
+                return colour == "all"
+                    || Master.TranslateCollections(u.colours)
+                    .Contains(colour);
+        return false;
+    }
+
     public void MakeUpgrade(Upgrade upgrade)
     {
         foreach (UpgradeQuantity u in upgrades)
@@ -78,6 +88,7 @@ public class Player : ScriptableObject
         }
 
         UnitColours newUnit = new UnitColours(unit.unit.name, new List<string>());
+        newUnit.colours.Add("neutral");
         newUnit.colours.Add(unit.colour);
         units.Add(newUnit);
         return true;

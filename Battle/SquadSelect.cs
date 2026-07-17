@@ -16,7 +16,6 @@ public class SquadSelect : MonoBehaviour
     public static bool began = false, artifactTutorial = true;
     public static int roundsDone, fairStars;
     public static List<SquadStatus> leftArmy, rightArmy;
-    public static AudioSource music;
 
     // Serialized variables for the editor.
     [Header("Menu")]
@@ -41,8 +40,6 @@ public class SquadSelect : MonoBehaviour
     [SerializeField] Slider levelMeter;
     [SerializeField] GameObject starLossText;
     [SerializeField] List<Image> resourceQuantities;
-    [Header("Miscellaneous")]
-    [SerializeField] GameObject battleMusic;
 
     // Miscellaneous variables.
     bool gameOver = false;
@@ -91,19 +88,6 @@ public class SquadSelect : MonoBehaviour
         // When the battle begins.
         else
         {
-            // Music
-            music = Instantiate(battleMusic).GetComponent<AudioSource>();
-            if (Master.battleSelected.settings.specialMusic)
-            {
-                music.clip = Master
-                    .battleSelected
-                    .settings
-                    .specialMusic;
-                music.Play();
-            }
-            music.volume = Master.data.musicVolume;
-            DontDestroyOnLoad(music.gameObject);
-
             // Squads
             List<Squad> squads = Master
                 .battleSelected
@@ -128,6 +112,7 @@ public class SquadSelect : MonoBehaviour
                 Master.data.AddResource(squad.squad.colour, -squad.squad.startMoney / 2);
             Master.Save();
 
+            Master.RefreshMusic(Master.battleSelected.settings.music);
             StarChallenges.totalScore.Reset();
         }
 
@@ -384,12 +369,12 @@ public class SquadSelect : MonoBehaviour
         while (resultsPanel.color.a <= 0.5f)
         {
             resultsPanel.color += Color.black * Time.deltaTime / 2;
-            music.volume -= Master.data.musicVolume * Time.deltaTime;
+            Master.backgroundMusic.volume
+                -= Master.data.musicVolume * Time.deltaTime;
             yield return null;
         }
         resultsPanel.color = Color.black / 2;
-        Destroy(music.gameObject);
-        music = null;
+        Master.backgroundMusic.volume = 0;
         resultsWindow.SetActive(true);
 
         // Stars on win
@@ -526,9 +511,6 @@ public class SquadSelect : MonoBehaviour
 
     public void Leave()
     {
-
-        foreach (AudioSource a in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
-            Destroy(a.gameObject);
         began = false;
         SceneManager.LoadScene("Town");
     }
