@@ -38,6 +38,7 @@ public class SquadSelect : MonoBehaviour
     [SerializeField] List<Transform> starRequirements;
     [SerializeField] TMP_Text levelText;
     [SerializeField] Slider levelMeter;
+    [SerializeField] TMP_Text pointsText;
     [SerializeField] GameObject starLossText;
     [SerializeField] List<Image> resourceQuantities;
 
@@ -302,6 +303,21 @@ public class SquadSelect : MonoBehaviour
 
     public IEnumerator BattleResults(bool retreated = false)
     {
+        // Methods
+        int researchGained = 0, upgradesGained = 0;
+        void UpdatePoints()
+        {
+            pointsText.text = $"{researchGained} research point";
+            if (researchGained > 1)
+                pointsText.text += "s";
+            if (upgradesGained > 0)
+            {
+                pointsText.text += $"\n{upgradesGained} upgrade point";
+                if (upgradesGained > 1)
+                    pointsText.text += "s";
+            }
+        }
+
         int stars = 0;
         List<string> failedStars = new List<string>();
         void UpdateStarText(string text, bool success)
@@ -334,7 +350,10 @@ public class SquadSelect : MonoBehaviour
                     challenge.IsCompleted(StarChallenges.totalScore));
         }
         if (stars > oldStars)
+        {
             Master.SetStars(Master.battleSelected.battleId, stars);
+            Master.data.researchPoints += stars - oldStars;
+        }
 
         // Update level.
         int[] oldLevel = new int[2]
@@ -410,6 +429,12 @@ public class SquadSelect : MonoBehaviour
                     lerp += Time.deltaTime * 8;
                 }
 
+                if (i >= oldStars)
+                {
+                    researchGained++;
+                    UpdatePoints();
+                }
+
                 star.transform.localScale = Vector3.one;
                 star.color = (i < oldStars)
                     ? Master.bronzeColor
@@ -442,6 +467,8 @@ public class SquadSelect : MonoBehaviour
                     oldMeter = 0;
                     levelText.text = $"Level {oldLevel[0]}";
                     levelText.transform.localScale = Vector3.one * 2f;
+                    upgradesGained++;
+                    UpdatePoints();
                     PlayResultsSound(goldSound);
                 }
 

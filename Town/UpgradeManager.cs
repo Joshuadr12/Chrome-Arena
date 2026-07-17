@@ -5,13 +5,13 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(AudioSource))]
 public class UpgradeManager : MonoBehaviour
 {
     [SerializeField] TMP_Text headerText, upgradePointText;
     [SerializeField] ScrollPanel scrollPanel;
     [SerializeField] TMP_Text requirementsText;
     [SerializeField] Button confirmButton;
+    [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip upgradeSound;
 
     string collectionName;
@@ -23,7 +23,7 @@ public class UpgradeManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        GetComponent<AudioSource>().volume = Master.data.sfxVolume;
+        audioSource.volume = Master.data.sfxVolume;
     }
 
     // Update is called once per frame
@@ -112,7 +112,7 @@ public class UpgradeManager : MonoBehaviour
     public void MakeUpgrade()
     {
         // Make the changes in the data.
-        GetComponent<AudioSource>().PlayOneShot(upgradeSound);
+        audioSource.PlayOneShot(upgradeSound);
         Master.data.upgradePoints -= layerActive.upgradeCost;
         Master.data.MakeUpgrade(upgradeActive);
         Master.Save();
