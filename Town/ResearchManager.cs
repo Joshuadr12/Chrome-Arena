@@ -16,15 +16,17 @@ public class ResearchManager : MonoBehaviour
     [SerializeField] Slider researchSlider;
     [SerializeField] Button researchButton;
     [Header("Results Panel"), SerializeField] GameObject resultsPanel;
+    [SerializeField] GameObject oneResultPanel, allResultsPanel;
     [SerializeField] UnitDisplay resultUnit;
     [SerializeField] ParticleSystem particles;
     [SerializeField] AudioClip newSound, notNewSound;
-    [SerializeField] TMP_Text resultHeader, resultUnitText, resultKeywordText;
+    [SerializeField] TMP_Text resultHeader;
+    [SerializeField] ScrollPanel allResultsScroll;
 
     GameObject textBox;
     int unitDisplayed;
-    List<UnitColour> results = new List<UnitColour>();
-    List<bool> newResults = new List<bool>();
+    List<UnitColour> results = new List<UnitColour>(),
+        newResults = new List<UnitColour>();
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -143,12 +145,15 @@ public class ResearchManager : MonoBehaviour
 
         newResults.Clear();
         foreach (UnitColour result in results)
-            newResults.Add(Master.data.NewUnitColour(result));
+            if (Master.data.NewUnitColour(result))
+                newResults.Add(result);
+
         Master.Save();
         RefreshMenu();
 
         // Start displaying the results.
         Master.OpenMenu(resultsPanel, mainPanel);
+        Master.CloseMenu(allResultsPanel, oneResultPanel);
         unitDisplayed = -1;
         NextResult();
     }
@@ -163,17 +168,31 @@ public class ResearchManager : MonoBehaviour
     {
         unitDisplayed++;
         if (unitDisplayed >= results.Count)
-            Master.CloseMenu(resultsPanel, mainPanel);
+        {
+            UnitHoverExit();
+            if (newResults.Count > 0)
+            {
+                Master.OpenMenu(allResultsPanel, oneResultPanel);
+                List<GameObject> newButtons = allResultsScroll.Populate(newResults.Count);
+                CharacterButton button;
+                for (int i = 0; i < newResults.Count; i++)
+                {
+                    button = newButtons[i].GetComponent<CharacterButton>();
+                    button.SetUnit(newResults[i]);
+                    button.manager = gameObject;
+                }
+            }
+            else
+                Master.CloseMenu(resultsPanel, mainPanel);
+        }
         else
         {
             UnitColour temp = results[unitDisplayed];
             resultUnit.ChangeUnit(temp);
             resultHeader.text = temp.GetString();
-            SquadCustomize.UpdateUnitDescriptions(temp.unit);
-            resultUnitText.text = SquadCustomize.unitDescription;
-            resultKeywordText.text = SquadCustomize.unitKeywords;
+            UnitHoverEnter(temp.unit);
 
-            if (newResults[unitDisplayed])
+            if (newResults.Contains(temp))
             {
                 GetComponent<AudioSource>().PlayOneShot(newSound);
                 particles.Play();
@@ -184,10 +203,16 @@ public class ResearchManager : MonoBehaviour
         }
     }
 
+    public void LeaveResults()
+    {
+        Master.CloseMenu(resultsPanel, mainPanel);
+    }
+
     public void CloseMenu()
     {
         SquadCustomize.selectedUnit = null;
         Master.colourActive = "";
+        researchButton.interactable = false;
         gameObject.SetActive(false);
     }
 

@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class CharacterButton : MonoBehaviour
 {
-    [SerializeField] ButtonType buttonType;
-    [SerializeField] GameObject manager;
+    public ButtonType buttonType;
+    public GameObject manager;
     [SerializeField] UnitDisplay unitDisplay;
     [SerializeField] Image artifactImage;
 

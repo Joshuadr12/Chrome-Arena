@@ -7,6 +7,7 @@ public class ScrollPanel : MonoBehaviour
     public GameObject item;
     public GridLayoutGroup layout;
     public Vector2 cellSize;
+    public int rows = 2;
 
     List<GameObject> items = new List<GameObject>();
 
@@ -14,6 +15,7 @@ public class ScrollPanel : MonoBehaviour
     void Start()
     {
         layout.cellSize = cellSize;
+        layout.constraintCount = rows;
     }
 
     // Update is called once per frame
@@ -31,8 +33,8 @@ public class ScrollPanel : MonoBehaviour
             items.Add(Instantiate(item, layout.transform));
 
         layout.GetComponent<RectTransform>().sizeDelta = new Vector2
-            (population * (cellSize.x + layout.spacing.x)
-            + layout.spacing.x, 0);
+            (population * (cellSize.x + layout.spacing.x) / rows
+            + layout.padding.left, 0);
 
         return items;
     }
