@@ -17,6 +17,7 @@ public class Unit : ScriptableObject
     public List<string> colours = new List<string>(){ "all" };
     [Tooltip("The units that can be unlocked when research is conducted with this unit.")] public List<Unit> research;
     public bool isStarter;
+    [Tooltip("A brief description of the unit's abilities when referenced by other units.")] public string abilityDesc;
     public float bodySize = 1;
     [Header("Battle")]
     public int health = 1;
@@ -106,6 +107,8 @@ public class Unit : ScriptableObject
             result += ", Slow";
         if (steady)
             result += ", Steady";
+        if (abilityDesc != "")
+            result += ", " + abilityDesc;
 
         return result;
     }
@@ -141,7 +144,8 @@ public class Cause
         Bonus,
         Block,
         Nonlethal,
-        Death
+        Death,
+        Pillage
     }
 
     // Variables.
@@ -162,7 +166,7 @@ public class Effect
         Buff,
         Summon,
         MoveFront,
-        GainColor,
+        GainPaint,
         GiveTrait,
         Retreat,
         Bleach
@@ -200,7 +204,7 @@ public class Effect
                 return typeUnits.units.Count > 0;
             case EffectType.MoveFront:
                 return reference.index > 0;
-            case EffectType.GainColor:
+            case EffectType.GainPaint:
                 return typeInt1 != 0;
             case EffectType.GiveTrait:
                 return (typeStr != "") && (typeInt1 != 0);

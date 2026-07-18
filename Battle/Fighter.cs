@@ -57,11 +57,7 @@ public class Fighter : UnitDisplay
             health = 1;
         }
         else
-        {
             SetAnimation(AnimState.Move);
-            foreach (Ability a in unit.abilities)
-                AddAbility(a);
-        }
 
         fast = unit.fast;
         agile = unit.agile;
@@ -111,13 +107,14 @@ public class Fighter : UnitDisplay
         }
     }
 
-    void OnDestroy()
+    public void RemoveFromBattle()
     {
         if (forCombat)
             foreach (Ability a in abilities)
                 Battle
                     .fighterAbilities[a.cause.type][a.effects[0].type]
                     .Remove(a);
+        Destroy(gameObject);
     }
 
     public int OverrideAdvantage()

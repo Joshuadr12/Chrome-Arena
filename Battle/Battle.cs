@@ -174,7 +174,7 @@ public class Battle : MonoBehaviour
         List<Fighter> summoned = new List<Fighter>();
         if (units != null)
         {
-            GameObject newFighter;
+            Fighter newFighter;
             Vector3 spawnPoint;
             foreach (Unit u in units.units)
             {
@@ -188,9 +188,12 @@ public class Battle : MonoBehaviour
                     newFighter = Instantiate
                         (fighter,
                         spawnPoint + Vector3.left * 15,
-                        Quaternion.identity);
-                    newFighter.GetComponent<Fighter>().ChangeUnit(u, leftSide.colour, true);
-                    lane.left.Insert(index, newFighter);
+                        Quaternion.identity)
+                        .GetComponent<Fighter>();
+                    newFighter.ChangeUnit(u, leftSide.colour, true);
+                    foreach (Ability a in newFighter.unit.abilities)
+                        newFighter.AddAbility(a);
+                    lane.left.Insert(index, newFighter.gameObject);
                 }
                 // Summon on the right side.
                 else
@@ -202,10 +205,13 @@ public class Battle : MonoBehaviour
                     newFighter = Instantiate
                         (fighter,
                         spawnPoint + Vector3.right * 15,
-                        Quaternion.identity);
-                    newFighter.GetComponent<Fighter>().ChangeUnit(u, rightSide.colour, true);
-                    newFighter.GetComponent<Fighter>().SwitchSides();
-                    lane.right.Insert(index, newFighter);
+                        Quaternion.identity)
+                        .GetComponent<Fighter>();
+                    newFighter.ChangeUnit(u, rightSide.colour, true);
+                    newFighter.SwitchSides();
+                    foreach (Ability a in newFighter.unit.abilities)
+                        newFighter.AddAbility(a);
+                    lane.right.Insert(index, newFighter.gameObject);
                 }
                 // Increase the index to ensure that the fighters are placed in the right order.
                 index++;
@@ -565,7 +571,7 @@ public class Battle : MonoBehaviour
                 / unitValue
                 * f.unit.price);
             f.retreated = true;
-            Destroy(f.gameObject);
+            f.RemoveFromBattle();
             return money;
         }
 
@@ -637,7 +643,8 @@ public class Battle : MonoBehaviour
         /// <summary>Summon as many fighters as possible in the given lanes and activate their summon abilities as needed.</summary>
 
         Lane laneWaiting;
-        List<Fighter> summoned = new List<Fighter>();
+        List<Fighter> summoned = new List<Fighter>(),
+            pillagers = new List<Fighter>();
         bool ready = false;
         bool marching = false;
         while (!ready)
@@ -657,13 +664,22 @@ public class Battle : MonoBehaviour
                         || (l.left.Count < laneWaiting.left.Count))
                         laneWaiting = l;
                 }
+                else if (l.left.Count == 0)
+                    foreach (GameObject f in l.right)
+                        if (!pillagers.Contains(f.GetComponent<Fighter>()))
+                            pillagers.Add(f.GetComponent<Fighter>());
             }
             if (laneWaiting != null)
+            {
+                if (laneWaiting.left.Count == 0)
+                    foreach (GameObject f in laneWaiting.right)
+                        pillagers.Add(f.GetComponent<Fighter>());
                 foreach (Fighter f in SummonFighters
                     (laneWaiting,
                     true,
                     leftSide.RandomUnits(settings.laneCapacity - laneWaiting.left.Count)))
                     summoned.Add(f);
+            }
 
             // Right side
             laneWaiting = null;
@@ -677,13 +693,22 @@ public class Battle : MonoBehaviour
                         || (l.right.Count < laneWaiting.right.Count))
                         laneWaiting = l;
                 }
+                else if (l.right.Count == 0)
+                    foreach (GameObject f in l.left)
+                        if (!pillagers.Contains(f.GetComponent<Fighter>()))
+                            pillagers.Add(f.GetComponent<Fighter>());
             }
             if (laneWaiting != null)
+            {
+                if (laneWaiting.right.Count == 0)
+                    foreach (GameObject f in laneWaiting.left)
+                        pillagers.Add(f.GetComponent<Fighter>());
                 foreach (Fighter f in SummonFighters
                     (laneWaiting,
                     false,
                     rightSide.RandomUnits(settings.laneCapacity - laneWaiting.right.Count)))
                     summoned.Add(f);
+            }
 
             if (!marching && (summoned.Count > 0))
             {
@@ -693,7 +718,7 @@ public class Battle : MonoBehaviour
             yield return Master.SetTimer(0.2f);
         }
 
-        // Select artifacts and activate summon abilities.
+        // Select artifacts and activate summon/pillage abilities.
         if (lanes.Count > 0)
         {
             // Stop marching!
@@ -734,8 +759,12 @@ public class Battle : MonoBehaviour
             foreach (Fighter f in summoned)
                 TriggerAbilities
                     (Cause.CauseType.Summon,
-                    null,
-                    f);
+                    null, f);
+            foreach (Fighter f in pillagers)
+                if (!summoned.Contains(f))
+                    TriggerAbilities
+                        (Cause.CauseType.Pillage,
+                        null, f);
             if (pendingTriggers.Count > 0)
                 yield return StartCoroutine(ActivateTriggers());
         }
@@ -809,9 +838,10 @@ public class Battle : MonoBehaviour
         }
     }
 
-    IEnumerator ActivateTriggers()
+    IEnumerator ActivateTriggers(bool aboutToRetreat = false)
     {
         /// <summary>Activate any abilities waiting to be activated and set sprite states accordingly.</summary>
+        /// <param name="aboutToRetreat">Whether or not the fighters are about to retreat. If so, don't cleanup or check lanes.</param>
 
         List<Fighter> abilityFighters = new List<Fighter>();
         Unit unitTurn;
@@ -901,8 +931,11 @@ public class Battle : MonoBehaviour
             leftAbilityUnit.gameObject.SetActive(false);
             rightAbilityUnit.gameObject.SetActive(false);
         }
-        yield return StartCoroutine(Clean());
-        yield return StartCoroutine(CheckLanes());
+        if (!aboutToRetreat)
+        {
+            yield return StartCoroutine(Clean());
+            yield return StartCoroutine(CheckLanes());
+        }
     }
 
     void ActivateEffects(Trigger trigger)
@@ -919,7 +952,8 @@ public class Battle : MonoBehaviour
                 trigger.causeTarget);
             switch (effect.type)
             {
-                case Effect.EffectType.Summon: // TODO: "For Opponent" functionality.
+                case Effect.EffectType.Summon:
+                    List<Fighter> summoned = new List<Fighter>();
                     Location temp;
                     Lane laneTemp;
                     foreach (Fighter f in targets)
@@ -931,12 +965,13 @@ public class Battle : MonoBehaviour
                             int summonIndex = Mathf.Min
                                 (temp.index,
                                 laneTemp.left.Count);
-                            SummonFighters
+                            foreach (Fighter newF in SummonFighters
                                 (laneTemp,
                                 true,
                                 effect.typeUnits,
                                 summonIndex,
-                                false);
+                                false))
+                                summoned.Add(newF);
                             for
                                 (int i = summonIndex + 1;
                                 i < laneTemp.left.Count;
@@ -956,12 +991,13 @@ public class Battle : MonoBehaviour
                             int summonIndex = Mathf.Min
                                 (temp.index,
                                 laneTemp.right.Count);
-                            SummonFighters
+                            foreach (Fighter newF in SummonFighters
                                 (laneTemp,
                                 false,
                                 effect.typeUnits,
                                 summonIndex,
-                                false);
+                                false))
+                                summoned.Add(newF);
                             for
                                 (int i = summonIndex + 1;
                                 i < laneTemp.right.Count;
@@ -977,6 +1013,9 @@ public class Battle : MonoBehaviour
                             }
                         }
                     }
+                    foreach (Fighter f in summoned)
+                        TriggerAbilities(Cause.CauseType.Summon,
+                            trigger.ability.owner, f);
                     break;
                 case Effect.EffectType.MoveFront:
                     foreach (Fighter f in targets)
@@ -1051,7 +1090,7 @@ public class Battle : MonoBehaviour
                             f,
                             effect.typeInt1);
                     break;
-                case Effect.EffectType.GainColor:
+                case Effect.EffectType.GainPaint:
                     if (trigger.ability.owner.isLeft ^ effect.forOpponent)
                     {
                         leftSide.money += effect.typeInt1;
@@ -1256,7 +1295,7 @@ public class Battle : MonoBehaviour
                 if (f.health <= 0)
                 {
                     lane.left.Remove(obj);
-                    Destroy(obj);
+                    f.RemoveFromBattle();
                     StarChallenges.tempScore.casualties++;
                     cleanup = true;
                 }
@@ -1281,7 +1320,7 @@ public class Battle : MonoBehaviour
                 if (f.health <= 0)
                 {
                     lane.right.Remove(obj);
-                    Destroy(obj);
+                    f.RemoveFromBattle();
                     cleanup = true;
                 }
                 else
@@ -1313,6 +1352,20 @@ public class Battle : MonoBehaviour
         /// <summary>Retreat and get rid of lanes that can no longer continue, and decide the outcome of the battle when it's time.</summary>
 
         List<Lane> temp = new List<Lane>();
+        IEnumerator TriggerPillages()
+        {
+            foreach (Lane l in temp)
+            {
+                foreach (GameObject f in l.left)
+                    TriggerAbilities(Cause.CauseType.Pillage,
+                        null, f.GetComponent<Fighter>());
+                foreach (GameObject f in l.right)
+                    TriggerAbilities(Cause.CauseType.Pillage,
+                        null, f.GetComponent<Fighter>());
+            }
+            if (pendingTriggers.Count > 0)
+                yield return StartCoroutine(ActivateTriggers(true));
+        }
 
         // Retreat where lanes can no longer continue. If no more lanes can continue, then this will not apply to the last one.
         foreach (Lane l in lanes)
@@ -1322,6 +1375,7 @@ public class Battle : MonoBehaviour
                 temp.Add(l);
 
         // Remove said lanes.
+        yield return TriggerPillages();
         foreach (Lane l in temp)
         {
             leftSide.money += l.RetreatAll(true);
@@ -1345,6 +1399,9 @@ public class Battle : MonoBehaviour
             }
             else
             {
+                temp.Clear();
+                temp.Add(lanes[0]);
+                yield return TriggerPillages();
                 leftSide.money += lanes[0].RetreatAll(true);
                 rightSide.money += lanes[0].RetreatAll(false);
                 yield return Master.SetTimer(0.5f);
