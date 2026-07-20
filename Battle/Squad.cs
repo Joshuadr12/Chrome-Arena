@@ -18,7 +18,7 @@ public class Squad : ScriptableObject
     [FormerlySerializedAs("weapon")] public Artifact artifact;
 
     // Miscellaneous variables.
-    [HideInInspector] public int startMoney, money = 0;
+    [HideInInspector] public int startMoney, paint = 0;
 
     public bool CanSummon(int maxCount = 5)
     {
@@ -27,7 +27,7 @@ public class Squad : ScriptableObject
 
         foreach (Line u in units)
             if
-                ((u.TotalPrice() <= money)
+                ((u.TotalPrice() <= paint)
                 && (u.units.Count <= maxCount))
                 return true;
         return false;
@@ -45,7 +45,7 @@ public class Squad : ScriptableObject
         foreach (Line u in units)
         {
             if
-                ((u.TotalPrice() <= money)
+                ((u.TotalPrice() <= paint)
                 && (u.units.Count <= maxCount))
             {
                 weightPool += u.TotalWeight();

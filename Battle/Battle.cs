@@ -51,7 +51,7 @@ public class Battle : MonoBehaviour
     // Miscellaneous variables.
     // -2 = Undecided; -1 = Right Wins; 0 = Draw; 1 = Left Wins
     int outcome = -2;
-    int rightMoneyInit;
+    int rightPaintInit;
     bool waitingForArtifacts = false;
     float totalShake = 0;
     float modShake;
@@ -64,12 +64,12 @@ public class Battle : MonoBehaviour
     //Start is called before the first frame update.
     void Start()
     {
-        leftSide.money = leftSide.startMoney;
+        leftSide.paint = leftSide.startMoney;
         if (!Master.FinishedTutorial())
-            leftSide.money += leftSide.money / 5;
-        rightMoneyInit = rightSide.money;
+            leftSide.paint += leftSide.paint / 5;
+        rightPaintInit = rightSide.paint;
         if (rightSide.isBoss)
-            rightSide.money += rightSide.money / 10;
+            rightSide.paint += rightSide.paint / 10;
 
         // Artifacts
         leftArtifact = leftArtifactHolder;
@@ -132,8 +132,8 @@ public class Battle : MonoBehaviour
     void Update()
     {
         // Display money.
-        leftMoney.text = $"{leftSide.money}C";
-        rightMoney.text = $"{rightSide.money}C";
+        leftMoney.text = $"{leftSide.paint}C";
+        rightMoney.text = $"{rightSide.paint}C";
 
         // Shake the camera.
         totalShake = Mathf.Max(totalShake, cameraShake);
@@ -228,9 +228,9 @@ public class Battle : MonoBehaviour
             if (chargeMoney)
             {
                 if (isLeft)
-                    leftSide.money -= units.TotalPrice();
+                    leftSide.paint -= units.TotalPrice();
                 else
-                    rightSide.money -= units.TotalPrice();
+                    rightSide.paint -= units.TotalPrice();
             }
         }
         return summoned;
@@ -617,7 +617,7 @@ public class Battle : MonoBehaviour
             if (squad.squad == leftSide)
             {
                 squad.outcome = outcome;
-                Master.data.AddResource(squad.squad.colour, Math.Min(leftSide.money, leftSide.startMoney));
+                Master.data.AddResource(squad.squad.colour, Math.Min(leftSide.paint, leftSide.startMoney));
                 if (outcome > 0)
                     StarChallenges.tempScore.roundsWon++;
             }
@@ -629,7 +629,7 @@ public class Battle : MonoBehaviour
         yield return Master.SetTimer(2, false);
 
         if (outcome == 0)
-            rightSide.money = rightMoneyInit;
+            rightSide.paint = rightPaintInit;
         else
             StarChallenges.AddTempScore();
 
@@ -1093,11 +1093,11 @@ public class Battle : MonoBehaviour
                 case Effect.EffectType.GainPaint:
                     if (trigger.ability.owner.isLeft ^ effect.forOpponent)
                     {
-                        leftSide.money += effect.typeInt1;
-                        StarChallenges.tempScore.colorGain += effect.typeInt1;
+                        leftSide.paint += effect.typeInt1;
+                        StarChallenges.tempScore.paintGain += effect.typeInt1;
                     }
                     else
-                        rightSide.money += effect.typeInt1;
+                        rightSide.paint += effect.typeInt1;
                     break;
                 case Effect.EffectType.GiveTrait:
                     foreach (Fighter f in targets)
@@ -1120,10 +1120,10 @@ public class Battle : MonoBehaviour
                         {
                             Location l = GetLocation(f);
                             if (l.isLeft)
-                                leftSide.money += lanes[l.lane]
+                                leftSide.paint += lanes[l.lane]
                                     .Retreat(true, l.index);
                             else
-                                rightSide.money += lanes[l.lane]
+                                rightSide.paint += lanes[l.lane]
                                     .Retreat(false, l.index);
                             lanes[l.lane].fighterRetreated = true;
                         }
@@ -1378,8 +1378,8 @@ public class Battle : MonoBehaviour
         yield return TriggerPillages();
         foreach (Lane l in temp)
         {
-            leftSide.money += l.RetreatAll(true);
-            rightSide.money += l.RetreatAll(false);
+            leftSide.paint += l.RetreatAll(true);
+            rightSide.paint += l.RetreatAll(false);
             lanes.Remove(l);
         }
 
@@ -1402,13 +1402,13 @@ public class Battle : MonoBehaviour
                 temp.Clear();
                 temp.Add(lanes[0]);
                 yield return TriggerPillages();
-                leftSide.money += lanes[0].RetreatAll(true);
-                rightSide.money += lanes[0].RetreatAll(false);
+                leftSide.paint += lanes[0].RetreatAll(true);
+                rightSide.paint += lanes[0].RetreatAll(false);
                 yield return Master.SetTimer(0.5f);
-                if (leftSide.money == rightSide.money)
+                if (leftSide.paint == rightSide.paint)
                     outcome = 0;
                 else
-                    outcome = (int)Mathf.Sign(leftSide.money - rightSide.money);
+                    outcome = (int)Mathf.Sign(leftSide.paint - rightSide.paint);
             }
         }
     }

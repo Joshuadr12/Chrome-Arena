@@ -45,7 +45,7 @@ public class BattleLevel : ScriptableObject
         {
             if (chosen.Count < 3)
             {
-                must.money = squadSize;
+                must.paint = squadSize;
                 chosen.Add(must);
                 squadIndex++;
             }
@@ -61,7 +61,7 @@ public class BattleLevel : ScriptableObject
             if (!chosen.Contains(squad))
             {
                 moneyIndex = squadIndex + mustHaves.Count;
-                squad.money = squadSize;
+                squad.paint = squadSize;
                 chosen.Add(extraSquads[squadIndex]);
             }
         }
@@ -105,14 +105,14 @@ public class StarChallenges
         totalScore.criticals += tempScore.criticals;
         totalScore.abilityTriggers += tempScore.abilityTriggers;
         totalScore.blocks += tempScore.blocks;
-        totalScore.colorGain += tempScore.colorGain;
+        totalScore.paintGain += tempScore.paintGain;
     }
 
     public class ScoreSet
     {
         public int roundsWon, casualties, attacks,
             damageDealt, criticals, abilityTriggers,
-            blocks, colorGain;
+            blocks, paintGain;
 
         public void Reset()
         {
@@ -123,7 +123,7 @@ public class StarChallenges
             criticals = 0;
             abilityTriggers = 0;
             blocks = 0;
-            colorGain = 0;
+            paintGain = 0;
         }
     }
 
@@ -139,7 +139,7 @@ public class StarChallenges
             CriticalHits,
             AbilityTriggers,
             Blocks,
-            ColorGain
+            PaintGain
         }
 
         public ChallengeType challenge;
@@ -167,8 +167,8 @@ public class StarChallenges
                     return score.abilityTriggers >= scoreNeeded;
                 case ChallengeType.Blocks:
                     return score.blocks >= scoreNeeded;
-                case ChallengeType.ColorGain:
-                    return score.colorGain >= scoreNeeded;
+                case ChallengeType.PaintGain:
+                    return score.paintGain >= scoreNeeded;
                 default:
                     Debug.LogWarning($"Unknown challenge type: {challenge}.");
                     return false;
@@ -209,10 +209,10 @@ public class StarChallenges
                     if (displayProgress)
                         temp += $"{totalScore.blocks}/";
                     return $"{temp}{scoreNeeded} Blocks";
-                case ChallengeType.ColorGain:
+                case ChallengeType.PaintGain:
                     if (displayProgress)
-                        temp += $"{totalScore.colorGain}/";
-                    return $"{temp}{scoreNeeded} Color Gained from Abilities";
+                        temp += $"{totalScore.paintGain}/";
+                    return $"{temp}{scoreNeeded} Paint Gained from Abilities";
                 default:
                     Debug.LogWarning($"Unknown challenge type: {challenge}.");
                     return scoreNeeded.ToString();

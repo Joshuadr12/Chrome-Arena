@@ -529,7 +529,7 @@ public class SquadSelect : MonoBehaviour
                 leftArmy[i].squad.colour,
                 leftArmy[i].outcome == 0
                 ? leftArmy[i].squad.startMoney / 2
-                : Math.Min(leftArmy[i].squad.money, leftArmy[i].squad.startMoney));
+                : Math.Min(leftArmy[i].squad.paint, leftArmy[i].squad.startMoney));
         resultsBody.SetActive(true);
 
         levelProgress = newLevel[1] / (float)(newLevel[0] / 10 + 2);
