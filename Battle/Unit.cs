@@ -47,7 +47,7 @@ public class Unit : ScriptableObject
 
         // Name, health/attack, and cost.
         string result = name;
-        result += $", {health}/{attack}, {price}C";
+        result += $", {health}/{attack}, ${price}";
 
         // Traits
         if (fast)

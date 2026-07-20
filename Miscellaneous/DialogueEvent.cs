@@ -1,15 +1,22 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Video;
 
 [CreateAssetMenu(menuName = "Chrome Arena/Dialogue Scene")]
 public class DialogueEvent : ScriptableObject
 {
+    public enum EndBehaviour
+    {
+        None,
+        RefreshTown,
+        GotoCastle
+    }
+
     public string eventId;
     public bool addId = true;
     public RequirementSet requirementSet;
     public List<Dialogue> dialogues;
+    public EndBehaviour endBehaviour;
     [Tooltip("There should be zero or two elements in this list.")] public List<Choice> choices;
 
     [Serializable]

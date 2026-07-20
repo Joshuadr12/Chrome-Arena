@@ -20,7 +20,8 @@ public class SquadMenu : MonoBehaviour
     [SerializeField] TMP_Text levelTitle;
     [SerializeField] List<UnitDisplay> enemyImages;
     [SerializeField] List<Image> artifactImages;
-    [SerializeField] GameObject dialoguePanel;
+    [SerializeField] DialogueScene dialoguePanel;
+    [SerializeField] List<DialogueEvent> events;
 
     // Miscellaneous variables.
     int index;
@@ -110,7 +111,7 @@ public class SquadMenu : MonoBehaviour
             .challenges[1]
             .GetDescription();
 
-        dialoguePanel.SetActive(true);
+        StartCoroutine(dialoguePanel.ExecuteScenes(events));
     }
 
     void RenderSquads()

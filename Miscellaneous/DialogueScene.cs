@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class DialogueScene : MonoBehaviour
 {
+    public static bool isDone = true;
     public const float offscreenPos = 13;
 
     [SerializeField] Image panel;
@@ -15,9 +17,8 @@ public class DialogueScene : MonoBehaviour
     [SerializeField] GameObject textBox, choiceBox;
     [SerializeField] TMP_Text header, body, choice1, choice2;
     [SerializeField] Image image;
-    [SerializeField] List<DialogueEvent> events;
+    [FormerlySerializedAs("events"), SerializeField] List<DialogueEvent> startupEvents;
 
-    bool isDone = false;
     float spriteIndex = 0;
     int choice;
     Color panelColor;
@@ -46,7 +47,7 @@ public class DialogueScene : MonoBehaviour
             displaySprite.sortingOrder = 10;
         }
 
-        StartCoroutine(ExecuteScenes());
+        StartCoroutine(ExecuteScenes(startupEvents));
     }
 
     // Update is called once per frame
@@ -59,8 +60,7 @@ public class DialogueScene : MonoBehaviour
             image.sprite = dialogue.imageSprite[Mathf.FloorToInt(spriteIndex)];
         }
 
-        if (isDone)
-            gameObject.SetActive(false);
+        panel.gameObject.SetActive(!isDone);
     }
 
     public void MakeChoice(int index)
@@ -68,8 +68,9 @@ public class DialogueScene : MonoBehaviour
         choice = index;
     }
 
-    public IEnumerator ExecuteScenes()
+    public IEnumerator ExecuteScenes(List<DialogueEvent> events)
     {
+        isDone = false;
         int index = 0;
         List<DialogueEvent> dialogueEvents = new List<DialogueEvent>();
         foreach (DialogueEvent e in events)
@@ -153,6 +154,19 @@ public class DialogueScene : MonoBehaviour
 
         if (e.addId)
             Master.data.events.Add(e.eventId);
+
+        switch (e.endBehaviour)
+        {
+            case DialogueEvent.EndBehaviour.RefreshTown:
+                FindFirstObjectByType<Town>().RenderResources();
+                break;
+            case DialogueEvent.EndBehaviour.GotoCastle:
+                FindFirstObjectByType<Town>().CreateParticles
+                    (FindFirstObjectByType<Town>().castle);
+                break;
+            default:
+                break;
+        }
     }
 
     public IEnumerator PanelIn()
@@ -188,21 +202,36 @@ public class DialogueScene : MonoBehaviour
         {
             actor = actors[action.actorIndex];
             if (action.changeUnit && actor.unit != action.changeUnit)
+            {
                 actor.ChangeUnit(action.changeUnit, "neutral", true);
+                displaySprite = actor
+                    .GetComponent<UnitDisplay>()
+                    .animator
+                    .GetComponent<SortingGroup>();
+                displaySprite.sortingOrder = 10;
+            }
 
             switch (action.behavior)
             {
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Stage1:
                     actor.NewPos(Vector3.left * 7);
+                    if (!actor.isLeft)
+                        actor.SwitchSides();
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Stage2:
                     actor.NewPos(Vector3.left * 4);
+                    if (!actor.isLeft)
+                        actor.SwitchSides();
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Stage3:
                     actor.NewPos(Vector3.right * 4);
+                    if (actor.isLeft)
+                        actor.SwitchSides();
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Stage4:
                     actor.NewPos(Vector3.right * 7);
+                    if (actor.isLeft)
+                        actor.SwitchSides();
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.OutLeft:
                     actor.NewPos(Vector3.left * offscreenPos);

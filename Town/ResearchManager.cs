@@ -7,6 +7,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(AudioSource))]
 public class ResearchManager : MonoBehaviour
 {
+    [SerializeField] List<DialogueEvent> openEvents;
     [Header("Main Panel"), SerializeField] GameObject mainPanel;
     [SerializeField] LineupCustomize lineupPanel;
     [SerializeField] UnitOptions unitOptions;
@@ -39,7 +40,8 @@ public class ResearchManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && Town.menuLayer > 0)
+        if (Input.GetKeyDown(KeyCode.Escape) && Town.menuLayer > 0
+            && DialogueScene.isDone)
         {
             if (Town.menuLayer == 1)
                 CloseMenu();
@@ -88,6 +90,8 @@ public class ResearchManager : MonoBehaviour
         lineupPanel.LoadLine(null);
 
         RefreshMenu();
+        StartCoroutine(FindFirstObjectByType<DialogueScene>()
+            .ExecuteScenes(openEvents));
     }
 
     public void RefreshMenu()
@@ -189,7 +193,7 @@ public class ResearchManager : MonoBehaviour
         if (unitDisplayed >= results.Count)
         {
             UnitHoverExit();
-            if (newResults.Count > 0)
+            if (results.Count > 1 && newResults.Count > 0)
             {
                 Master.OpenMenu(allResultsPanel, oneResultPanel);
                 showingAllResults = true;

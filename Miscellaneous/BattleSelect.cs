@@ -28,7 +28,8 @@ public class BattleSelect : MonoBehaviour
     //Update is called once per frame.
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape)
+            && DialogueScene.isDone)
         {
             if (Master.battleSelected == null)
                 BackToTown();

@@ -22,7 +22,9 @@ public class SquadCustomize : MonoBehaviour
     [SerializeField] Image artifactImage;
     [SerializeField] UnitDisplay dragAndDropUnit;
     [SerializeField] TMP_InputField nameInput;
-    [SerializeField] GameObject squadSelectUI, squadCustomizeUI, dialoguePanel;
+    [SerializeField] GameObject squadSelectUI, squadCustomizeUI;
+    [SerializeField] DialogueScene dialoguePanel;
+    [SerializeField] List<DialogueEvent> events;
     [SerializeField] TMP_Text unitText, keywordText;
 
     [HideInInspector] public int menuLayer = 0;
@@ -48,7 +50,8 @@ public class SquadCustomize : MonoBehaviour
         textBox.SetActive(unitDescription != "");
 
         // Press 'Escape' to leave the current menu.
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape)
+            && DialogueScene.isDone)
         {
             if (chooseArtifact)
             {
@@ -163,7 +166,7 @@ public class SquadCustomize : MonoBehaviour
                 : null);
 
         unitOptions.UpdateUnitOptions("basic", squadActive.colour);
-        dialoguePanel.SetActive(true);
+        StartCoroutine(dialoguePanel.ExecuteScenes(events));
     }
 
     public void SquadSelected(int squadIndex)

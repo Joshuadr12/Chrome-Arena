@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
-using static UnityEngine.GraphicsBuffer;
 
 public class Battle : MonoBehaviour
 {
@@ -32,9 +32,10 @@ public class Battle : MonoBehaviour
     [SerializeField, Tooltip("Sounds to play based on total damage dealt, in descending order")] AudioClip[] damageSounds;
     [SerializeField, Tooltip("The minimum damage for the corresponding sounds, in descending order")] int[] damageMinimums;
     [Header("Interface")]
-    [SerializeField] GameObject dialoguePanel;
-    [SerializeField] TMP_Text leftMoney;
-    [SerializeField] TMP_Text rightMoney;
+    [SerializeField] DialogueScene dialoguePanel;
+    [SerializeField] List<DialogueEvent> events;
+    [FormerlySerializedAs("leftMoney"), SerializeField] TMP_Text leftPaintText;
+    [FormerlySerializedAs("rightMoney"), SerializeField] TMP_Text rightPaintText;
     [SerializeField] GameObject artifactSelect;
     [SerializeField] Image artifactDeselectImage, artifactSelectImage;
     [SerializeField] TMP_Text confirmArtifactsText;
@@ -132,8 +133,8 @@ public class Battle : MonoBehaviour
     void Update()
     {
         // Display money.
-        leftMoney.text = $"{leftSide.paint}C";
-        rightMoney.text = $"{rightSide.paint}C";
+        leftPaintText.text = $"${leftSide.paint}";
+        rightPaintText.text = $"${rightSide.paint}";
 
         // Shake the camera.
         totalShake = Mathf.Max(totalShake, cameraShake);
@@ -392,7 +393,7 @@ public class Battle : MonoBehaviour
 
         // Check for critical hits.
         float advantage = source.colour.Advantage(target.colour);
-        if (UnityEngine.Random.value <= advantage
+        if (UnityEngine.Random.value <= advantage / 2f
             || source.OverrideAdvantage() > target.OverrideAdvantage())
         {
             multi++;
@@ -603,9 +604,7 @@ public class Battle : MonoBehaviour
 
         // Summon the fighters, then undergo the battle loop.
         yield return StartCoroutine(SummonArmy(lanes));
-        dialoguePanel.SetActive(true);
-        while (dialoguePanel.activeSelf)
-            yield return null;
+        yield return StartCoroutine(dialoguePanel.ExecuteScenes(events));
         while (outcome < -1)
         {
             yield return StartCoroutine(Step());

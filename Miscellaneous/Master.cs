@@ -266,9 +266,9 @@ public class Master : MonoBehaviour
         resourceText.text = amount.ToString();
     }
 
-    public static bool FinishedTutorial(string level = "basic_1")
+    public static bool FinishedTutorial(string battleId = "basic_1")
     {
-        return (GetStars(level) >= 1)
+        return (GetStars(battleId) >= 1)
             || data.events.Contains("skip_tutorial");
     }
 

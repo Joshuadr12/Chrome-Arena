@@ -211,8 +211,8 @@ public class StarChallenges
                     return $"{temp}{scoreNeeded} Blocks";
                 case ChallengeType.PaintGain:
                     if (displayProgress)
-                        temp += $"{totalScore.paintGain}/";
-                    return $"{temp}{scoreNeeded} Paint Gained from Abilities";
+                        temp += $"${totalScore.paintGain}/";
+                    return $"{temp}${scoreNeeded} Gained from Abilities";
                 default:
                     Debug.LogWarning($"Unknown challenge type: {challenge}.");
                     return scoreNeeded.ToString();

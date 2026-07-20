@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using TMPro;
 
 public class SquadSelect : MonoBehaviour
@@ -179,7 +178,9 @@ public class SquadSelect : MonoBehaviour
     void Update()
     {
         // Leave the battle.
-        if (Input.GetKeyDown(KeyCode.Escape)) {
+        if (Input.GetKeyDown(KeyCode.Escape)
+            && DialogueScene.isDone)
+        {
             if (leftChoice != null)
             {
                 leftChoice = null;
@@ -227,15 +228,17 @@ public class SquadSelect : MonoBehaviour
             // When the round begins.
             if (countTimer <= 0)
             {
-                // In the tutorial level, right squads are chosen for specific color advantages.
+                // In the tutorial, right squads are chosen differently.
                 if
                     (!Master.FinishedTutorial()
                     && (roundsDone <= 1))
                     rightChoice = FindPreciseMatch(roundsDone == 1);
+                else if (!Master.FinishedTutorial("basic_2"))
+                    rightChoice = FindEasiestMatch();
 
-                Battle.leftSide = leftChoice.squad;
+                    Battle.leftSide = leftChoice.squad;
                 Battle.rightSide = rightChoice.squad;
-                SceneManager.LoadScene("Battle");
+                Master.GotoScene("Battle");
             }
             // When the countdown takes place.
             else if (countTimer <= 3)
@@ -539,20 +542,17 @@ public class SquadSelect : MonoBehaviour
     public void Leave()
     {
         began = false;
-        SceneManager.LoadScene("Town");
+        Master.GotoScene("Town");
     }
 
-    public SquadStatus FindPreciseMatch(bool invert)
+    public SquadStatus FindPreciseMatch(bool invert = false)
     {
         /// <summary>Determines and returns the right squad that grants the lowest advantage/disadvantage possible, given the current left choice.</summary>
         /// <param name="invert">If set to true, the highest advantage/disadvantage will be returned instead.</param>
 
         SquadStatus result = null;
         float score;
-        if (invert)
-            score = 0;
-        else
-            score = 1;
+        score = invert ? 0 : 1;
         float a;
         foreach (SquadStatus s in rightArmy)
         {
@@ -573,6 +573,43 @@ public class SquadSelect : MonoBehaviour
                     score = a;
                 }
                 else if (!invert && a < score)
+                {
+                    result = s;
+                    score = a;
+                }
+            }
+        }
+        return result;
+    }
+
+    public SquadStatus FindEasiestMatch(bool invert = false)
+    {
+        /// <summary>Determines and returns the right squad that grants the highest advantage possible, given the current left choice.</summary>
+        /// <param name="invert">If set to true, the lowest advantage will be returned instead.</param>
+
+        SquadStatus result = null;
+        float score;
+        score = invert ? 1 : -1;
+        float a;
+        foreach (SquadStatus s in rightArmy)
+        {
+            if (s.outcome == 0)
+            {
+                a = Master
+                    .colours[leftChoice.squad.colour]
+                    .Advantage(Master.colours[s.squad.colour]);
+                if (result == null)
+                {
+                    result = s;
+                    score = a;
+                }
+                // Check if the current choice would grant a better score.
+                else if (invert && a < score)
+                {
+                    result = s;
+                    score = a;
+                }
+                else if (!invert && a > score)
                 {
                     result = s;
                     score = a;

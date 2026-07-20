@@ -16,6 +16,7 @@ public class Town : MonoBehaviour
     public static int menuLayer;
 
     [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
+    public Transform castle;
     [SerializeField] GameObject buildingParticles;
     [SerializeField] List<Image> resourceDisplay;
     [SerializeField] List<ButtonRequirement> buttonsToEnable;
@@ -32,13 +33,14 @@ public class Town : MonoBehaviour
     //Update is called once per frame.
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) && menuLayer == 0)
+        if (Input.GetKeyDown(KeyCode.Escape) && menuLayer == 0
+            && DialogueScene.isDone)
             Master.GotoScene("MainMenu");
     }
 
     public void RenderResources(string justUpgraded = "")
     {
-        /// <summary>Update the conditionally active buttons, then update the resources section with the current day and resources.</summary>
+        /// <summary>Update the conditionally active buttons, then update the resources section with the current week and resources.</summary>
         /// <param name="justUpgraded">If a new building was just built, enter the upgrade ID to create particle effects at the building.</param>
 
         foreach (ButtonRequirement button in buttonsToEnable)
@@ -79,6 +81,11 @@ public class Town : MonoBehaviour
         Master.data.NextWeek();
         Master.Save();
         RenderResources();
+    }
+
+    public void CreateParticles(Transform location)
+    {
+        Instantiate(buildingParticles, location.position, Quaternion.identity);
     }
 }
 
