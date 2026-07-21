@@ -134,10 +134,3 @@ public class UpgradeManager : MonoBehaviour
         Town.menuLayer--;
     }
 }
-
-[Serializable]
-public class Collection
-{
-    public string name;
-    public List<Upgrade> upgrades;
-}

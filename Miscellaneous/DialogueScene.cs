@@ -128,7 +128,11 @@ public class DialogueScene : MonoBehaviour
                 || dialogueIndex == 0
                 || e.dialogues[dialogueIndex - 1].imageSprite.Count == 0
                 || e.dialogues[dialogueIndex - 1].imageSprite[0] != dialogue.imageSprite[0])
+            {
                 spriteIndex = 0;
+                if (dialogue.imageSprite.Count > 0)
+                    image.sprite = dialogue.imageSprite[0];
+            }
 
             yield return null;
             while (!Input.GetMouseButtonDown(0))
@@ -214,30 +218,30 @@ public class DialogueScene : MonoBehaviour
             switch (action.behavior)
             {
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Stage1:
-                    actor.NewPos(Vector3.left * 7);
                     if (!actor.isLeft)
                         actor.SwitchSides();
+                    actor.NewPos(Vector3.left * 7);
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Stage2:
-                    actor.NewPos(Vector3.left * 4);
                     if (!actor.isLeft)
                         actor.SwitchSides();
+                    actor.NewPos(Vector3.left * 4);
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Stage3:
-                    actor.NewPos(Vector3.right * 4);
                     if (actor.isLeft)
                         actor.SwitchSides();
+                    actor.NewPos(Vector3.right * 4);
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Stage4:
-                    actor.NewPos(Vector3.right * 7);
                     if (actor.isLeft)
                         actor.SwitchSides();
+                    actor.NewPos(Vector3.right * 7);
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.OutLeft:
-                    actor.NewPos(Vector3.left * offscreenPos);
+                    actor.NewPos(Vector3.left * offscreenPos, !actor.isLeft);
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.OutRight:
-                    actor.NewPos(Vector3.right * offscreenPos);
+                    actor.NewPos(Vector3.right * offscreenPos, actor.isLeft);
                     break;
                 case DialogueEvent.Dialogue.ActorAction.ActorBehavior.Attack:
                     actor.SetAnimation(UnitDisplay.AnimState.Attack);

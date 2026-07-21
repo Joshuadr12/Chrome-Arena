@@ -120,6 +120,11 @@ public class ResearchManager : MonoBehaviour
         lineupPanel.Drop(unit);
     }
 
+    public void RemoveSelected(int index)
+    {
+        lineupPanel.RemoveUnit(index);
+    }
+
     public void Drag(Unit unit)
     {
         SquadCustomize.selectedUnit = unit;

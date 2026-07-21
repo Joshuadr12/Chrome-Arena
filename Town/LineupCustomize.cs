@@ -60,6 +60,16 @@ public class LineupCustomize : MonoBehaviour
         LoadLine(null);
     }
 
+
+    public void RemoveUnit(int index)
+    {
+        if (index < units.Count)
+        {
+            units.RemoveAt(index);
+            RenderUnits();
+        }
+    }
+
     public Line GenerateLine()
     {
         /// <summary>Generates and returns a Line instance representing the customized line that this was managing.</summary>
@@ -113,5 +123,6 @@ public class LineupCustomize : MonoBehaviour
         units.Clear();
         units.Add(new UnitColour(unit));
         RenderUnits();
+        UnitHoverEnter(unit);
     }
 }

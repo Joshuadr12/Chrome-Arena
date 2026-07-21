@@ -41,7 +41,7 @@ public class Master : MonoBehaviour
     [SerializeField] ColourCollection[] colourCollections;
     [SerializeField] UnitCollection[] unitCollections;
     [SerializeField] Artifact[] artifactSet;
-    [SerializeField] Collection[] upgradeCollections;
+    [SerializeField] UpgradeCollection[] upgradeCollections;
     [SerializeField, Tooltip("The order in which to activate simultaneous abilities based on their causes")] List<Cause.CauseType> causeOrder;
     [SerializeField, Tooltip("The order in which to activate simultaneous abilities based on their effects")] List<Effect.EffectType> effectOrder;
     [SerializeField] List<Keyword> keywordSet;
@@ -86,7 +86,7 @@ public class Master : MonoBehaviour
                 artifacts.Add(artifact);
 
             // Add given upgrade collections to the static list.
-            foreach (Collection collection in upgradeCollections)
+            foreach (UpgradeCollection collection in upgradeCollections)
             {
                 upgrades.Add(collection.name, new List<Upgrade>());
                 foreach (Upgrade upgrade in collection.upgrades)
@@ -477,6 +477,16 @@ public class Master : MonoBehaviour
         return null;
     }
 
+
+    public static Upgrade GetUpgrade(string upgradeId)
+    {
+        foreach (List<Upgrade> upgradeSet in upgrades.Values)
+            foreach (Upgrade upgrade in upgradeSet)
+                if (upgrade.upgradeId == upgradeId)
+                    return upgrade;
+        return null;
+    }
+
     public static IEnumerator SetTimer
         (float duration,
         bool applyBattlespeed = true)
@@ -585,6 +595,13 @@ public class UnitCollection
 }
 
 [Serializable]
+public class UpgradeCollection
+{
+    public string name;
+    public List<Upgrade> upgrades;
+}
+
+[Serializable]
 public class Keyword
 {
     /// <summary>
@@ -683,7 +700,12 @@ public class RequirementSet
                         ? $"Clear {identifier}."
                         : $"Clear {identifier} with {scoreNeeded} stars.";
                 case RequireType.Upgrade:
-                    return $"Upgrade {identifier}.";
+                    Upgrade upgrade = Master.GetUpgrade(identifier);
+                    if (upgrade.isBuilding)
+                        return upgrade.upgradeName;
+                    if (upgrade.layers.Count > 1)
+                        return $"Upgrade {upgrade.upgradeName} {scoreNeeded}.";
+                    return $"Upgrade {upgrade.upgradeName}.";
                 case RequireType.Level:
                     return $"Reach Level {scoreNeeded}.";
                 case RequireType.Rank:

@@ -114,6 +114,8 @@ public class Fighter : UnitDisplay
                 Battle
                     .fighterAbilities[a.cause.type][a.effects[0].type]
                     .Remove(a);
+        if (unit.name == "Bounty" && health <= 0)
+            Battle.bountiesGone++;
         Destroy(gameObject);
     }
 

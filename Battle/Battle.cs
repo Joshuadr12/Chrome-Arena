@@ -18,6 +18,7 @@ public class Battle : MonoBehaviour
     public static List<Trigger> activeTriggers, pendingTriggers, turnTriggers;
     public static Squad leftSide, rightSide;
     public static Fighter leftArtifact, rightArtifact;
+    public static int bountyAbilities = 0, bountiesGone = 0;
 
     // Serialized variables for the editor.
     [Header("Battle")]
@@ -1090,6 +1091,8 @@ public class Battle : MonoBehaviour
                             effect.typeInt1);
                     break;
                 case Effect.EffectType.GainPaint:
+                    if (effect.forOpponent)
+                        bountyAbilities++;
                     if (trigger.ability.owner.isLeft ^ effect.forOpponent)
                     {
                         leftSide.paint += effect.typeInt1;
@@ -1338,6 +1341,11 @@ public class Battle : MonoBehaviour
                     summonFighters = true;
             }
         }
+
+        if (bountiesGone != bountyAbilities)
+            Debug.LogError($"{bountyAbilities} Bounty abilities activated, {bountiesGone} Bounties cleaned.");
+        bountiesGone = 0;
+        bountyAbilities = 0;
 
         // Summon more fighters in any lanes that need it.
         if (summonFighters)

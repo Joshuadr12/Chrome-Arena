@@ -2,16 +2,19 @@ using System.Drawing;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class CharacterButton : MonoBehaviour
+public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
 {
     public ButtonType buttonType;
     public GameObject manager;
     [SerializeField] UnitDisplay unitDisplay;
     [SerializeField] Image artifactImage;
+    [Tooltip("If this button is part of a lineup panel, enter its index here."), SerializeField] int lineIndex;
 
     UnitColour unit = new UnitColour(null, null);
     Artifact artifact = null;
+    bool isLeftClicking = false;
 
     public enum ButtonType
     {
@@ -95,6 +98,43 @@ public class CharacterButton : MonoBehaviour
                     break;
             }
     }
+    
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Right
+            && unit.unit != null)
+        {
+            switch (buttonType)
+            {
+                case ButtonType.ResearchSelected:
+                    manager.GetComponent<ResearchManager>()
+                        .RemoveSelected(lineIndex);
+                    manager.GetComponent<ResearchManager>()
+                        .UnitHoverExit();
+                    break;
+                case ButtonType.SquadLine:
+                    manager.GetComponent<LineupCustomize>()
+                        .RemoveUnit(lineIndex);
+                    manager.GetComponent<LineupCustomize>()
+                        .UnitHoverExit();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+            isLeftClicking = true;
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+            isLeftClicking = false;
+    }
 
     public void OnHoverEnter()
     {
@@ -157,7 +197,7 @@ public class CharacterButton : MonoBehaviour
 
     public void OnDrag()
     {
-        if (unit.unit != null)
+        if (isLeftClicking && unit.unit != null)
             switch (buttonType)
             {
                 case ButtonType.ResearchOption:
@@ -175,19 +215,20 @@ public class CharacterButton : MonoBehaviour
 
     public void OnDrop()
     {
-        switch (buttonType)
-        {
-            case ButtonType.ResearchSelected:
-                manager.GetComponent<ResearchManager>()
-                    .SelectUnit(SquadCustomize.selectedUnit);
-                break;
-            // TODO: Allow for more than one button in a line.
-            case ButtonType.SquadLine:
-                manager.GetComponent<LineupCustomize>()
-                    .Drop(0);
-                break;
-            default:
-                break;
-        }
+        if (SquadCustomize.selectedUnit != null)
+            switch (buttonType)
+            {
+                case ButtonType.ResearchSelected:
+                    manager.GetComponent<ResearchManager>()
+                        .SelectUnit(SquadCustomize.selectedUnit);
+                    break;
+                // TODO: Allow for more than one button in a line.
+                case ButtonType.SquadLine:
+                    manager.GetComponent<LineupCustomize>()
+                        .Drop(0);
+                    break;
+                default:
+                    break;
+            }
     }
 }
