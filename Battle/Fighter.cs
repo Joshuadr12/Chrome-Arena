@@ -24,7 +24,7 @@ public class Fighter : UnitDisplay
     [HideInInspector] public bool isLeft = true;
     [HideInInspector] public bool retreated = false;
     [HideInInspector] public bool isArtifact;
-    [HideInInspector] public Artifact hasArtifact;
+    [HideInInspector] public ArtifactType hasArtifact;
     [HideInInspector] public int artifactUsed = -1;
     [HideInInspector] public Vector3 oldPos, newPos;
     [HideInInspector] public int health, attack;

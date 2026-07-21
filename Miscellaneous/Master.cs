@@ -19,7 +19,7 @@ public class Master : MonoBehaviour
     public static Dictionary<string, Colour> colours = new Dictionary<string, Colour>();
     public static Dictionary<string, List<string>> colourSets = new Dictionary<string, List<string>>();
     public static Dictionary<string, List<Unit>> unitSets = new Dictionary<string, List<Unit>>();
-    public static List<Artifact> artifacts = new List<Artifact>();
+    public static List<ArtifactType> artifacts = new List<ArtifactType>();
     public static Dictionary<string, List<Upgrade>> upgrades = new Dictionary<string, List<Upgrade>>();
     public static List<Cause.CauseType> abilityCauses = new List<Cause.CauseType>();
     public static List<Effect.EffectType> abilityEffects = new List<Effect.EffectType>();
@@ -40,7 +40,7 @@ public class Master : MonoBehaviour
     [SerializeField] Colour[] colourSet;
     [SerializeField] ColourCollection[] colourCollections;
     [SerializeField] UnitCollection[] unitCollections;
-    [SerializeField] Artifact[] artifactSet;
+    [SerializeField] ArtifactType[] artifactSet;
     [SerializeField] UpgradeCollection[] upgradeCollections;
     [SerializeField, Tooltip("The order in which to activate simultaneous abilities based on their causes")] List<Cause.CauseType> causeOrder;
     [SerializeField, Tooltip("The order in which to activate simultaneous abilities based on their effects")] List<Effect.EffectType> effectOrder;
@@ -82,7 +82,7 @@ public class Master : MonoBehaviour
             }
 
             // Add given artifacts to the static list.
-            foreach (Artifact artifact in artifactSet)
+            foreach (ArtifactType artifact in artifactSet)
                 artifacts.Add(artifact);
 
             // Add given upgrade collections to the static list.
@@ -121,7 +121,7 @@ public class Master : MonoBehaviour
         SaveData.Save(data, saveFile);
     }
 
-    public static void LoadData(PlayerData_0_3_2 saveData)
+    public static void LoadData(PlayerData_0_3_3 saveData)
     {
         /// <summary>Load the given save data.</summary>
 
@@ -171,9 +171,29 @@ public class Master : MonoBehaviour
         data.starsLeftover = saveData.starsLeftover;
         data.upgradePoints = saveData.upgradePoints;
         data.researchPoints = saveData.researchPoints;
+        data.artifactsPurchased = saveData.artifactsPurchased;
+
+        List<Artifact> list;
+        data.artifacts.Clear();
+        foreach (KeyValuePair<string, List<PlayerData_0_3_3.ArtifactData>> colour in saveData.artifacts)
+        {
+            list = new List<Artifact>();
+            foreach (PlayerData_0_3_3.ArtifactData artifact in colour.Value)
+                list.Add(new Artifact(FindArtifact(artifact.name), artifact.uses));
+            data.artifacts.Add(new Player.ArtifactList(colour.Key, list));
+        }
+
+        data.forgeSales.Clear();
+        foreach (KeyValuePair<string, List<PlayerData_0_3_3.ArtifactData>> colour in saveData.forgeSales)
+        {
+            list = new List<Artifact>();
+            foreach (PlayerData_0_3_3.ArtifactData artifact in colour.Value)
+                list.Add(new Artifact(FindArtifact(artifact.name), artifact.uses));
+            data.forgeSales.Add(new Player.ArtifactList(colour.Key, list));
+        }
 
         Squad squad;
-        PlayerData_0_3_2.SquadData squadData;
+        PlayerData_0_3_3.SquadData squadData;
         Line line;
         for (int s = 0; s < data.squads.Count; s++)
         {
@@ -181,7 +201,6 @@ public class Master : MonoBehaviour
             squadData = saveData.squads[s];
             squad.squadName = squadData.title;
             squad.colour = squadData.colour;
-            squad.artifact = FindArtifact(squadData.artifact);
 
             squad.units.Clear();
             Unit u;
@@ -446,10 +465,10 @@ public class Master : MonoBehaviour
         }
         return result;
     }
-    public static List<Artifact> GetArtifacts(string colour = "all")
+    public static List<ArtifactType> GetArtifacts(string colour = "all")
     {
-        List<Artifact> result = new List<Artifact>();
-        foreach (Artifact artifact in artifacts)
+        List<ArtifactType> result = new List<ArtifactType>();
+        foreach (ArtifactType artifact in artifacts)
             if ((colour == "all")
                 || TranslateCollections(artifact.colours)
                 .Contains(colour))
@@ -468,9 +487,9 @@ public class Master : MonoBehaviour
         return null;
     }
 
-    public static Artifact FindArtifact(string name)
+    public static ArtifactType FindArtifact(string name)
     {
-        foreach (Artifact artifact in artifacts)
+        foreach (ArtifactType artifact in artifacts)
             if (artifact.name == name)
                 return artifact;
         Debug.LogWarning(name + " artifact not found.");

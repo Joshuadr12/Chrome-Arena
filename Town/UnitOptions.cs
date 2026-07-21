@@ -10,13 +10,13 @@ public class UnitOptions : MonoBehaviour
     public List<CharacterButton> unitOptionButtons;
 
     [HideInInspector] public List<Unit> unitOptions = new List<Unit>();
-    [HideInInspector] public List<Artifact> artifactOptions = new List<Artifact>();
+    [HideInInspector] public List<ArtifactType> artifactOptions = new List<ArtifactType>();
 
     public Unit GetUnit(int index)
     {
         return unitOptions[index];
     }
-    public Artifact GetArtifact(int index)
+    public ArtifactType GetArtifact(int index)
     {
         return artifactOptions[index];
     }
@@ -45,7 +45,7 @@ public class UnitOptions : MonoBehaviour
             // Artifact options.
             artifactOptions = Master.GetArtifacts(colour);
             buttonIndex = 0;
-            foreach (Artifact a in artifactOptions)
+            foreach (ArtifactType a in artifactOptions)
             {
                 if (buttonIndex < unitOptionButtons.Count)
                 {

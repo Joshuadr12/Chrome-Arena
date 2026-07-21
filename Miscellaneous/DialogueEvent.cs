@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Chrome Arena/Dialogue Scene")]
+[CreateAssetMenu(menuName = "Chrome Arena/Dialogue Event")]
 public class DialogueEvent : ScriptableObject
 {
     public enum EndBehaviour

@@ -30,7 +30,7 @@ public class SquadMenu : MonoBehaviour
     List<string> squadsChosen = new List<string>(),
         allSquads = new List<string>();
     List<Unit> unitsFound = new List<Unit>();
-    List<Artifact> artifactsFound = new List<Artifact>();
+    List<ArtifactType> artifactsFound = new List<ArtifactType>();
 
     public void SetupMenu()
     {
@@ -78,7 +78,7 @@ public class SquadMenu : MonoBehaviour
         FindArtifacts(Master.battleSelected.mustHaves);
         FindArtifacts(Master.battleSelected.extraSquads);
         index = 0;
-        foreach (Artifact artifact in Master.artifacts)
+        foreach (ArtifactType artifact in Master.artifacts)
             if
                 (artifactsFound.Contains(artifact)
                 && (index < artifactImages.Count))

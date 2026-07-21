@@ -13,7 +13,7 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
     [Tooltip("If this button is part of a lineup panel, enter its index here."), SerializeField] int lineIndex;
 
     UnitColour unit = new UnitColour(null, null);
-    Artifact artifact = null;
+    ArtifactType artifact = null;
     bool isLeftClicking = false;
 
     public enum ButtonType
@@ -62,7 +62,7 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
         if (unit == null)
             unitDisplay.gameObject.SetActive(false);
     }
-    public void SetArtifact(Artifact artifact, string colour)
+    public void SetArtifact(ArtifactType artifact, string colour)
     {
         this.artifact = artifact;
         this.unit.colour = colour;

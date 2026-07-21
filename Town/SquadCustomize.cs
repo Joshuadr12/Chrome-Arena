@@ -30,7 +30,7 @@ public class SquadCustomize : MonoBehaviour
     [HideInInspector] public int menuLayer = 0;
 
     GameObject textBox;
-    Artifact artifactActive;
+    ArtifactType artifactActive;
 
     // Start is called before the first frame update.
     void Start()
@@ -97,7 +97,7 @@ public class SquadCustomize : MonoBehaviour
         foreach (Unit u in unit.keywordUnits)
             unitKeywords += u.KeywordDescription() + "\n";
     }
-    public static void UpdateArtifactDescriptions(Artifact artifact)
+    public static void UpdateArtifactDescriptions(ArtifactType artifact)
     {
         unitDescription = artifact.GetDescription();
 
@@ -185,7 +185,7 @@ public class SquadCustomize : MonoBehaviour
         }
     }
 
-    public void SelectArtifact(Artifact artifact)
+    public void SelectArtifact(ArtifactType artifact)
     {
         if (chooseArtifact)
         {
@@ -227,7 +227,7 @@ public class SquadCustomize : MonoBehaviour
             squadActive.colour);
     }
 
-    public void UnitHoverEnter(Unit unit, Artifact artifact)
+    public void UnitHoverEnter(Unit unit, ArtifactType artifact)
     {
         if (chooseArtifact && artifact != null)
             UpdateArtifactDescriptions(artifact);

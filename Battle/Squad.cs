@@ -15,7 +15,7 @@ public class Squad : ScriptableObject
     public string colour;
     public bool isBoss;
     public List<Line> units;
-    [FormerlySerializedAs("weapon")] public Artifact artifact;
+    [FormerlySerializedAs("weapon")] public ArtifactType artifact;
 
     // Miscellaneous variables.
     [HideInInspector] public int startMoney, paint = 0;

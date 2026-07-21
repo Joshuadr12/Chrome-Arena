@@ -16,13 +16,15 @@ public class Player : ScriptableObject
     [Tooltip("The unit representing the player that displays in battle.")] public Unit character;
     public List<int> defaultSquads = new List<int>();
     [FormerlySerializedAs("totalSquads")] public List<Squad> squads;
+    public List<ArtifactList> artifacts, forgeSales;
     [Tooltip("The resources that the player has at the start of each day.")] public List<ResourceQuantity> income;
     public List<ResourceQuantity> resources;
     public List<UpgradeQuantity> upgrades;
     public List<UnitColours> units;
     public List<BattleStars> stars;
     public List<string> events;
-    public int level, starsLeftover, upgradePoints, researchPoints;
+    public int level, starsLeftover,
+        upgradePoints, researchPoints, artifactsPurchased;
 
     public void AddResource(string colour, int amount)
     {
@@ -92,6 +94,19 @@ public class Player : ScriptableObject
         newUnit.colours.Add(unit.colour);
         units.Add(newUnit);
         return true;
+    }
+
+    [Serializable]
+    public class ArtifactList
+    {
+        public string colour;
+        public List<Artifact> artifacts;
+
+        public ArtifactList(string colour, List<Artifact> artifacts)
+        {
+            this.colour = colour;
+            this.artifacts = artifacts;
+        }
     }
 
     [Serializable]

@@ -94,8 +94,6 @@ public class PlayerData_0_3_2
     [Serializable]
     public class SquadData
     {
-        // TODO: Contruction methods
-
         public string title, colour, artifact;
         public List<List<string>> lines = new List<List<string>>();
     }
