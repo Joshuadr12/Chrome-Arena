@@ -18,6 +18,7 @@ public class Battle : MonoBehaviour
     public static List<Trigger> activeTriggers, pendingTriggers, turnTriggers;
     public static Squad leftSide, rightSide;
     public static Fighter leftArtifact, rightArtifact;
+    public static int leftArtifactPoints;
     public static int bountyAbilities = 0, bountiesGone = 0;
 
     // Serialized variables for the editor.
@@ -37,6 +38,9 @@ public class Battle : MonoBehaviour
     [SerializeField] List<DialogueEvent> events;
     [FormerlySerializedAs("leftMoney"), SerializeField] TMP_Text leftPaintText;
     [FormerlySerializedAs("rightMoney"), SerializeField] TMP_Text rightPaintText;
+    [SerializeField] TMP_Text leftArtifactPointText;
+    [SerializeField] TMP_Text artifactDesc;
+    [SerializeField] ScrollPanel artifactPanel;
     [SerializeField] GameObject abilityDesc;
     [SerializeField] UnitDisplay leftAbilityUnit, rightAbilityUnit;
     [SerializeField, Tooltip("For camera shaking")] Camera cam;
@@ -51,7 +55,6 @@ public class Battle : MonoBehaviour
     // -2 = Undecided; -1 = Right Wins; 0 = Draw; 1 = Left Wins
     int outcome = -2;
     int rightPaintInit;
-    bool waitingForArtifacts = false;
     float totalShake = 0;
     float modShake;
     float cameraShake = 0;
@@ -59,6 +62,7 @@ public class Battle : MonoBehaviour
     AudioSource source;
     Trigger newTrigger;
     Vector3 cameraPos, randomShake;
+    List<ArtifactButton> artifactButtons = new List<ArtifactButton>();
 
     //Start is called before the first frame update.
     void Start()
@@ -112,6 +116,20 @@ public class Battle : MonoBehaviour
             lanes.Add(newLane);
         }
 
+        // Artifact buttons
+        leftArtifactPoints = 10;
+        List<Artifact> artifacts = Master.GetArtifacts(leftSide.colour);
+        foreach (GameObject newObject in artifactPanel.Populate(artifacts.Count))
+            artifactButtons.Add(newObject.GetComponent<ArtifactButton>());
+        for (int a = 0; a < artifacts.Count;  a++)
+        {
+            artifactButtons[a].artifact = artifacts[a];
+            artifactButtons[a].battle = this;
+            artifactButtons[a].index = a;
+            leftArtifact.AddAbility(artifacts[a].type.ability);
+            leftArtifactPointText.gameObject.SetActive(true);
+        }
+
         Particle.paintDepth = 0;
         source = GetComponent<AudioSource>();
         source.volume = Master.data.sfxVolume;
@@ -123,9 +141,12 @@ public class Battle : MonoBehaviour
     //Update is called once per frame.
     void Update()
     {
-        // Display money.
+        // Display paint and artifact points.
         leftPaintText.text = $"${leftSide.paint}";
         rightPaintText.text = $"${rightSide.paint}";
+
+        if (artifactButtons.Count > 0)
+            leftArtifactPointText.text = $"{leftArtifactPoints}A";
 
         // Shake the camera.
         totalShake = Mathf.Max(totalShake, cameraShake);
@@ -730,10 +751,11 @@ public class Battle : MonoBehaviour
         }
     }
 
-    void TriggerAbilities
+    public void TriggerAbilities
         (Cause.CauseType cause,
         Fighter causeSource,
-        Fighter causeTarget)
+        Fighter causeTarget,
+        int artifactIndex = 0)
     {
         /// <summary>Check if a given action triggers any abilities and submit those abilities for activation.</summary>
         /// <param name="cause">The type of action in question.</param>
@@ -744,10 +766,10 @@ public class Battle : MonoBehaviour
         Trigger newTrigger;
 
         // Add the artifact ability if it is an artifact.
-        if (causeTarget && causeTarget.hasArtifact)
+        if (causeTarget && causeTarget.isArtifact)
         {
             newTrigger = new Trigger();
-            newTrigger.ability = causeTarget.abilities[0];
+            newTrigger.ability = causeTarget.abilities[artifactIndex];
             newTrigger.causeSource = null;
             newTrigger.causeTarget = causeTarget;
             pendingTriggers.Add(newTrigger);
@@ -759,21 +781,27 @@ public class Battle : MonoBehaviour
         {
             foreach (Ability ability in fighterAbilities[cause][effect])
             {
-                sources = ability.cause.source.SelectTargets
-                    (this,
-                    GetLocation(ability.owner));
-                targets = ability.cause.target.SelectTargets
-                    (this,
-                    GetLocation(ability.owner));
-                if
-                    (sources.Contains(causeSource)
-                    && targets.Contains(causeTarget))
+                if (!(cause == Cause.CauseType.Pillage
+                    && ability.owner.hasPillaged))
                 {
-                    newTrigger = new Trigger();
-                    newTrigger.ability = ability;
-                    newTrigger.causeSource = causeSource;
-                    newTrigger.causeTarget = causeTarget;
-                    pendingTriggers.Add(newTrigger);
+                    sources = ability.cause.source.SelectTargets
+                        (this,
+                        GetLocation(ability.owner));
+                    targets = ability.cause.target.SelectTargets
+                        (this,
+                        GetLocation(ability.owner));
+                    if
+                        (sources.Contains(causeSource)
+                        && targets.Contains(causeTarget))
+                    {
+                        newTrigger = new Trigger();
+                        newTrigger.ability = ability;
+                        newTrigger.causeSource = causeSource;
+                        newTrigger.causeTarget = causeTarget;
+                        pendingTriggers.Add(newTrigger);
+                        if (cause == Cause.CauseType.Pillage)
+                            ability.owner.hasPillaged = true;
+                    }
                 }
             }
         }
@@ -876,6 +904,8 @@ public class Battle : MonoBehaviour
         {
             yield return StartCoroutine(Clean());
             yield return StartCoroutine(CheckLanes());
+            foreach (Fighter f in AllFighters())
+                f.hasPillaged = false;
         }
     }
 
@@ -1011,6 +1041,8 @@ public class Battle : MonoBehaviour
                     {
                         f.health += healthGain;
                         f.attack += attackGain;
+                        if (f.health > 0 && f.state == UnitDisplay.AnimState.Die)
+                            f.SetAnimation(overrideDeath: true);
 
                         GameObject marker = Instantiate
                             (buffMarker,
@@ -1088,7 +1120,13 @@ public class Battle : MonoBehaviour
 
     IEnumerator Step()
     {
-        /// <summary>Activate any step abilities that the fighters may have, among other things.</summary>
+        /// <summary>Refresh artifacts and activate any step abilities
+        /// that the fighters may have, among other things.</summary>
+
+        // Refresh artifacts.
+        leftArtifactPoints++;
+        foreach (ArtifactButton button in artifactButtons)
+            button.Cooldown();
 
         // Reset fighters' hasCombo values.
         foreach (Fighter f in AllFighters())
@@ -1359,6 +1397,17 @@ public class Battle : MonoBehaviour
                     outcome = (int)Mathf.Sign(leftSide.paint - rightSide.paint);
             }
         }
+    }
+
+    public void ArtifactHoverEnter(Artifact artifact)
+    {
+        artifactDesc.text = artifact.GetDescription();
+        artifactDesc.transform.parent.gameObject.SetActive(true);
+    }
+    public void ArtifactHoverExit()
+    {
+        artifactDesc.text = "";
+        artifactDesc.transform.parent.gameObject.SetActive(false);
     }
 }
 

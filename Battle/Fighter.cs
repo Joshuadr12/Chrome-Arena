@@ -11,7 +11,6 @@ public class Fighter : UnitDisplay
     /// </summary>
 
     // Serialized variables for the editor.
-    [SerializeField] bool forCombat = true;
     [SerializeField] Transform statCanvas;
     [SerializeField] Image healthImage;
     [SerializeField] TMP_Text healthText;
@@ -22,7 +21,8 @@ public class Fighter : UnitDisplay
     [HideInInspector] public bool accelerate = false;
     [HideInInspector] public bool isAttacking = false;
     [HideInInspector] public bool isLeft = true;
-    [HideInInspector] public bool retreated = false;
+    [HideInInspector] public bool retreated = false,
+        hasPillaged = false;
     [HideInInspector] public bool isArtifact;
     [HideInInspector] public ArtifactType hasArtifact;
     [HideInInspector] public int artifactUsed = -1;
@@ -51,8 +51,6 @@ public class Fighter : UnitDisplay
 
         if (isArtifact)
         {
-            if (hasArtifact)
-                AddAbility(hasArtifact.ability);
             newPos = transform.position;
             health = 1;
         }
@@ -109,11 +107,10 @@ public class Fighter : UnitDisplay
 
     public void RemoveFromBattle()
     {
-        if (forCombat)
-            foreach (Ability a in abilities)
-                Battle
-                    .fighterAbilities[a.cause.type][a.effects[0].type]
-                    .Remove(a);
+        foreach (Ability a in abilities)
+            Battle
+                .fighterAbilities[a.cause.type][a.effects[0].type]
+                .Remove(a);
         if (unit.name == "Bounty" && health <= 0)
             Battle.bountiesGone++;
         Destroy(gameObject);
@@ -142,10 +139,9 @@ public class Fighter : UnitDisplay
             newAbility.effects.Add(effect);
         abilities.Add(newAbility);
 
-        if (forCombat)
-            Battle
-                .fighterAbilities[a.cause.type][a.effects[0].type]
-                .Add(newAbility);
+        Battle
+            .fighterAbilities[a.cause.type][a.effects[0].type]
+            .Add(newAbility);
     }
 
     public void SwitchSides()

@@ -50,9 +50,9 @@ public class UnitDisplay : MonoBehaviour
             : Master.data.battleSpeed);
     }
 
-    public void SetAnimation(AnimState newState = AnimState.Idle)
+    public void SetAnimation(AnimState newState = AnimState.Idle, bool overrideDeath = false)
     {
-        if (state != AnimState.Die)
+        if (state != AnimState.Die || overrideDeath)
         {
             state = newState;
             switch (state)

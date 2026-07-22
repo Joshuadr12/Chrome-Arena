@@ -18,11 +18,13 @@ public class ArtifactType : ScriptableObject
     [Tooltip("Used in squad customization to describe what this unit does.")] public List<string> keywords;
     [Tooltip("A list of units to reference when describing what this unit does.")] public List<Unit> keywordUnits;
 
-    public string GetDescription()
+    public string GetDescription(bool addName = true)
     {
         /// <summary>Generates and returns a multiline description about the artifact for display.</summary>
 
-        return ability.description;
+        string result = addName ? $"{name.ToUpper()}: " : "";
+        result += ability.description;
+        return result;
     }
 }
 
@@ -30,11 +32,20 @@ public class ArtifactType : ScriptableObject
 public class Artifact
 {
     public ArtifactType type;
-    public int uses;
+    public int uses = 5;
 
     public Artifact(ArtifactType type, int uses)
     {
         this.type = type;
         this.uses = uses;
+    }
+
+    public string GetDescription()
+    {
+        string result = $"{type.name}, costs {type.valuePerUse}A, {uses} use";
+        if (uses != 1)
+            result += "s";
+        result += $"\n{type.GetDescription(false)}";
+        return result;
     }
 }

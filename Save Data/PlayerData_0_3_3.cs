@@ -27,6 +27,7 @@ public class PlayerData_0_3_3
     public int level, starsLeftover,
         upgradePoints, researchPoints, artifactsPurchased;
 
+    public PlayerData_0_3_3() { }
     public PlayerData_0_3_3(Player player)
     {
         if (player == null)
@@ -43,6 +44,7 @@ public class PlayerData_0_3_3
             defaultSquads.Add(i);
 
         List<ArtifactData> artifactData;
+        artifacts.Clear();
         foreach (ArtifactList list in player.artifacts)
         {
             artifactData = new List<ArtifactData>();
@@ -51,6 +53,7 @@ public class PlayerData_0_3_3
             artifacts.Add(list.colour, artifactData);
         }
 
+        forgeSales.Clear();
         foreach (ArtifactList list in player.forgeSales)
         {
             artifactData = new List<ArtifactData>();

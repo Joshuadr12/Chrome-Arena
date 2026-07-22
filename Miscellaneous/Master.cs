@@ -465,14 +465,12 @@ public class Master : MonoBehaviour
         }
         return result;
     }
-    public static List<ArtifactType> GetArtifacts(string colour = "all")
+    public static List<Artifact> GetArtifacts(string colour = "all")
     {
-        List<ArtifactType> result = new List<ArtifactType>();
-        foreach (ArtifactType artifact in artifacts)
-            if ((colour == "all")
-                || TranslateCollections(artifact.colours)
-                .Contains(colour))
-                if (artifact.playable)
+        List<Artifact> result = new List<Artifact>();
+        foreach (ArtifactList list in data.artifacts)
+            if (colour == "all" || list.colour == colour)
+                foreach (Artifact artifact in list.artifacts)
                     result.Add(artifact);
         return result;
     }
