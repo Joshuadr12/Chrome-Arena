@@ -97,19 +97,6 @@ public class Player : ScriptableObject
     }
 
     [Serializable]
-    public class ArtifactList
-    {
-        public string colour;
-        public List<Artifact> artifacts;
-
-        public ArtifactList(string colour, List<Artifact> artifacts)
-        {
-            this.colour = colour;
-            this.artifacts = artifacts;
-        }
-    }
-
-    [Serializable]
     public class ResourceQuantity
     {
         public string colour;
@@ -169,5 +156,18 @@ public class Player : ScriptableObject
             this.battleId = battleId;
             this.stars = stars;
         }
+    }
+}
+
+[Serializable]
+public class ArtifactList
+{
+    public string colour;
+    public List<Artifact> artifacts;
+
+    public ArtifactList(string colour, List<Artifact> artifacts)
+    {
+        this.colour = colour;
+        this.artifacts = artifacts;
     }
 }

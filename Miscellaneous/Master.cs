@@ -180,7 +180,7 @@ public class Master : MonoBehaviour
             list = new List<Artifact>();
             foreach (PlayerData_0_3_3.ArtifactData artifact in colour.Value)
                 list.Add(new Artifact(FindArtifact(artifact.name), artifact.uses));
-            data.artifacts.Add(new Player.ArtifactList(colour.Key, list));
+            data.artifacts.Add(new ArtifactList(colour.Key, list));
         }
 
         data.forgeSales.Clear();
@@ -189,7 +189,7 @@ public class Master : MonoBehaviour
             list = new List<Artifact>();
             foreach (PlayerData_0_3_3.ArtifactData artifact in colour.Value)
                 list.Add(new Artifact(FindArtifact(artifact.name), artifact.uses));
-            data.forgeSales.Add(new Player.ArtifactList(colour.Key, list));
+            data.forgeSales.Add(new ArtifactList(colour.Key, list));
         }
 
         Squad squad;

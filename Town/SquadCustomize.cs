@@ -12,14 +12,12 @@ public class SquadCustomize : MonoBehaviour
 
     public static Squad squadActive = null;
     public static Unit selectedUnit = null;
-    public static bool chooseArtifact = false;
     public static string unitDescription = "", unitKeywords = "";
 
     [SerializeField] List<Squad> squads;
     [SerializeField] List<GameObject> squadButtons;
     [SerializeField] List<LineupCustomize> lineupButtons;
     [SerializeField] UnitOptions unitOptions;
-    [SerializeField] Image artifactImage;
     [SerializeField] UnitDisplay dragAndDropUnit;
     [SerializeField] TMP_InputField nameInput;
     [SerializeField] GameObject squadSelectUI, squadCustomizeUI;
@@ -30,16 +28,11 @@ public class SquadCustomize : MonoBehaviour
     [HideInInspector] public int menuLayer = 0;
 
     GameObject textBox;
-    ArtifactType artifactActive;
 
     // Start is called before the first frame update.
     void Start()
     {
         textBox = unitText.transform.parent.gameObject;
-        if (!Master.FinishedTutorial("basic_2"))
-            artifactImage
-                .transform.parent
-                .gameObject.SetActive(false);
     }
 
     // Update is called once per frame.
@@ -53,12 +46,7 @@ public class SquadCustomize : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape)
             && DialogueScene.isDone)
         {
-            if (chooseArtifact)
-            {
-                chooseArtifact = false;
-                unitOptions.UpdateUnitOptions("basic", squadActive.colour);
-            }
-            else if (squadActive != null)
+            if (squadActive != null)
                 EndCustomize();
             else
                 GotoScene("Town");
@@ -112,11 +100,8 @@ public class SquadCustomize : MonoBehaviour
 
     public void Drag(Unit unit)
     {
-        if (!chooseArtifact)
-        {
-            selectedUnit = unit;
-            UnitHoverExit();
-        }
+        selectedUnit = unit;
+        UnitHoverExit();
     }
 
     public void GotoScene(string sceneName)
@@ -151,11 +136,6 @@ public class SquadCustomize : MonoBehaviour
         ///<param name="squadIndex">The index of the squad to customize.</param>
 
         squadCustomizeUI.SetActive(true);
-        chooseArtifact = false;
-        artifactActive = squadActive.artifact;
-        artifactImage.sprite = artifactActive.sprite;
-        artifactImage.material = Master
-            .colours[squadActive.colour].material;
         nameInput.text = squadActive.squadName;
 
         // Line panels
@@ -176,31 +156,10 @@ public class SquadCustomize : MonoBehaviour
         StartCustomize();
     }
 
-    public void ArtifactSelectMenu()
-    {
-        if (!chooseArtifact)
-        {
-            chooseArtifact = true;
-            unitOptions.UpdateUnitOptions(colour: squadActive.colour);
-        }
-    }
-
-    public void SelectArtifact(ArtifactType artifact)
-    {
-        if (chooseArtifact)
-        {
-            artifactActive = artifact;
-            artifactImage.sprite = artifactActive.sprite;
-            chooseArtifact = false;
-            unitOptions.UpdateUnitOptions("basic", squadActive.colour);
-        }
-    }
-
     public void SaveChanges()
     {
         /// <summary>Save the changes to the squad being customized.</summary>
 
-        squadActive.artifact = artifactActive;
         squadActive.units.Clear();
         if (nameInput.text != "")
             squadActive.squadName = nameInput.text;
@@ -227,12 +186,13 @@ public class SquadCustomize : MonoBehaviour
             squadActive.colour);
     }
 
-    public void UnitHoverEnter(Unit unit, ArtifactType artifact)
+    public void UnitHoverEnter(Unit unit)
     {
-        if (chooseArtifact && artifact != null)
-            UpdateArtifactDescriptions(artifact);
-        else
-            UpdateUnitDescriptions(unit);
+        UpdateUnitDescriptions(unit);
+    }
+    public void UnitHoverEnter(ArtifactType artifact)
+    {
+        UpdateArtifactDescriptions(artifact);
     }
 
     public void UnitHoverExit()

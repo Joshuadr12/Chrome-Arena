@@ -13,7 +13,6 @@ public class LineupCustomize : MonoBehaviour
     public List<CharacterButton> unitButtons;
 
     [HideInInspector] public List<UnitColour> units = new List<UnitColour>();
-    UnitDisplay display;
 
     void RenderUnits()
     {
@@ -85,7 +84,6 @@ public class LineupCustomize : MonoBehaviour
 
     public void UnitHoverEnter(Unit unit)
     {
-        if (!SquadCustomize.chooseArtifact)
         SquadCustomize.UpdateUnitDescriptions(unit);
 
         if (FindAnyObjectByType<ResearchManager>())
@@ -101,22 +99,19 @@ public class LineupCustomize : MonoBehaviour
 
     public void Drop(int index)
     {
-        if (!SquadCustomize.chooseArtifact)
+        if (index < units.Count)
         {
-            if (index < units.Count)
-            {
-                units[index].unit = SquadCustomize.selectedUnit;
-                if (SquadCustomize.squadActive != null)
-                    units[index].colour = SquadCustomize.squadActive.colour;
-                else if (Master.colourActive != "")
-                    units[index].colour = Master.colourActive;
-            }
-            else
-                units.Add(new UnitColour(SquadCustomize.selectedUnit));
-
-            RenderUnits();
-            UnitHoverEnter(SquadCustomize.selectedUnit);
+            units[index].unit = SquadCustomize.selectedUnit;
+            if (SquadCustomize.squadActive != null)
+                units[index].colour = SquadCustomize.squadActive.colour;
+            else if (Master.colourActive != "")
+                units[index].colour = Master.colourActive;
         }
+        else
+            units.Add(new UnitColour(SquadCustomize.selectedUnit));
+
+        RenderUnits();
+        UnitHoverEnter(SquadCustomize.selectedUnit);
     }
     public void Drop(Unit unit)
     {

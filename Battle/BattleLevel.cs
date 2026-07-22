@@ -24,6 +24,7 @@ public class BattleLevel : ScriptableObject
     [Header("Squads")]
     [Tooltip("The enemy squads to be used necessarily")] public List<Squad> mustHaves;
     [Tooltip("The enemy squads to be chosen at random after the must-haves")] public List<Squad> extraSquads;
+    public List<ArtifactList> artifacts;
     [Header("Miscellaneous")]
     public BattleSettings settings;
 

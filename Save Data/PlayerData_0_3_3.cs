@@ -43,7 +43,7 @@ public class PlayerData_0_3_3
             defaultSquads.Add(i);
 
         List<ArtifactData> artifactData;
-        foreach (Player.ArtifactList list in player.artifacts)
+        foreach (ArtifactList list in player.artifacts)
         {
             artifactData = new List<ArtifactData>();
             foreach (Artifact artifact in list.artifacts)
@@ -51,7 +51,7 @@ public class PlayerData_0_3_3
             artifacts.Add(list.colour, artifactData);
         }
 
-        foreach (Player.ArtifactList list in player.forgeSales)
+        foreach (ArtifactList list in player.forgeSales)
         {
             artifactData = new List<ArtifactData>();
             foreach (Artifact artifact in list.artifacts)
@@ -129,7 +129,7 @@ public class PlayerData_0_3_3
 
         List<ArtifactData> list;
         artifacts.Clear();
-        foreach (Player.ArtifactList artifactList in Master.newData.artifacts)
+        foreach (ArtifactList artifactList in Master.newData.artifacts)
         {
             list = new List<ArtifactData>();
             foreach (Artifact a in artifactList.artifacts)
@@ -138,7 +138,7 @@ public class PlayerData_0_3_3
         }
 
         forgeSales.Clear();
-        foreach (Player.ArtifactList sales in Master.newData.forgeSales)
+        foreach (ArtifactList sales in Master.newData.forgeSales)
         {
             list = new List<ArtifactData>();
             foreach (Artifact a in sales.artifacts)

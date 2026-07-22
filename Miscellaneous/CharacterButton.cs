@@ -9,11 +9,9 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
     public ButtonType buttonType;
     public GameObject manager;
     [SerializeField] UnitDisplay unitDisplay;
-    [SerializeField] Image artifactImage;
     [Tooltip("If this button is part of a lineup panel, enter its index here."), SerializeField] int lineIndex;
 
     UnitColour unit = new UnitColour(null, null);
-    ArtifactType artifact = null;
     bool isLeftClicking = false;
 
     public enum ButtonType
@@ -43,34 +41,16 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
     {
         this.unit = unit;
         gameObject.SetActive(true);
-        Master.CloseMenu(artifactImage.gameObject,
-            unitDisplay.gameObject);
         unitDisplay.ChangeUnit(unit);
-
-        if (unit.unit == null)
-            unitDisplay.gameObject.SetActive(false);
+        unitDisplay.gameObject.SetActive(unit.unit != null);
     }
     public void SetUnit(Unit unit, string colour)
     {
         this.unit.unit = unit;
         this.unit.colour = colour;
         gameObject.SetActive(true);
-        Master.CloseMenu(artifactImage.gameObject,
-            unitDisplay.gameObject);
         unitDisplay.ChangeUnit(unit, colour);
-
-        if (unit == null)
-            unitDisplay.gameObject.SetActive(false);
-    }
-    public void SetArtifact(ArtifactType artifact, string colour)
-    {
-        this.artifact = artifact;
-        this.unit.colour = colour;
-        gameObject.SetActive(true);
-        Master.OpenMenu(artifactImage.gameObject,
-            unitDisplay.gameObject);
-        artifactImage.sprite = artifact.sprite;
-        artifactImage.material = Master.colours[colour].material;
+        unitDisplay.gameObject.SetActive(unit != null);
     }
     public void Disable()
     {
@@ -88,11 +68,6 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
                 case ButtonType.ResearchOption:
                     manager.GetComponent<ResearchManager>()
                         .SelectUnit(unit.unit);
-                    break;
-                case ButtonType.SquadOption:
-                    if (SquadCustomize.chooseArtifact)
-                        manager.GetComponent<SquadCustomize>()
-                            .SelectArtifact(artifact);
                     break;
                 default:
                     break;
@@ -155,7 +130,7 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
                     break;
                 case ButtonType.SquadOption:
                     manager.GetComponent<SquadCustomize>()
-                        .UnitHoverEnter(unit.unit, artifact);
+                        .UnitHoverEnter(unit.unit);
                     break;
                 case ButtonType.SquadLine:
                     manager.GetComponent<LineupCustomize>()

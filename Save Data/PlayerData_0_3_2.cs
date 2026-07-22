@@ -75,7 +75,8 @@ public class PlayerData_0_3_2
             squad = new SquadData();
             squad.title = s.squadName;
             squad.colour = s.colour;
-            squad.artifact = s.artifact.name;
+            squad.artifact = "Sword";
+            //squad.artifact = s.artifact.name;
 
             List<string> newLine;
             squad.lines.Clear();

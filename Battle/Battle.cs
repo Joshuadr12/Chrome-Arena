@@ -37,9 +37,6 @@ public class Battle : MonoBehaviour
     [SerializeField] List<DialogueEvent> events;
     [FormerlySerializedAs("leftMoney"), SerializeField] TMP_Text leftPaintText;
     [FormerlySerializedAs("rightMoney"), SerializeField] TMP_Text rightPaintText;
-    [SerializeField] GameObject artifactSelect;
-    [SerializeField] Image artifactDeselectImage, artifactSelectImage;
-    [SerializeField] TMP_Text confirmArtifactsText;
     [SerializeField] GameObject abilityDesc;
     [SerializeField] UnitDisplay leftAbilityUnit, rightAbilityUnit;
     [SerializeField, Tooltip("For camera shaking")] Camera cam;
@@ -77,7 +74,6 @@ public class Battle : MonoBehaviour
         leftArtifact = leftArtifactHolder;
         leftArtifact.isLeft = true;
         leftArtifact.isArtifact = true;
-        leftArtifact.hasArtifact = leftSide.artifact;
         leftArtifact.ChangeUnit
             (Master.data.character,
             leftSide.colour,
@@ -86,16 +82,10 @@ public class Battle : MonoBehaviour
         rightArtifact = rightArtifactHolder;
         rightArtifact.isLeft = false;
         rightArtifact.isArtifact = true;
-        rightArtifact.hasArtifact = rightSide.artifact;
         rightArtifact.ChangeUnit
             (Master.battleSelected.opponentDisplay,
             rightSide.colour,
             true);
-
-        artifactSelectImage.material = Master
-            .colours[leftSide.colour].material;
-        artifactDeselectImage.material = Master
-            .colours[leftSide.colour].material;
 
         // Abilities and triggers
         fighterAbilities = new Dictionary<Cause.CauseType, Dictionary<Effect.EffectType, List<Ability>>>();
@@ -726,36 +716,6 @@ public class Battle : MonoBehaviour
             source.Stop();
             yield return Master.SetTimer(1);
 
-            // Select artifacts.
-            if (Master.FinishedTutorial("basic_2"))
-            {
-                if (leftArtifact.artifactUsed < 1)
-                {
-                    waitingForArtifacts = true;
-                    artifactSelect.SetActive(true);
-                    artifactDeselectImage.sprite = leftArtifact
-                        .hasArtifact
-                        .sprite;
-                    artifactSelectImage.sprite = leftArtifact
-                        .hasArtifact
-                        .sprite;
-                    leftArtifact.artifactUsed = 0;
-                    while (waitingForArtifacts)
-                        yield return null;
-
-                    if (leftArtifact.artifactUsed == 0)
-                    {
-                        TriggerAbilities(Cause.CauseType.Artifact, null, leftArtifact);
-                        leftArtifact.artifactUsed = 1;
-                    }
-                }
-                if (rightArtifact.artifactUsed < 1)
-                {
-                    TriggerAbilities(Cause.CauseType.Artifact, null, rightArtifact);
-                    rightArtifact.artifactUsed = 1;
-                }
-            }
-
             foreach (Fighter f in summoned)
                 TriggerAbilities
                     (Cause.CauseType.Summon,
@@ -768,25 +728,6 @@ public class Battle : MonoBehaviour
             if (pendingTriggers.Count > 0)
                 yield return StartCoroutine(ActivateTriggers());
         }
-    }
-
-    public void SelectArtifact()
-    {
-        leftArtifact.artifactUsed = 0;
-        confirmArtifactsText.text = "CONFIRM";
-    }
-
-    public void DeselectArtifact()
-    {
-        leftArtifact.artifactUsed = -1;
-        confirmArtifactsText.text = "X";
-    }
-
-    public void ConfirmArtifacts()
-    {
-        confirmArtifactsText.text = "CONFIRM";
-        artifactSelect.SetActive(false);
-        waitingForArtifacts = false;
     }
 
     void TriggerAbilities

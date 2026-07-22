@@ -10,15 +10,10 @@ public class UnitOptions : MonoBehaviour
     public List<CharacterButton> unitOptionButtons;
 
     [HideInInspector] public List<Unit> unitOptions = new List<Unit>();
-    [HideInInspector] public List<ArtifactType> artifactOptions = new List<ArtifactType>();
 
     public Unit GetUnit(int index)
     {
         return unitOptions[index];
-    }
-    public ArtifactType GetArtifact(int index)
-    {
-        return artifactOptions[index];
     }
 
     public void UpdateUnitOptions
@@ -26,81 +21,43 @@ public class UnitOptions : MonoBehaviour
         string colour = "neutral",
         bool canBeBig = true)
     {
-        /// <summary>Update the unit collection tabs and unit option buttons for the given collection and colour,
-        /// or artifacts if the artifact selection menu is to be opened.</summary>
+        /// <summary>Update the unit collection tabs and unit option buttons for the given collection and colour.</summary>
 
-        // Artifact Select
-        if (SquadCustomize.chooseArtifact)
-        {
-            // Disable collection labels.
-            int buttonIndex = 0;
-            foreach (TMP_Text label in collectionLabels)
+        int buttonIndex = 0;
+        foreach (string co in collections)
+            if (buttonIndex < collectionLabels.Count)
             {
-                label.text = "";
-                label
+                collectionLabels[buttonIndex].text = collections[buttonIndex]
+                    .ToUpper();
+                collectionLabels[buttonIndex]
                     .transform.parent
-                        .GetComponent<Button>().interactable = false;
+                    .GetComponent<Button>().interactable = collections[buttonIndex] != collection;
+                buttonIndex++;
             }
+        while (buttonIndex < collectionLabels.Count)
+        {
+            collectionLabels[buttonIndex]
+                .transform.parent
+                    .GetComponent<Button>().interactable = false;
+            buttonIndex++;
+        }
 
-            // Artifact options.
-            artifactOptions = Master.GetArtifacts(colour);
-            buttonIndex = 0;
-            foreach (ArtifactType a in artifactOptions)
+        // Unit options.
+        unitOptions = Master.GetUnits(collection, colour);
+        buttonIndex = 0;
+        foreach (Unit u in unitOptions)
+        {
+            if (buttonIndex < unitOptionButtons.Count
+                && (u.bodySize <= 1 || canBeBig))
             {
-                if (buttonIndex < unitOptionButtons.Count)
-                {
-                    unitOptionButtons[buttonIndex]
-                        .SetArtifact(artifactOptions[buttonIndex], colour);
-                    buttonIndex++;
-                }
-            }
-            while (buttonIndex < unitOptionButtons.Count)
-            {
-                unitOptionButtons[buttonIndex].Disable();
+                unitOptionButtons[buttonIndex].SetUnit(u, colour);
                 buttonIndex++;
             }
         }
-
-        // Unit Customization
-        else
+        while (buttonIndex < unitOptionButtons.Count)
         {
-            // Unit collection labels.
-            int buttonIndex = 0;
-            foreach (string co in collections)
-                if (buttonIndex < collectionLabels.Count)
-                {
-                    collectionLabels[buttonIndex].text = collections[buttonIndex]
-                        .ToUpper();
-                    collectionLabels[buttonIndex]
-                        .transform.parent
-                        .GetComponent<Button>().interactable = collections[buttonIndex] != collection;
-                    buttonIndex++;
-                }
-            while (buttonIndex < collectionLabels.Count)
-            {
-                collectionLabels[buttonIndex]
-                    .transform.parent
-                        .GetComponent<Button>().interactable = false;
-                buttonIndex++;
-            }
-
-            // Unit options.
-            unitOptions = Master.GetUnits(collection, colour);
-            buttonIndex = 0;
-            foreach (Unit u in unitOptions)
-            {
-                if (buttonIndex < unitOptionButtons.Count
-                    && (u.bodySize <= 1 || canBeBig))
-                {
-                    unitOptionButtons[buttonIndex].SetUnit(u, colour);
-                    buttonIndex++;
-                }
-            }
-            while (buttonIndex < unitOptionButtons.Count)
-            {
-                unitOptionButtons[buttonIndex].Disable();
-                buttonIndex++;
-            }
+            unitOptionButtons[buttonIndex].Disable();
+            buttonIndex++;
         }
     }
 }
