@@ -29,7 +29,7 @@ public class Fighter : UnitDisplay
     [HideInInspector] public Vector3 oldPos, newPos;
     [HideInInspector] public int health, attack;
     [HideInInspector] public bool fast;
-    [HideInInspector] public int agile, block, armor;
+    [HideInInspector] public int agile, block, armor, persist;
     [HideInInspector] public bool antiAgile, antiBlock;
     [HideInInspector] public bool morph, combo, hasCombo = false;
     [HideInInspector] public bool slow, steady, bleached;
@@ -61,6 +61,7 @@ public class Fighter : UnitDisplay
         agile = unit.agile;
         block = unit.block;
         armor = unit.armor;
+        persist = unit.persist;
         antiAgile = unit.antiAgile && !isArtifact;
         antiBlock = unit.antiBlock && !isArtifact;
         morph = unit.morph && !isArtifact;

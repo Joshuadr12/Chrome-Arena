@@ -24,7 +24,7 @@ public class Unit : ScriptableObject
     public int attack = 1;
     public int price = 1;
     public bool fast;
-    public int agile = 0, block = 0, armor = 0;
+    public int agile = 0, block = 0, armor = 0, persist = 0;
     public bool antiAgile, antiBlock;
     public bool morph, combo;
     public bool slow, steady;
@@ -58,6 +58,8 @@ public class Unit : ScriptableObject
             result += $", Block {block}";
         if (armor > 0)
             result += $", Armor {armor}";
+        if (persist > 0)
+            result += $", Persist {persist}";
         if (antiAgile)
             result += ", AntiAgile";
         if (antiBlock)
@@ -95,6 +97,8 @@ public class Unit : ScriptableObject
             result += $", Block {block}";
         if (armor > 0)
             result += $", Armor {armor}";
+        if (persist > 0)
+            result += $", Persist {persist}";
         if (antiAgile)
             result += ", AntiAgile";
         if (antiBlock)

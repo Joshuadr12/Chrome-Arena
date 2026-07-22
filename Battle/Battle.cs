@@ -381,13 +381,18 @@ public class Battle : MonoBehaviour
         particle.offColor = source.colour.physicalColour;
     }
 
-    public void CreateBuffText(Fighter location, string text)
+    public void CreateBuffMarker(Fighter location, string text = "", int health = 0, int attack = 0, bool isLeft = true)
     {
-        GameObject marker = Instantiate
+        BuffMarker marker = Instantiate
             (buffMarker,
             location.transform.position,
-            Quaternion.identity);
-        marker.GetComponent<BuffMarker>().free = text;
+            Quaternion.identity)
+            .GetComponent<BuffMarker>();
+        marker.free = text;
+        marker.health = health;
+        marker.attack = attack;
+        if (!isLeft)
+            marker.SwitchSides();
     }
 
     public void DealDamage
@@ -420,7 +425,7 @@ public class Battle : MonoBehaviour
             if (!source.antiAgile
                 && UnityEngine.Random.value * (target.agile + 1) > 1)
             {
-                CreateBuffText(target, "DODGED");
+                CreateBuffMarker(target, "DODGED");
                 multi--;
             }
         }
@@ -430,7 +435,7 @@ public class Battle : MonoBehaviour
         {
             while (multi > 0 && target.block > 0)
             {
-                CreateBuffText(target, "BLOCKED");
+                CreateBuffMarker(target, "BLOCKED");
                 multi--;
                 target.block--;
                 CreateParticle
@@ -463,6 +468,17 @@ public class Battle : MonoBehaviour
         {
 
             target.health -= damage;
+            if (target.health <= 0 && target.persist > 0)
+            {
+                if (UnityEngine.Random.value <= 0.5f)
+                {
+                    target.health += target.persist;
+                    CreateBuffMarker(target, "PERSIST");
+                    CreateBuffMarker(target, "", target.persist, 0, target.isLeft);
+                }
+                target.persist = 0;
+            }
+
             if (target.health > 0)
                 TriggerAbilities(Cause.CauseType.Nonlethal,
                     source.isArtifact ? null : source,
@@ -497,7 +513,7 @@ public class Battle : MonoBehaviour
                 StarChallenges.tempScore.damageDealt += damage;
         }
         else if (deflect)
-            CreateBuffText(target, "DEFLECTED");
+            CreateBuffMarker(target, "DEFLECTED");
     }
 
     public void Fight(Fighter left, Fighter right)
@@ -523,7 +539,7 @@ public class Battle : MonoBehaviour
                 DealDamage(right, left, right.attack);
         }
         else if (right.isAttacking)
-                CreateBuffText(left, "FAST");
+                CreateBuffMarker(left, "FAST");
     }
 
     public class Lane
@@ -1044,7 +1060,8 @@ public class Battle : MonoBehaviour
                         if (f.health > 0 && f.state == UnitDisplay.AnimState.Die)
                             f.SetAnimation(overrideDeath: true);
 
-                        GameObject marker = Instantiate
+                        CreateBuffMarker(f, "", healthGain, attackGain, f.isLeft);
+/*                        GameObject marker = Instantiate
                             (buffMarker,
                             f.transform.position,
                             Quaternion.identity);
@@ -1053,7 +1070,7 @@ public class Battle : MonoBehaviour
                         if (!GetLocation(f).isLeft)
                             marker
                                 .GetComponent<BuffMarker>()
-                                .SwitchSides();
+                                .SwitchSides();*/
                     }
                     break;
                 case Effect.EffectType.Damage:
@@ -1077,7 +1094,7 @@ public class Battle : MonoBehaviour
                 case Effect.EffectType.GiveTrait:
                     foreach (Fighter f in targets)
                     {
-                        CreateBuffText(f, effect.typeStr.ToUpper());
+                        CreateBuffMarker(f, effect.typeStr.ToUpper());
                         switch (effect.typeStr)
                         {
                             case "block":
@@ -1106,7 +1123,7 @@ public class Battle : MonoBehaviour
                 case Effect.EffectType.Bleach:
                     foreach (Fighter f in targets)
                     {
-                        CreateBuffText(f, "BLEACHED");
+                        CreateBuffMarker(f, "BLEACHED");
                         f.bleached = true;
                         f.ChangeUnit(newColour: "neutral");
                     }
@@ -1161,14 +1178,14 @@ public class Battle : MonoBehaviour
                     || (UnityEngine.Random.value <= 0.5f))
                     leftFighter.isAttacking = true;
                 else
-                    CreateBuffText(leftFighter, "SLOW");
+                    CreateBuffMarker(leftFighter, "SLOW");
 
                 if (leftFighter.isAttacking)
                 {
                     laneFighting = true;
                     if (isCombo)
                     {
-                        CreateBuffText(leftFighter, "COMBO");
+                        CreateBuffMarker(leftFighter, "COMBO");
                         leftFighter.hasCombo = false;
                     }
                     else
@@ -1188,14 +1205,14 @@ public class Battle : MonoBehaviour
                     || (UnityEngine.Random.value <= 0.5f))
                     rightFighter.isAttacking = true;
                 else
-                    CreateBuffText(rightFighter, "SLOW");
+                    CreateBuffMarker(rightFighter, "SLOW");
 
                 if (rightFighter.isAttacking)
                 {
                     laneFighting = true;
                     if (isCombo)
                     {
-                        CreateBuffText(rightFighter, "COMBO");
+                        CreateBuffMarker(rightFighter, "COMBO");
                         rightFighter.hasCombo = false;
                     }
                     else
