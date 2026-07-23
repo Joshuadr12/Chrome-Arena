@@ -10,10 +10,14 @@ public class ArtifactButton : MonoBehaviour
         cooldownText;
     [SerializeField] Image image;
     [SerializeField] ParticleSystem particles;
+    [Header("Forge"), SerializeField] GameObject priceObject;
+    [SerializeField] Image colorImage;
+    [SerializeField] TMP_Text colorText;
 
     [HideInInspector] public Artifact artifact;
-    [HideInInspector] public Battle battle;
-    [HideInInspector] public int index,
+    [HideInInspector] public string colour;
+    [HideInInspector] public Battle battle = null;
+    [HideInInspector] public int index, price,
         cooldown = 0;
 
     Button button;
@@ -24,7 +28,16 @@ public class ArtifactButton : MonoBehaviour
     {
         headerText.text = artifact.type.name;
         image.sprite = artifact.type.sprite;
-        image.material = Master.colours[Battle.leftSide.colour].material;
+
+        if (battle)
+            colour = Battle.leftSide.colour;
+        else
+        {
+            Master.OpenMenu(priceObject, requirementText.gameObject);
+            colorImage.color = Master.colours[colour].physicalColour;
+            colorText.text = price.ToString();
+        }
+        image.material = Master.colours[colour].material;
 
         button = GetComponent<Button>();
         audioSource = GetComponent<AudioSource>();
@@ -34,9 +47,10 @@ public class ArtifactButton : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        button.interactable = artifact.uses > 0
-            && cooldown <= 0
-            && Battle.leftArtifactPoints >= artifact.type.valuePerUse;
+        if (battle)
+            button.interactable = artifact.uses > 0
+                && cooldown <= 0
+                && Battle.leftArtifactPoints >= artifact.type.valuePerUse;
 
         if (Battle.leftArtifactPoints < artifact.type.valuePerUse)
         {
@@ -52,30 +66,34 @@ public class ArtifactButton : MonoBehaviour
 
     public void HoverEnter()
     {
-        if (button.interactable)
+        if (battle && button.interactable)
             battle.ArtifactHoverEnter(artifact);
     }
     public void HoverExit()
     {
-        battle.ArtifactHoverExit();
+        if (battle)
+            battle.ArtifactHoverExit();
     }
 
     public void OnClick()
     {
-        battle.TriggerAbilities
-            (Cause.CauseType.Artifact, null,
-            Battle.leftArtifact, index);
-        Battle.leftArtifactPoints -= artifact.type.valuePerUse;
-        artifact.uses--;
-        cooldown = 3;
-        Master.OpenMenu(cooldownText.gameObject, infoObject);
-        cooldownText.text = artifact.uses <= 0
-            ? "BROKEN"
-            : cooldown.ToString();
-        HoverExit();
+        if (battle)
+        {
+            battle.TriggerAbilities
+                (Cause.CauseType.Artifact, null,
+                Battle.leftArtifact, index);
+            Battle.leftArtifactPoints -= artifact.type.valuePerUse;
+            artifact.uses--;
+            cooldown = 3;
+            Master.OpenMenu(cooldownText.gameObject, infoObject);
+            cooldownText.text = artifact.uses <= 0
+                ? "BROKEN"
+                : cooldown.ToString();
+            HoverExit();
 
-        audioSource.Play();
-        particles.Play();
+            audioSource.Play();
+            particles.Play();
+        }
     }
 
     public void Cooldown()
