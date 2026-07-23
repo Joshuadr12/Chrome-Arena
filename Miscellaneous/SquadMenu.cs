@@ -58,7 +58,7 @@ public class SquadMenu : MonoBehaviour
                     (unitsFound.Contains(unit)
                     && (index < enemyImages.Count))
                 {
-                    enemyImages[index].ChangeUnit(unit, "neutral");
+                    enemyImages[index].ChangeUnit(unit, "neutral", true);
                     enemyImages[index].gameObject.SetActive(true);
                     displaySprite = enemyImages[index]
                         .animator

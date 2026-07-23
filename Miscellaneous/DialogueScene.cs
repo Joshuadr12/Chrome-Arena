@@ -38,7 +38,7 @@ public class DialogueScene : MonoBehaviour
         actors[3].transform.position = Vector3.right * offscreenPos;
         foreach (Fighter actor in actors)
         {
-            actor.ChangeUnit(defaultUnit, "neutral");
+            actor.ChangeUnit(defaultUnit, "neutral", true);
             actor.NewPos(actor.transform.position);
             displaySprite = actor
                 .GetComponent<UnitDisplay>()

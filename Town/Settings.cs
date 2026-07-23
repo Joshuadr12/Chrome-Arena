@@ -1,8 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class Settings : MonoBehaviour
 {
@@ -31,7 +32,10 @@ public class Settings : MonoBehaviour
             squadsChosen.Add(allSquads[n]);
         Master.RenderSquadDropdowns(defaultSquads, squadsChosen);
 
-        unitOptions.UpdateUnitOptions("basic", canBeBig: false);
+        unitOptions.UpdateUnitOptions
+            ("basic",
+            canBeBig: false);
+        unitOptions.DisableUnit(Master.data.character);
     }
 
     //Update is called once per frame.
@@ -73,6 +77,15 @@ public class Settings : MonoBehaviour
 
     public void SelectCollection(int index)
     {
-        unitOptions.UpdateUnitOptions(unitOptions.collections[index], canBeBig: false);
+        unitOptions.UpdateUnitOptions
+            (unitOptions.collections[index],
+            canBeBig: false);
+        unitOptions.DisableUnit(Master.data.character);
+    }
+
+    public void SelectUnit(Unit unit)
+    {
+        Master.data.character = unit;
+        unitOptions.DisableUnit(Master.data.character);
     }
 }

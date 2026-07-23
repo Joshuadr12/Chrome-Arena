@@ -16,10 +16,12 @@ public class SquadCustomize : MonoBehaviour
 
     [SerializeField] List<Squad> squads;
     [SerializeField] List<GameObject> squadButtons;
+    [SerializeField] TMP_Text errorText;
+    [TextArea(1, 2), SerializeField] string notEnoughUnits, tooManyDuplicates;
+    [SerializeField] TMP_InputField nameInput;
     [SerializeField] List<LineupCustomize> lineupButtons;
     [SerializeField] UnitOptions unitOptions;
     [SerializeField] UnitDisplay dragAndDropUnit;
-    [SerializeField] TMP_InputField nameInput;
     [SerializeField] GameObject squadSelectUI, squadCustomizeUI;
     [SerializeField] DialogueScene dialoguePanel;
     [SerializeField] List<DialogueEvent> events;
@@ -156,18 +158,79 @@ public class SquadCustomize : MonoBehaviour
         StartCustomize();
     }
 
+    public int CheckValidity()
+    {
+        /// <summary>Returns an integer code based on the validity of the current squad setup.
+        /// 0: The squad setup is valid.
+        /// 1: There are less than three lines in use.
+        /// 2: Three or more lines are in use, but there is more than two of the same unit.</summary>
+
+        Dictionary<Unit, int> unitQuantity = new Dictionary<Unit, int>();
+        int activeLines = 0;
+        bool tooManyDuplicates = false;
+        Line line;
+        foreach (LineupCustomize l in lineupButtons)
+        {
+            line = l.GenerateLine();
+            if (line != null)
+            {
+                activeLines++;
+                foreach (Unit u in line.units)
+                {
+                    if (!unitQuantity.ContainsKey(u))
+                        unitQuantity[u] = 1;
+                    else
+                    {
+                        unitQuantity[u]++;
+                        if (unitQuantity[u] > 2)
+                            tooManyDuplicates = true;
+                    }
+                }
+            }
+        }
+
+        if (activeLines < 3)
+            return 1;
+        return tooManyDuplicates ? 2 : 0;
+    }
+
+    public void ThrowError(string message)
+    {
+        errorText.text = message;
+        CancelInvoke("ResetError");
+        Invoke("ResetError", 5);
+    }
+    public void ResetError()
+    {
+        errorText.text = "";
+    }
+
     public void SaveChanges()
     {
-        /// <summary>Save the changes to the squad being customized.</summary>
+        /// <summary>Check the validity of the squad being customized, and if it's valid, save the changes.</summary>
 
-        squadActive.units.Clear();
-        if (nameInput.text != "")
-            squadActive.squadName = nameInput.text;
-        foreach (LineupCustomize line in lineupButtons)
-            squadActive.units.Add(line.GenerateLine());
-        while (squadActive.units.Contains(null))
-            squadActive.units.Remove(null);
-        Master.Save();
+        switch (CheckValidity())
+        {
+            case 0:
+                squadActive.units.Clear();
+                if (nameInput.text != "")
+                    squadActive.squadName = nameInput.text;
+                foreach (LineupCustomize line in lineupButtons)
+                    squadActive.units.Add(line.GenerateLine());
+                while (squadActive.units.Contains(null))
+                    squadActive.units.Remove(null);
+                Master.Save();
+                EndCustomize();
+                break;
+            case 1:
+                ThrowError(notEnoughUnits);
+                break;
+            case 2:
+                ThrowError(tooManyDuplicates);
+                break;
+            default:
+                break;
+        }
     }
 
     public void EndCustomize()
@@ -175,6 +238,7 @@ public class SquadCustomize : MonoBehaviour
         ///<summary>End the customization process and return to the select squad menu.</summary>
 
         squadActive = null;
+        ResetError();
         Master.CloseMenu(squadCustomizeUI, squadSelectUI);
         UpdateSquadButtons();
     }

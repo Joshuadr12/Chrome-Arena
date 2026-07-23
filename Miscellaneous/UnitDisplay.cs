@@ -122,7 +122,8 @@ public class UnitDisplay : MonoBehaviour
         {
             float newX = Mathf.Sign(transform.localScale.x);
             Vector3 scale = new Vector3(newX, 1, 1);
-            scale *= unit.bodySize * offsetScale;
+            if (unit != null)
+                scale *= unit.bodySize * offsetScale;
             transform.localScale = scale;
         }
 

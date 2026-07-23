@@ -29,8 +29,9 @@ public class Battle : MonoBehaviour
     [SerializeField] GameObject paintParticle, shellParticle;
     [SerializeField] Fighter leftArtifactHolder, rightArtifactHolder;
     [Header("Audio")]
-    [SerializeField] AudioClip summonSound;
-    [SerializeField] AudioClip chargeSound, victorySound, failSound, drawSound;
+    [SerializeField] GameObject damageAudioBit;
+    [SerializeField] AudioClip summonSound,
+        chargeSound, victorySound, failSound, drawSound;
     [SerializeField, Tooltip("Sounds to play based on total damage dealt, in descending order")] AudioClip[] damageSounds;
     [SerializeField, Tooltip("The minimum damage for the corresponding sounds, in descending order")] int[] damageMinimums;
     [Header("Interface")]
@@ -60,7 +61,6 @@ public class Battle : MonoBehaviour
     float cameraShake = 0;
     [HideInInspector] public List<Lane> lanes = new List<Lane>();
     AudioSource source;
-    Trigger newTrigger;
     Vector3 cameraPos, randomShake;
     List<ArtifactButton> artifactButtons = new List<ArtifactButton>();
 
@@ -272,7 +272,11 @@ public class Battle : MonoBehaviour
         {
             if (cameraShake >= damageMinimums[n])
             {
-                source.PlayOneShot(damageSounds[n]);
+                AudioSource newSound = Instantiate(damageAudioBit)
+                    .GetComponent<AudioSource>();
+                newSound.clip = damageSounds[n];
+                newSound.volume = Master.data.sfxVolume;
+                newSound.Play();
                 return;
             }
         }

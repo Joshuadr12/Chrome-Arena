@@ -217,7 +217,7 @@ public class ResearchManager : MonoBehaviour
         else
         {
             UnitColour temp = results[unitDisplayed];
-            resultUnit.ChangeUnit(temp);
+            resultUnit.ChangeUnit(temp, true);
             resultHeader.text = temp.GetString();
             UnitHoverEnter(temp.unit);
 

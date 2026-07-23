@@ -11,7 +11,7 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
     [SerializeField] UnitDisplay unitDisplay;
     [Tooltip("If this button is part of a lineup panel, enter its index here."), SerializeField] int lineIndex;
 
-    UnitColour unit = new UnitColour(null, null);
+    [HideInInspector] public UnitColour unit = new UnitColour(null, null);
     bool isLeftClicking = false;
 
     public enum ButtonType
@@ -37,19 +37,19 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
         
     }
 
-    public void SetUnit(UnitColour unit)
+    public void SetUnit(UnitColour unit, bool canBeBig = true)
     {
         this.unit = unit;
         gameObject.SetActive(true);
-        unitDisplay.ChangeUnit(unit);
+        unitDisplay.ChangeUnit(unit, canBeBig);
         unitDisplay.gameObject.SetActive(unit.unit != null);
     }
-    public void SetUnit(Unit unit, string colour)
+    public void SetUnit(Unit unit, string colour, bool canBeBig = true)
     {
         this.unit.unit = unit;
         this.unit.colour = colour;
         gameObject.SetActive(true);
-        unitDisplay.ChangeUnit(unit, colour);
+        unitDisplay.ChangeUnit(unit, colour, canBeBig);
         unitDisplay.gameObject.SetActive(unit != null);
     }
     public void Disable()
@@ -63,7 +63,8 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
             switch (buttonType)
             {
                 case ButtonType.DisplayCharacter:
-                    Master.data.character = unit.unit;
+                    manager.GetComponent<Settings>()
+                        .SelectUnit(unit.unit);
                     break;
                 case ButtonType.ResearchOption:
                     manager.GetComponent<ResearchManager>()

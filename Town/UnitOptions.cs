@@ -50,7 +50,7 @@ public class UnitOptions : MonoBehaviour
             if (buttonIndex < unitOptionButtons.Count
                 && (u.bodySize <= 1 || canBeBig))
             {
-                unitOptionButtons[buttonIndex].SetUnit(u, colour);
+                unitOptionButtons[buttonIndex].SetUnit(u, colour, canBeBig);
                 buttonIndex++;
             }
         }
@@ -59,5 +59,12 @@ public class UnitOptions : MonoBehaviour
             unitOptionButtons[buttonIndex].Disable();
             buttonIndex++;
         }
+    }
+
+    public void DisableUnit(Unit unit)
+    {
+        foreach (CharacterButton button in unitOptionButtons)
+            button.GetComponent<Button>().interactable
+                = button.unit.unit != unit;
     }
 }
