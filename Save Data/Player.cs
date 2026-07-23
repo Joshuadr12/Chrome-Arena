@@ -35,10 +35,32 @@ public class Player : ScriptableObject
 
     public void NextWeek()
     {
-        Master.data.week++;
+        week++;
+        artifactsPurchased = 0;
+
+        // Reset paint resources.
         resources.Clear();
         foreach (ResourceQuantity gain in income)
             resources.Add(new ResourceQuantity(gain.colour, gain.quantity));
+
+        // Restock the Forge.
+        if (events.Contains("first_purchase"))
+        {
+            foreach (ArtifactList list in forgeSales)
+                list.artifacts.Clear();
+            ArtifactType artifactType;
+            Artifact artifact;
+            for (int a = 0; a < 3; a++)
+            {
+                artifactType = Master.artifacts
+                    [UnityEngine.Random.Range(0, Master.artifacts.Count)];
+                artifact = new Artifact
+                    (artifactType,
+                    Mathf.RoundToInt(50 / artifactType.valuePerUse));
+                forgeSales[UnityEngine.Random.Range(0, forgeSales.Count)]
+                    .artifacts.Add(artifact);
+            }
+        }
     }
 
     public int TimesUpgraded(Upgrade upgrade)

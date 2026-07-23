@@ -6,14 +6,17 @@ using UnityEngine.UI;
 
 public class ForgeManager : MonoBehaviour
 {
+    public static ArtifactButton artifactActive = null;
+
     [SerializeField] ScrollPanel artifactPanel;
+    [SerializeField] GameObject limitText;
     [SerializeField] List<ResourceDisplay> resources;
+    [SerializeField] GameObject artifactDesc;
+    [SerializeField] TMP_Text artifactText, keywordText;
     [SerializeField] Button purchaseButton;
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip purchaseSound;
 
-    List<ArtifactButton> buttons = new List<ArtifactButton>();
-    Artifact artifactActive;
     string colour;
     int price;
 
@@ -43,6 +46,7 @@ public class ForgeManager : MonoBehaviour
         // Display the resources the player has.
         foreach (ResourceDisplay display in resources)
         {
+            display.text.color = Color.black;
             foreach (Player.ResourceQuantity quantity in Master.data.resources)
             {
                 if (quantity.colour == display.colour)
@@ -54,58 +58,122 @@ public class ForgeManager : MonoBehaviour
         }
 
         // Create the artifact buttons.
+        artifactActive = null;
+        ArtifactHoverExit();
         int artifactCount = 0;
         foreach (ArtifactList list in Master.data.forgeSales)
             artifactCount += list.artifacts.Count;
 
-        List<GameObject> objects = artifactPanel.Populate(artifactCount);
-        int index = 0;
-        ArtifactButton newButton;
-        foreach (ArtifactList list in Master.data.forgeSales)
+        if (artifactCount > 0
+            && Master.data.artifactsPurchased
+            < Master.data.TimesUpgraded("productivity") + 1)
         {
-            foreach (Artifact artifact in list.artifacts)
+            Master.OpenMenu(artifactPanel.gameObject, limitText);
+            List<GameObject> objects = artifactPanel.Populate(artifactCount);
+            int index = 0;
+            ArtifactButton newButton;
+            foreach (ArtifactList list in Master.data.forgeSales)
             {
-                newButton = objects[index].GetComponent<ArtifactButton>();
-                newButton.artifact = artifact;
-                newButton.colour = list.colour;
-                newButton.price = Mathf.RoundToInt(artifact.uses * artifact.type.valuePerUse / 4f) * 5;
-                index++;
+                foreach (Artifact artifact in list.artifacts)
+                {
+                    newButton = objects[index].GetComponent<ArtifactButton>();
+                    newButton.artifact = artifact;
+                    newButton.colour = list.colour;
+                    newButton.price = Master.data.events.Contains("first_purchase")
+                        ? Mathf.RoundToInt(artifact.uses * artifact.type.valuePerUse / 4f) * 5
+                        : 0;
+                    index++;
+                }
             }
         }
+        else
+            Master.CloseMenu(artifactPanel.gameObject, limitText);
 
         purchaseButton.interactable = false;
     }
 
-    public void SelectUpgrade(Upgrade upgrade)
+    public void ArtifactHoverEnter(ArtifactButton artifact)
     {
-/*        // Make the select upgrade button uninteractable.
-        upgradeActive = upgrade;
-        foreach (UpgradeButton button in buttons)
-            button.GetComponent<Button>().interactable
-                = button.upgrade != upgrade;*/
+        artifactDesc.SetActive(true);
+        artifactText.text = artifact.GetDescription();
+        keywordText.text = artifact.artifact.type.KeywordDescription();
+    }
+    public void ArtifactHoverExit()
+    {
+        artifactDesc.SetActive(false);
     }
 
-    public void MakeUpgrade()
+    public void SelectArtifact(ArtifactButton artifact)
     {
-/*        // Make the changes in the data.
+        // Toggle interactability.
+        artifactActive = artifact;
+        foreach (ArtifactButton button
+            in FindObjectsByType<ArtifactButton>(FindObjectsSortMode.None))
+            button.GetComponent<Button>().interactable
+                = button != artifact;
+
+        // Update the resource panel to reflect the price.
+        purchaseButton.interactable = true;
+        foreach (ResourceDisplay display in resources)
+        {
+            foreach (Player.ResourceQuantity quantity in Master.data.resources)
+                if (quantity.colour == display.colour)
+                    display.quantity = quantity.quantity;
+
+            if (display.colour == artifact.colour)
+            {
+                display.quantity -= artifact.price;
+                display.text.color = new Color(0.5f, 0, 0);
+                if (display.quantity < 0)
+                    purchaseButton.interactable = false;
+            }
+            else
+                display.text.color = Color.black;
+            display.text.text = display.quantity.ToString();
+        }
+    }
+
+    public void MakePurchase()
+    {
         audioSource.PlayOneShot(purchaseSound);
-        Master.data.upgradePoints -= layerActive.upgradeCost;
-        Master.data.MakeUpgrade(upgradeActive);
+        Master.data.AddResource(artifactActive.colour, -artifactActive.price);
+
+        // Add the artifact.
+        bool colourFound = false;
+        foreach (ArtifactList list in Master.data.artifacts)
+        {
+            if (list.colour == artifactActive.colour)
+            {
+                list.artifacts.Add(artifactActive.artifact);
+                colourFound = true;
+            }
+        }
+        if (!colourFound)
+        {
+            ArtifactList newList = new ArtifactList
+                (artifactActive.colour, new List<Artifact>());
+            newList.artifacts.Add(artifactActive.artifact);
+            Master.data.artifacts.Add(newList);
+        }
+
+        // Remove the artifact from the store.
+        foreach (ArtifactList list in Master.data.forgeSales)
+            if (list.colour == artifactActive.colour)
+                list.artifacts.Remove(artifactActive.artifact);
+
+        Master.data.artifactsPurchased++;
+        if (artifactActive.price <= 0)
+            Master.data.events.Add("first_purchase");
         Master.Save();
 
-        // Close the upgrade panel or show the new building.
-        if (upgradeActive.isBuilding)
-        {
-            FindFirstObjectByType<Town>()
-                .RenderResources(upgradeActive.upgradeId);
-            CloseMenu();
-        }
-        else
-            RefreshMenu();*/
+        FindFirstObjectByType<Town>().RenderResources();
+        RefreshMenu();
     }
 
     public void CloseMenu()
     {
+        artifactActive = null;
+        ArtifactHoverExit();
         gameObject.SetActive(false);
         Town.menuLayer--;
     }

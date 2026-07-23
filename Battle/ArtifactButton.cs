@@ -1,4 +1,5 @@
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -66,13 +67,26 @@ public class ArtifactButton : MonoBehaviour
 
     public void HoverEnter()
     {
-        if (battle && button.interactable)
-            battle.ArtifactHoverEnter(artifact);
+        if (button.interactable)
+        {
+            if (battle)
+                battle.ArtifactHoverEnter(artifact);
+            else
+                FindFirstObjectByType<ForgeManager>()
+                    .ArtifactHoverEnter(this);
+        }
+
     }
     public void HoverExit()
     {
         if (battle)
             battle.ArtifactHoverExit();
+        else if (ForgeManager.artifactActive != null)
+            FindFirstObjectByType<ForgeManager>()
+                .ArtifactHoverEnter(ForgeManager.artifactActive);
+        else
+            FindFirstObjectByType<ForgeManager>()
+                .ArtifactHoverExit();
     }
 
     public void OnClick()
@@ -94,6 +108,21 @@ public class ArtifactButton : MonoBehaviour
             audioSource.Play();
             particles.Play();
         }
+        else
+            FindFirstObjectByType<ForgeManager>()
+                .SelectArtifact(this);
+    }
+
+    public string GetDescription()
+    {
+        string result = $"{colour.FirstCharacterToUpper()} {artifact.type.name}, costs ${price}";
+        if (Master.data.events.Contains("first_purchase"))
+            result += $", {artifact.type.valuePerUse}A per use";
+        result += $", {artifact.uses} use";
+        if (artifact.uses != 1)
+            result += "s";
+        result += $"\n{artifact.type.GetDescription(false)}";
+        return result;
     }
 
     public void Cooldown()

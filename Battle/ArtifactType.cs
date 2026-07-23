@@ -26,6 +26,17 @@ public class ArtifactType : ScriptableObject
         result += ability.description;
         return result;
     }
+
+    public string KeywordDescription()
+    {
+        string result = "";
+        foreach (Keyword keyword in Master.keywords)
+            if (keywords.Contains(keyword.name))
+                result += $"{keyword.description}\n";
+        foreach (Unit unit in keywordUnits)
+            result += $"{unit.KeywordDescription()}\n";
+        return result.Trim();
+    }
 }
 
 [Serializable]
