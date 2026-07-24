@@ -72,7 +72,7 @@ public class ResearchManager : MonoBehaviour
 
             if (dragAndDropUnit.unit != SquadCustomize.selectedUnit
                 || dragAndDropUnit.colour != Master.colours[Master.colourActive])
-                dragAndDropUnit.ChangeUnit(SquadCustomize.selectedUnit, Master.colourActive);
+                dragAndDropUnit.ChangeUnit(SquadCustomize.selectedUnit, Master.colourActive, true);
         }
 
         // Update whether or not research can be done.

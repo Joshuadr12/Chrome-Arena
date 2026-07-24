@@ -69,7 +69,7 @@ public class SquadCustomize : MonoBehaviour
 
             if (dragAndDropUnit.unit != selectedUnit
                 || dragAndDropUnit.colour != Master.colours[squadActive.colour])
-                dragAndDropUnit.ChangeUnit(selectedUnit, squadActive.colour);
+                dragAndDropUnit.ChangeUnit(selectedUnit, squadActive.colour, true);
         }
 
         UpdateSquadButtons();

@@ -62,6 +62,7 @@ public class UpgradeManager : MonoBehaviour
                         upgrades.Add(upgrade);
 
         // Update the upgrade panel.
+        buttons.Clear();
         List<GameObject> newButtons = scrollPanel.Populate(upgrades.Count);
         UpgradeButton newButton;
         for (int i = 0; i < newButtons.Count; i++)
