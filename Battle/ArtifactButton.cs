@@ -20,8 +20,8 @@ public class ArtifactButton : MonoBehaviour
     [HideInInspector] public Battle battle = null;
     [HideInInspector] public int index, price,
         cooldown = 0;
+    [HideInInspector] public Button button;
 
-    Button button;
     AudioSource audioSource;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -41,6 +41,8 @@ public class ArtifactButton : MonoBehaviour
         image.material = Master.colours[colour].material;
 
         button = GetComponent<Button>();
+        button.interactable = Master.data.ArtifactsOwned(colour)
+            <= Master.data.TimesUpgraded("backpack");
         audioSource = GetComponent<AudioSource>();
         audioSource.volume = Master.data.sfxVolume;
     }
@@ -67,15 +69,16 @@ public class ArtifactButton : MonoBehaviour
 
     public void HoverEnter()
     {
-        if (button.interactable)
+        if (battle)
         {
-            if (battle)
+            if (button.interactable)
                 battle.ArtifactHoverEnter(artifact);
-            else
-                FindFirstObjectByType<ForgeManager>()
-                    .ArtifactHoverEnter(this);
         }
-
+        else
+        {
+            FindFirstObjectByType<ForgeManager>()
+                .ArtifactHoverEnter(this);
+        }
     }
     public void HoverExit()
     {

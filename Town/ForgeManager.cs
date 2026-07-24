@@ -13,6 +13,7 @@ public class ForgeManager : MonoBehaviour
     [SerializeField] List<ResourceDisplay> resources;
     [SerializeField] GameObject artifactDesc;
     [SerializeField] TMP_Text artifactText, keywordText;
+    [TextArea(1, 2), SerializeField] string tooManySameColor;
     [SerializeField] Button purchaseButton;
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip purchaseSound;
@@ -95,8 +96,17 @@ public class ForgeManager : MonoBehaviour
     public void ArtifactHoverEnter(ArtifactButton artifact)
     {
         artifactDesc.SetActive(true);
-        artifactText.text = artifact.GetDescription();
-        keywordText.text = artifact.artifact.type.KeywordDescription();
+        if (artifact.button.interactable
+            || artifactActive == artifact)
+        {
+            artifactText.text = artifact.GetDescription();
+            keywordText.text = artifact.artifact.type.KeywordDescription();
+        }
+        else
+        {
+            artifactText.text = tooManySameColor;
+            keywordText.text = "";
+        }
     }
     public void ArtifactHoverExit()
     {
@@ -109,8 +119,9 @@ public class ForgeManager : MonoBehaviour
         artifactActive = artifact;
         foreach (ArtifactButton button
             in FindObjectsByType<ArtifactButton>(FindObjectsSortMode.None))
-            button.GetComponent<Button>().interactable
-                = button != artifact;
+            button.button.interactable = button != artifact
+                && Master.data.ArtifactsOwned(button.colour)
+                <= Master.data.TimesUpgraded("backpack");
 
         // Update the resource panel to reflect the price.
         purchaseButton.interactable = true;
