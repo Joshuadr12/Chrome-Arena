@@ -75,10 +75,14 @@ public class SquadMenu : MonoBehaviour
 
         // Display the enemy artifacts.
         artifactsFound.Clear();
-        foreach (ArtifactList list in Master.battleSelected.artifacts)
-            foreach (Artifact artifact in list.artifacts)
-                if (!artifactsFound.Contains(artifact.type))
-                    artifactsFound.Add(artifact.type);
+        foreach (Squad squad in Master.battleSelected.mustHaves)
+            foreach (ArtifactType artifact in squad.artifacts)
+                if (!artifactsFound.Contains(artifact))
+                    artifactsFound.Add(artifact);
+        foreach (Squad squad in Master.battleSelected.extraSquads)
+            foreach (ArtifactType artifact in squad.artifacts)
+                if (!artifactsFound.Contains(artifact))
+                    artifactsFound.Add(artifact);
 
         index = 0;
         foreach (ArtifactType artifact in Master.artifacts)

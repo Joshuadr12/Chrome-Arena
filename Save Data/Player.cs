@@ -101,14 +101,6 @@ public class Player : ScriptableObject
         upgrades.Add(new UpgradeQuantity(upgrade.upgradeId, 1));
     }
 
-    public int ArtifactsOwned(string colour)
-    {
-        foreach (ArtifactList list in artifacts)
-            if (list.colour == colour)
-                return list.artifacts.Count;
-        return 0;
-    }
-
     public bool NewUnitColour(UnitColour unit)
     {
         foreach (UnitColours u in units)

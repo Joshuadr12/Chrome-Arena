@@ -18,7 +18,7 @@ public class Battle : MonoBehaviour
     public static List<Trigger> activeTriggers, pendingTriggers, turnTriggers;
     public static Squad leftSide, rightSide;
     public static Fighter leftArtifact, rightArtifact;
-    public static int leftArtifactPoints;
+    public static int leftArtifactPoints, rightArtifactPoints;
     public static int bountyAbilities = 0, bountiesGone = 0;
 
     // Serialized variables for the editor.
@@ -63,6 +63,7 @@ public class Battle : MonoBehaviour
     AudioSource source;
     Vector3 cameraPos, randomShake;
     List<ArtifactButton> artifactButtons = new List<ArtifactButton>();
+    List<int> enemyCooldowns = new List<int>();
 
     //Start is called before the first frame update.
     void Start()
@@ -123,11 +124,28 @@ public class Battle : MonoBehaviour
             artifactButtons.Add(newObject.GetComponent<ArtifactButton>());
         for (int a = 0; a < artifacts.Count;  a++)
         {
+            artifactButtons[a].type = ArtifactButton.ButtonType.Battle;
             artifactButtons[a].artifact = artifacts[a];
-            artifactButtons[a].battle = this;
+            artifactButtons[a].manager = gameObject;
             artifactButtons[a].index = a;
             leftArtifact.AddAbility(artifacts[a].type.ability);
             leftArtifactPointText.gameObject.SetActive(true);
+        }
+
+        // Enemy artifacts
+        rightArtifactPoints = 10;
+        for (int a = 0; a < rightSide.artifacts.Count; a++)
+        {
+            enemyCooldowns.Add(0);
+            rightArtifact.AddAbility(rightSide.artifacts[a].ability);
+            if (rightSide.artifacts[a].valuePerUse
+                <= rightArtifactPoints)
+            {
+                TriggerAbilities
+                    (Cause.CauseType.Artifact, null, rightArtifact, a);
+                rightArtifactPoints -= rightSide.artifacts[a].valuePerUse;
+                enemyCooldowns[a] = 3;
+            }
         }
 
         Particle.paintDepth = 0;
@@ -1148,6 +1166,21 @@ public class Battle : MonoBehaviour
         leftArtifactPoints++;
         foreach (ArtifactButton button in artifactButtons)
             button.Cooldown();
+
+        rightArtifactPoints++;
+        for (int a = 0; a < enemyCooldowns.Count; a++)
+        {
+            enemyCooldowns[a]--;
+            if (enemyCooldowns[a] <= 0
+                && rightSide.artifacts[a].valuePerUse
+                <= rightArtifactPoints)
+            {
+                TriggerAbilities
+                    (Cause.CauseType.Artifact, null, rightArtifact, a);
+                rightArtifactPoints -= rightSide.artifacts[a].valuePerUse;
+                enemyCooldowns[a] = 3;
+            }
+        }
 
         // Reset fighters' hasCombo values.
         foreach (Fighter f in AllFighters())

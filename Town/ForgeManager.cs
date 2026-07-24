@@ -78,11 +78,17 @@ public class ForgeManager : MonoBehaviour
                 foreach (Artifact artifact in list.artifacts)
                 {
                     newButton = objects[index].GetComponent<ArtifactButton>();
+                    newButton.type = ArtifactButton.ButtonType.Forge;
+                    newButton.manager = gameObject;
                     newButton.artifact = artifact;
                     newButton.colour = list.colour;
                     newButton.price = Master.data.events.Contains("first_purchase")
                         ? Mathf.RoundToInt(artifact.uses * artifact.type.valuePerUse / 4f) * 5
                         : 0;
+                    newButton.button = newButton.GetComponent<Button>();
+                    newButton.button.interactable
+                        = Master.GetArtifacts(newButton.colour).Count
+                        <= Master.data.TimesUpgraded("backpack");
                     index++;
                 }
             }
@@ -120,7 +126,7 @@ public class ForgeManager : MonoBehaviour
         foreach (ArtifactButton button
             in FindObjectsByType<ArtifactButton>(FindObjectsSortMode.None))
             button.button.interactable = button != artifact
-                && Master.data.ArtifactsOwned(button.colour)
+                && Master.GetArtifacts(button.colour).Count
                 <= Master.data.TimesUpgraded("backpack");
 
         // Update the resource panel to reflect the price.

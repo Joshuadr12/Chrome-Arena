@@ -15,6 +15,7 @@ public class Squad : ScriptableObject
     public string colour;
     public bool isBoss;
     public List<Line> units;
+    public List<ArtifactType> artifacts;
 
     // Miscellaneous variables.
     [HideInInspector] public int startMoney, paint = 0;

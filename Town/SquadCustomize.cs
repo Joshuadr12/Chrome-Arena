@@ -19,6 +19,9 @@ public class SquadCustomize : MonoBehaviour
     [SerializeField] TMP_Text errorText;
     [TextArea(1, 2), SerializeField] string notEnoughUnits, tooManyDuplicates;
     [SerializeField] TMP_InputField nameInput;
+    [SerializeField] TMP_Text artifactsText;
+    [SerializeField] GameObject unitsMenu;
+    [SerializeField] ScrollPanel artifactsPanel;
     [SerializeField] List<LineupCustomize> lineupButtons;
     [SerializeField] UnitOptions unitOptions;
     [SerializeField] UnitDisplay dragAndDropUnit;
@@ -87,17 +90,10 @@ public class SquadCustomize : MonoBehaviour
         foreach (Unit u in unit.keywordUnits)
             unitKeywords += u.KeywordDescription() + "\n";
     }
-    public static void UpdateArtifactDescriptions(ArtifactType artifact)
+    public static void UpdateArtifactDescriptions(ArtifactButton artifact)
     {
         unitDescription = artifact.GetDescription();
-
-        // Keyword description.
-        unitKeywords = "";
-        foreach (Keyword keyword in Master.keywords)
-            if (artifact.keywords.Contains(keyword.name))
-                unitKeywords += keyword.description + "\n";
-        foreach (Unit u in artifact.keywordUnits)
-            unitKeywords += u.KeywordDescription() + "\n";
+        unitKeywords = artifact.artifact.type.KeywordDescription();
     }
 
     public void Drag(Unit unit)
@@ -140,6 +136,28 @@ public class SquadCustomize : MonoBehaviour
         squadCustomizeUI.SetActive(true);
         nameInput.text = squadActive.squadName;
 
+        // Artifacts
+        Master.CloseMenu(artifactsPanel.gameObject, unitsMenu);
+        List<Artifact> artifacts
+            = Master.GetArtifacts(squadActive.colour);
+        artifactsText.transform.parent.gameObject.SetActive
+            (artifacts.Count > 0);
+        if (artifacts.Count > 0)
+        {
+            artifactsText.text = "View Artifacts";
+            List<GameObject> artifactButtons
+                = artifactsPanel.Populate(artifacts.Count);
+            ArtifactButton newButton;
+            for (int a = 0; a < artifacts.Count; a++)
+            {
+                newButton = artifactButtons[a].GetComponent<ArtifactButton>();
+                newButton.type = ArtifactButton.ButtonType.SquadCustomize;
+                newButton.manager = gameObject;
+                newButton.artifact = artifacts[a];
+                newButton.colour = squadActive.colour;
+            }
+        }
+
         // Line panels
         for (int u = 0; u < lineupButtons.Count; u++)
             lineupButtons[u].LoadLine
@@ -156,6 +174,20 @@ public class SquadCustomize : MonoBehaviour
         squadActive = squads[squadIndex];
         squadSelectUI.SetActive(false);
         StartCustomize();
+    }
+
+    public void ToggleArtifacts()
+    {
+        if (unitsMenu.activeSelf)
+        {
+            Master.OpenMenu(artifactsPanel.gameObject, unitsMenu);
+            artifactsText.text = "View Units";
+        }
+        else
+        {
+            Master.CloseMenu(artifactsPanel.gameObject, unitsMenu);
+            artifactsText.text = "View Artifacts";
+        }
     }
 
     public int CheckValidity()
@@ -254,7 +286,7 @@ public class SquadCustomize : MonoBehaviour
     {
         UpdateUnitDescriptions(unit);
     }
-    public void UnitHoverEnter(ArtifactType artifact)
+    public void UnitHoverEnter(ArtifactButton artifact)
     {
         UpdateArtifactDescriptions(artifact);
     }
