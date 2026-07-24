@@ -73,7 +73,7 @@ public class BattleSelect : MonoBehaviour
         Master.battleSelected = battle;
 
         // When the battle is a tutorial.
-        if (Master.FinishedTutorial())
+        if (Master.FinishedTutorial("basic_3"))
         {
             Master.OpenMenu(squadMenu, buttons);
             squadMenu.GetComponent<SquadMenu>().SetupMenu();

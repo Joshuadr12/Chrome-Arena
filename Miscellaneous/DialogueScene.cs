@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class DialogueScene : MonoBehaviour
 {
     public static bool isDone = true;
-    public const float offscreenPos = 13;
+    public const float offscreenPos = 15;
 
     [SerializeField] Image panel;
     [SerializeField] List<Fighter> actors;

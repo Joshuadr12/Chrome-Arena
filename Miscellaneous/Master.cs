@@ -697,7 +697,8 @@ public class RequirementSet
             BattleSelected,
             Upgrade,
             Level,
-            Rank
+            Rank,
+            Artifacts
         }
 
         public RequireType type;
@@ -750,6 +751,8 @@ public class RequirementSet
                     return Master.data.level >= scoreNeeded;
                 case RequireType.Rank:
                     return Master.data.TimesUpgraded("rank") >= scoreNeeded;
+                case RequireType.Artifacts:
+                    return Master.GetArtifacts().Count >= scoreNeeded;
                 default:
                     Debug.LogWarning($"Unknown requirement type: {type}");
                     return false;

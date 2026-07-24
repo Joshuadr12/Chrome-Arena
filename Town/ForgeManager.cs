@@ -17,6 +17,7 @@ public class ForgeManager : MonoBehaviour
     [SerializeField] Button purchaseButton;
     [SerializeField] AudioSource audioSource;
     [SerializeField] AudioClip purchaseSound;
+    [SerializeField] List<DialogueEvent> openEvents;
 
     string colour;
     int price;
@@ -40,6 +41,8 @@ public class ForgeManager : MonoBehaviour
         gameObject.SetActive(true);
         Town.menuLayer++;
         RefreshMenu();
+        StartCoroutine(FindFirstObjectByType<DialogueScene>()
+            .ExecuteScenes(openEvents));
     }
 
     public void RefreshMenu()
