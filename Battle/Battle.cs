@@ -420,15 +420,17 @@ public class Battle : MonoBehaviour
     public void DealDamage
         (Fighter source,
         Fighter target,
-        int damage)
+        int damage,
+        bool tooFast = false)
     {
         /// <summary>Deal damage from one fighter to another based on their stats.</summary>
         /// <param name="source">The fighter dealing damage.</param>
         /// <param name="target">The righter receiving the damage.</param>
         /// <param name="damage">The amount of damage to deal.</param>
+        /// <param name="tooFast">Whether or not the target is Fast and already killed the source.</param>
 
         bool isCritical = false;
-        int multi = 1;
+        int multi = tooFast ? 0 : 1;
 
         // Check for critical hits.
         float advantage = source.colour.Advantage(target.colour);
@@ -442,15 +444,18 @@ public class Battle : MonoBehaviour
         }
 
         // Check for Agile.
-        for (int n = multi; n > 0; n--)
+        if (!source.antiAgile)
         {
-            if (!source.antiAgile
-                && UnityEngine.Random.value * (target.agile + 1) > 1)
+            for (int n = multi; n > 0; n--)
             {
-                CreateBuffMarker(target, "DODGED");
-                multi--;
+                if (UnityEngine.Random.value * (target.agile + 1) > 1)
+                {
+                    CreateBuffMarker(target, "DODGED");
+                    multi--;
+                }
             }
         }
+
 
         // Check for Block.
         if (!source.antiBlock)
@@ -490,6 +495,8 @@ public class Battle : MonoBehaviour
         {
 
             target.health -= damage;
+
+            // Check for Persist.
             if (target.health <= 0 && target.persist > 0)
             {
                 if (UnityEngine.Random.value <= 0.5f)
@@ -536,6 +543,8 @@ public class Battle : MonoBehaviour
         }
         else if (deflect)
             CreateBuffMarker(target, "DEFLECTED");
+        else if (tooFast)
+            CreateBuffMarker(target, "FAST");
     }
 
     public void Fight(Fighter left, Fighter right)
@@ -554,14 +563,9 @@ public class Battle : MonoBehaviour
         if (left.isAttacking)
             DealDamage(left, right, left.attack);
 
-        // Check for Fast.
-        if (!left.fast || right.fast || (right.health > 0))
-        {
-            if (right.isAttacking)
-                DealDamage(right, left, right.attack);
-        }
-        else if (right.isAttacking)
-                CreateBuffMarker(left, "FAST");
+        if (right.isAttacking)
+            DealDamage(right, left, right.attack,
+                left.fast && !right.fast && right.health <= 0);
     }
 
     public class Lane

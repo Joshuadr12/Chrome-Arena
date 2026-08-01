@@ -29,6 +29,7 @@ public class MainMenu : MonoBehaviour
     Unit randomUnit;
     List<string> colours;
     string randomColour;
+    Vector2 cameraMin, cameraMax;
     Vector3 fighterPos;
     GameObject fighter;
     Transform displayTrans;
@@ -38,6 +39,12 @@ public class MainMenu : MonoBehaviour
     // Start is called before the first frame update.
     void Start()
     {
+        // Set camera boundaries.
+        cameraMin = Camera.main.ScreenToWorldPoint(Vector2.zero);
+        cameraMax = Camera.main.ScreenToWorldPoint(new Vector2(
+            Camera.main.pixelWidth,
+            Camera.main.pixelHeight));
+
         // Load the save files.
         foreach (string save in saveFiles)
             saves.Add(save, SaveData.Load(save));
@@ -66,7 +73,7 @@ public class MainMenu : MonoBehaviour
                 * Time.deltaTime);
 
             // Destroy the fighters when they are off-screen.
-            if (displayTrans.position.x >= 10)
+            if (displayTrans.position.x >= cameraMax.x + 1)
             {
                 // Not detaching the child causes the game to crash.
                 transform.GetChild(f).parent = null;
@@ -118,7 +125,8 @@ public class MainMenu : MonoBehaviour
         || !Master.colours.ContainsKey(randomColour));
 
         // Instantiate the fighter.
-        fighterPos = new Vector3(-10, Random.value * 12 - 6);
+        fighterPos = new Vector3(cameraMin.x - 1,
+            Random.Range(cameraMin.y - 1, cameraMax.y + 1));
         fighter = Instantiate
             (backgroundFighter,
             fighterPos,
