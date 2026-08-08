@@ -5,10 +5,10 @@ using UnityEngine.UI;
 using UnityEngine.Rendering;
 using TMPro;
 
-public class SquadMenu : MonoBehaviour
+public class BattlePrep : MonoBehaviour
 {
     /// <summary>
-    /// Manages the squad menu when choosing squads for a battle.
+    /// Manages the battle prep menu when choosing squads for a battle.
     /// </summary>
 
     // Serialized variables for the editor.
@@ -34,7 +34,7 @@ public class SquadMenu : MonoBehaviour
 
     public void SetupMenu()
     {
-        /// <summary>Generate the squad menu in accordance with the selected level.</summary>
+        /// <summary>Generate the battle prep menu in accordance with the selected level.</summary>
 
         // Configure the squad dropdowns.
         allSquads.Clear();

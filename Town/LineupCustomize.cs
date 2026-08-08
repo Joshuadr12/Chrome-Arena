@@ -37,7 +37,7 @@ public class LineupCustomize : MonoBehaviour
     public void SetColourAll()
     {
         foreach (UnitColour u in units)
-            u.colour = SquadCustomize.squadActive.colour;
+            u.colour = Master.colourActive;
         RenderUnits();
     }
 

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -113,6 +112,7 @@ public class ResearchManager : MonoBehaviour
     {
         Master.colourActive = colour;
         unitOptions.UpdateUnitOptions("basic", colour);
+        lineupPanel.SetColourAll();
     }
 
     public void SelectUnit(Unit unit)

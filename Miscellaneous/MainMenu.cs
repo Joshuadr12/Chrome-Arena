@@ -156,7 +156,10 @@ public class MainMenu : MonoBehaviour
             if (unit == null)
                 unit = Master.newData.character;
             saveCharacters[n].ChangeUnit(unit, "neutral");
-            displaySprite = saveCharacters[n].animator.GetComponent<SortingGroup>();
+            saveCharacters[n].gameObject.SetActive
+                (save.events.Contains("intro"));
+            displaySprite = saveCharacters[n].animator
+                .GetComponent<SortingGroup>();
             displaySprite.sortingOrder = 10001;
             deleteButtons[n].interactable = save.events.Contains("intro");
 

@@ -13,7 +13,7 @@ public class BattleSelect : MonoBehaviour
     /// </summary>
 
     [SerializeField] List<GameObject> buttons;
-    [SerializeField] GameObject squadMenu;
+    [SerializeField, FormerlySerializedAs("squadMenu")] GameObject battlePrepMenu;
     [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
     [SerializeField] List<Image> resourceDisplay;
 
@@ -75,8 +75,8 @@ public class BattleSelect : MonoBehaviour
         // When the battle is a tutorial.
         if (Master.FinishedTutorial("basic_3"))
         {
-            Master.OpenMenu(squadMenu, buttons);
-            squadMenu.GetComponent<SquadMenu>().SetupMenu();
+            Master.OpenMenu(battlePrepMenu, buttons);
+            battlePrepMenu.GetComponent<BattlePrep>().SetupMenu();
         }
         else
         {
@@ -96,7 +96,7 @@ public class BattleSelect : MonoBehaviour
         /// <summary>Close the setup menu and return to battle selection.</summary>
 
         Master.battleSelected = null;
-        Master.CloseMenu(squadMenu, buttons);
+        Master.CloseMenu(battlePrepMenu, buttons);
     }
 
     public void BackToTown()
