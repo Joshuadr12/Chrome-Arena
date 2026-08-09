@@ -7,9 +7,13 @@ public class UnitOptions : MonoBehaviour
 {
     public List<string> collections;
     public List<TMP_Text> collectionLabels;
-    public List<CharacterButton> unitOptionButtons;
+    public ScrollPanel unitOptionPanel;
+    public CharacterButton.ButtonType buttonType;
+    public GameObject manager;
+    public List<CharacterButton> unitOptionButtons = new List<CharacterButton>();
 
     [HideInInspector] public List<Unit> unitOptions = new List<Unit>();
+    List<GameObject> unitObjects;
 
     public Unit GetUnit(int index)
     {
@@ -23,6 +27,7 @@ public class UnitOptions : MonoBehaviour
     {
         /// <summary>Update the unit collection tabs and unit option buttons for the given collection and colour.</summary>
 
+        // Collections.
         int buttonIndex = 0;
         foreach (string co in collections)
             if (buttonIndex < collectionLabels.Count)
@@ -43,21 +48,21 @@ public class UnitOptions : MonoBehaviour
         }
 
         // Unit options.
-        unitOptions = Master.GetUnits(collection, colour);
-        buttonIndex = 0;
-        foreach (Unit u in unitOptions)
+        unitOptions.Clear();
+        unitOptionButtons.Clear();
+        foreach (Unit u in Master.GetUnits(collection, colour))
+            if (canBeBig || u.bodySize <= 1)
+                unitOptions.Add(u);
+
+        unitObjects = unitOptionPanel.Populate(unitOptions.Count);
+        CharacterButton button;
+        for (int u = 0; u < unitOptions.Count; u++)
         {
-            if (buttonIndex < unitOptionButtons.Count
-                && (u.bodySize <= 1 || canBeBig))
-            {
-                unitOptionButtons[buttonIndex].SetUnit(u, colour, canBeBig);
-                buttonIndex++;
-            }
-        }
-        while (buttonIndex < unitOptionButtons.Count)
-        {
-            unitOptionButtons[buttonIndex].Disable();
-            buttonIndex++;
+            button = unitObjects[u].GetComponent<CharacterButton>();
+            button.buttonType = buttonType;
+            button.manager = manager;
+            button.SetUnit(unitOptions[u], colour, canBeBig);
+            unitOptionButtons.Add(button);
         }
     }
 
