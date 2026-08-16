@@ -39,7 +39,8 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
 
     public void SetUnit(UnitColour unit, bool canBeBig = true)
     {
-        this.unit = unit;
+        this.unit.unit = unit.unit;
+        this.unit.colour = unit.colour;
         gameObject.SetActive(true);
         unitDisplay.ChangeUnit(unit, canBeBig);
         unitDisplay.gameObject.SetActive(unit.unit != null);
@@ -201,7 +202,7 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
                 // TODO: Allow for more than one button in a line.
                 case ButtonType.SquadLine:
                     manager.GetComponent<LineupCustomize>()
-                        .Drop(0);
+                        .Drop(lineIndex);
                     break;
                 default:
                     break;

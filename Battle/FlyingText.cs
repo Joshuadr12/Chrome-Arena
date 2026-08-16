@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.Serialization;
 
-public class DamageMarker : MonoBehaviour
+public class FlyingText : MonoBehaviour
 {
     /// <summary>
     /// Displays damage dealt when needed.
@@ -17,7 +18,8 @@ public class DamageMarker : MonoBehaviour
     public GameObject critObj;
 
     // Miscellaneous variables.
-    [HideInInspector] public int damage = 0;
+    [HideInInspector] public bool isPaint = false;
+    [FormerlySerializedAs("damage"), HideInInspector] public int value = 0;
     [HideInInspector] public bool isCritical = false;
     Vector3 velocity, spin;
     float fade;
@@ -30,7 +32,15 @@ public class DamageMarker : MonoBehaviour
     {
         velocity = new Vector3(Random.value / 2 - 0.5f, 1.5f, 0);
         spin = new Vector3(0, 0, Random.value * 30 - 15);
-        text.text = damage.ToString();
+
+        if (isPaint)
+        {
+            transform.localScale *= 1.5f;
+            text.text = $"${value}";
+            text.color = Color.green;
+        }
+        else
+            text.text = value.ToString();
     }
 
     // Update is called once per frame
@@ -48,7 +58,7 @@ public class DamageMarker : MonoBehaviour
             transform.GetChild(0).Rotate(spin * time);
             text.color = Color.Lerp
                 (Color.clear,
-                Color.black,
+                isPaint ? Color.green : Color.black,
                 timer);
 
             // When the damage is critical.

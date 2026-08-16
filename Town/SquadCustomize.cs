@@ -23,6 +23,7 @@ public class SquadCustomize : MonoBehaviour
     [SerializeField] GameObject unitsMenu;
     [SerializeField] ScrollPanel artifactsPanel;
     [SerializeField] List<LineupCustomize> lineupButtons;
+    [SerializeField] LineupCustomize noLineupButtons;
     [SerializeField] UnitOptions unitOptions;
     [SerializeField] UnitDisplay dragAndDropUnit;
     [SerializeField] GameObject squadSelectUI, squadCustomizeUI;
@@ -131,7 +132,6 @@ public class SquadCustomize : MonoBehaviour
     public void StartCustomize()
     {
         ///<summary>Load the screen for squad customization.</summary>
-        ///<param name="squadIndex">The index of the squad to customize.</param>
 
         squadCustomizeUI.SetActive(true);
         nameInput.text = squadActive.squadName;
@@ -159,11 +159,18 @@ public class SquadCustomize : MonoBehaviour
         }
 
         // Line panels
-        for (int u = 0; u < lineupButtons.Count; u++)
+        Line line = new Line();
+        line.units = new List<Unit>();
+        foreach (Line l in squadActive.units)
+            line.units.Add(l.units[0]);
+        noLineupButtons.LoadLine(line);
+
+        // TODO: Add back when line upgrade is added.
+        /*for (int u = 0; u < lineupButtons.Count; u++)
             lineupButtons[u].LoadLine
                 (u < squadActive.units.Count
                 ? squadActive.units[u]
-                : null);
+                : null);*/
 
         unitOptions.UpdateUnitOptions("basic", squadActive.colour);
         StartCoroutine(dialoguePanel.ExecuteScenes(events));
@@ -199,9 +206,27 @@ public class SquadCustomize : MonoBehaviour
 
         Dictionary<Unit, int> unitQuantity = new Dictionary<Unit, int>();
         int activeLines = 0;
-        bool tooManyDuplicates = false;
         Line line;
-        foreach (LineupCustomize l in lineupButtons)
+
+        line = noLineupButtons.GenerateLine();
+        if (line != null)
+        {
+            foreach (Unit u in line.units)
+            {
+                activeLines++;
+                if (!unitQuantity.ContainsKey(u))
+                    unitQuantity[u] = 1;
+                else
+                {
+                    unitQuantity[u]++;
+                    if (unitQuantity[u] > 2)
+                        return 2;
+                }
+            }
+        }
+
+        // TODO: Add back when line upgrade is added.
+        /*foreach (LineupCustomize l in lineupButtons)
         {
             line = l.GenerateLine();
             if (line != null)
@@ -215,15 +240,13 @@ public class SquadCustomize : MonoBehaviour
                     {
                         unitQuantity[u]++;
                         if (unitQuantity[u] > 2)
-                            tooManyDuplicates = true;
+                            return 2;
                     }
                 }
             }
-        }
+        }*/
 
-        if (activeLines < 3)
-            return 1;
-        return tooManyDuplicates ? 2 : 0;
+        return (activeLines < 3) ? 1 : 0;
     }
 
     public void ThrowError(string message)
@@ -247,8 +270,16 @@ public class SquadCustomize : MonoBehaviour
                 squadActive.units.Clear();
                 if (nameInput.text != "")
                     squadActive.squadName = nameInput.text;
-                foreach (LineupCustomize line in lineupButtons)
-                    squadActive.units.Add(line.GenerateLine());
+                Line line;
+                foreach (Unit u in noLineupButtons.GenerateLine().units)
+                {
+                    line = new Line();
+                    line.units = new List<Unit> { u };
+                    squadActive.units.Add(line);
+                }
+                // TODO: Add back when line upgrade is added.
+                /*foreach (LineupCustomize line in lineupButtons)
+                    squadActive.units.Add(line.GenerateLine());*/
                 while (squadActive.units.Contains(null))
                     squadActive.units.Remove(null);
                 Master.Save();

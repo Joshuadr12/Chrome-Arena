@@ -25,7 +25,8 @@ public class Battle : MonoBehaviour
     [Header("Battle")]
     public BattleSettings settings;
     [SerializeField] GameObject fighter;
-    [SerializeField] GameObject damageMarker, buffMarker;
+    [FormerlySerializedAs("damageMarker"), SerializeField] GameObject flyingText;
+    [SerializeField] GameObject buffMarker;
     [SerializeField] GameObject paintParticle, shellParticle;
     [SerializeField] Fighter leftArtifactHolder, rightArtifactHolder;
     [Header("Audio")]
@@ -522,11 +523,11 @@ public class Battle : MonoBehaviour
 
             // Create a damage marker.
             GameObject marker = Instantiate
-                (damageMarker,
+                (flyingText,
                 target.transform.position,
                 Quaternion.identity);
-            marker.GetComponent<DamageMarker>().damage = damage;
-            marker.GetComponent<DamageMarker>().isCritical = isCritical;
+            marker.GetComponent<FlyingText>().value = damage;
+            marker.GetComponent<FlyingText>().isCritical = isCritical;
 
             if (source.colour.createPaint
                 && target.colour.createPaint)
@@ -626,6 +627,13 @@ public class Battle : MonoBehaviour
                 / unitValue
                 * f.unit.price);
             f.retreated = true;
+
+            GameObject marker = Instantiate
+                (FindFirstObjectByType<Battle>().flyingText,
+                f.transform.position,
+                Quaternion.identity);
+            marker.GetComponent<FlyingText>().value = money;
+            marker.GetComponent<FlyingText>().isPaint = true;
             f.RemoveFromBattle();
             return money;
         }
@@ -678,6 +686,9 @@ public class Battle : MonoBehaviour
             if (squad.squad == rightSide)
                 squad.outcome = -outcome;
 
+        if (outcome != 0)
+            StartCoroutine(HighlightPaintText
+                (outcome > 0 ? leftPaintText : rightPaintText));
         scroll.Broadcast(outcome, false);
         yield return Master.SetTimer(2, false);
 
@@ -686,7 +697,6 @@ public class Battle : MonoBehaviour
         else
             StarChallenges.AddTempScore();
 
-        //print(StarChallenges.tempScore.attacks);
         SquadSelect.roundsDone++;
         SceneManager.LoadScene("SquadSelect");
     }
@@ -1087,16 +1097,6 @@ public class Battle : MonoBehaviour
                             f.SetAnimation(overrideDeath: true);
 
                         CreateBuffMarker(f, "", healthGain, attackGain, f.isLeft);
-/*                        GameObject marker = Instantiate
-                            (buffMarker,
-                            f.transform.position,
-                            Quaternion.identity);
-                        marker.GetComponent<BuffMarker>().health = healthGain;
-                        marker.GetComponent<BuffMarker>().attack = attackGain;
-                        if (!GetLocation(f).isLeft)
-                            marker
-                                .GetComponent<BuffMarker>()
-                                .SwitchSides();*/
                     }
                     break;
                 case Effect.EffectType.Damage:
@@ -1116,6 +1116,13 @@ public class Battle : MonoBehaviour
                     }
                     else
                         rightSide.paint += effect.typeInt1;
+
+                    GameObject marker = Instantiate
+                        (flyingText,
+                        trigger.ability.owner.transform.position,
+                        Quaternion.identity);
+                    marker.GetComponent<FlyingText>().value = effect.typeInt1;
+                    marker.GetComponent<FlyingText>().isPaint = true;
                     break;
                 case Effect.EffectType.GiveTrait:
                     foreach (Fighter f in targets)
@@ -1455,6 +1462,18 @@ public class Battle : MonoBehaviour
                     outcome = (int)Mathf.Sign(leftSide.paint - rightSide.paint);
             }
         }
+    }
+
+    IEnumerator HighlightPaintText(TMP_Text text)
+    {
+        for (float lerp = 1; lerp > 0; lerp -= Time.deltaTime)
+        {
+            text.transform.localScale = Vector3.one * (1 + lerp);
+            text.color = Color.Lerp(Color.white, Color.green, lerp);
+            yield return null;
+        }
+        text.transform.localScale = Vector3.one;
+        text.color = Color.white;
     }
 
     public void ArtifactHoverEnter(Artifact artifact)
