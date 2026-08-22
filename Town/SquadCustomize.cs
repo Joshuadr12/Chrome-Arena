@@ -27,11 +27,8 @@ public class SquadCustomize : MonoBehaviour
     [SerializeField] UnitOptions unitOptions;
     [SerializeField] UnitDisplay dragAndDropUnit;
     [SerializeField] GameObject squadSelectUI, squadCustomizeUI;
-    [SerializeField] DialogueScene dialoguePanel;
     [SerializeField] List<DialogueEvent> events;
     [SerializeField] TMP_Text unitText, keywordText;
-
-    [HideInInspector] public int menuLayer = 0;
 
     GameObject textBox;
 
@@ -52,10 +49,10 @@ public class SquadCustomize : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape)
             && DialogueScene.isDone)
         {
-            if (squadActive != null)
+            if (Town.menuLayer == 2)
                 EndCustomize();
             else
-                GotoScene("Town");
+                CloseMenu();
         }
 
         if (Input.GetMouseButtonUp(0))
@@ -76,6 +73,13 @@ public class SquadCustomize : MonoBehaviour
                 dragAndDropUnit.ChangeUnit(selectedUnit, squadActive.colour, true);
         }
 
+    }
+
+    public void OpenMenu()
+    {
+        // Open and refresh the menu.
+        gameObject.SetActive(true);
+        Town.menuLayer = 1;
         UpdateSquadButtons();
     }
 
@@ -103,14 +107,6 @@ public class SquadCustomize : MonoBehaviour
         UnitHoverExit();
     }
 
-    public void GotoScene(string sceneName)
-    {
-        /// <summary>Load the given scene.</summary>
-        /// <param name="sceneName">The scene to load.</param>
-
-        Master.GotoScene(sceneName);
-    }
-
     void UpdateSquadButtons()
     {
         /// <summary>Set the button colors and names based on the corresponding squads.</summary>
@@ -133,7 +129,8 @@ public class SquadCustomize : MonoBehaviour
     {
         ///<summary>Load the screen for squad customization.</summary>
 
-        squadCustomizeUI.SetActive(true);
+        Master.OpenMenu(squadCustomizeUI, squadSelectUI);
+        Town.menuLayer = 2;
         nameInput.text = squadActive.squadName;
 
         // Artifacts
@@ -173,13 +170,13 @@ public class SquadCustomize : MonoBehaviour
                 : null);*/
 
         unitOptions.UpdateUnitOptions("basic", squadActive.colour);
-        StartCoroutine(dialoguePanel.ExecuteScenes(events));
+        StartCoroutine(FindFirstObjectByType<DialogueScene>()
+            .ExecuteScenes(events));
     }
 
     public void SquadSelected(int squadIndex)
     {
         squadActive = squads[squadIndex];
-        squadSelectUI.SetActive(false);
         StartCustomize();
     }
 
@@ -303,7 +300,14 @@ public class SquadCustomize : MonoBehaviour
         squadActive = null;
         ResetError();
         Master.CloseMenu(squadCustomizeUI, squadSelectUI);
+        Town.menuLayer = 1;
         UpdateSquadButtons();
+    }
+
+    public void CloseMenu()
+    {
+        gameObject.SetActive(false);
+        Town.menuLayer = 0;
     }
 
     public void SelectCollection(int index)

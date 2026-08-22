@@ -42,13 +42,20 @@ public class Settings : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
-            BackToTown();
+            CloseMenu();
     }
 
-    public void BackToTown()
+    public void OpenMenu()
+    {
+        gameObject.SetActive(true);
+        Town.menuLayer = 1;
+    }
+
+    public void CloseMenu()
     {
         Master.Save();
-        Master.GotoScene("Town");
+        gameObject.SetActive(false);
+        Town.menuLayer = 0;
     }
 
     public void MusicVolume()
