@@ -400,6 +400,7 @@ public class Battle : MonoBehaviour
             Quaternion.identity)
             .GetComponent<Particle>();
         particle.size = size;
+        particle.spawnCount = Mathf.CeilToInt(size);
         particle.baseColor = target.colour.physicalColour;
         particle.offColor = source.colour.physicalColour;
     }

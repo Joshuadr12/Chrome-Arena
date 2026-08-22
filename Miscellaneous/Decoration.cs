@@ -39,7 +39,7 @@ public class Decoration : MonoBehaviour
         if (collision.gameObject.layer == 3)
         {
             particle = collision.GetComponent<Particle>();
-            if (particle != null && particle.isPaint)
+            if (particle != null && particle.spreadColor)
             {
                 renderer.material = particle.decorMaterial;
                 renderer.color = particle.lerp;
