@@ -127,6 +127,7 @@ public class Ability
 
     // Serialized variables for the editor.
     [TextArea(2, 2)] public string description;
+    public AudioClip audio;
     public Cause cause;
     public List<Effect> effects;
 

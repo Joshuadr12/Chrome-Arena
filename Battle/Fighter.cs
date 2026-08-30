@@ -134,6 +134,7 @@ public class Fighter : UnitDisplay
         newAbility = new Ability();
         newAbility.owner = this;
         newAbility.description = a.description;
+        newAbility.audio = a.audio;
         newAbility.cause = a.cause;
         newAbility.effects = new List<Effect>();
         foreach (Effect effect in a.effects)

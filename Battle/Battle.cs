@@ -926,7 +926,9 @@ public class Battle : MonoBehaviour
                     t.ability.owner.SetAnimation(UnitDisplay.AnimState.Ability);
                 yield return Master.SetTimer(1);
 
-                // Activate the triggers chosen from above.
+                // Play audio and activate the triggers chosen from above.
+                if (activeTriggers[0].ability.audio != null)
+                    PlaySound(activeTriggers[0].ability.audio, true);
                 foreach (Trigger t in activeTriggers)
                     if (!t.ability.owner.retreated)
                         ActivateEffects(t);
