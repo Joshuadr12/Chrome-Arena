@@ -20,6 +20,7 @@ public class SquadSelect : MonoBehaviour
     [Header("Menu")]
     [SerializeField] List<SquadStatus> leftSquads;
     [SerializeField] List<SquadStatus> rightSquads;
+    [SerializeField] GameObject splashScreen;
     [SerializeField] UnitDisplay leftDisplay, rightDisplay;
     [SerializeField] TMP_Text instructions, countdown;
     [SerializeField] Image advantageDiagram;
@@ -55,6 +56,8 @@ public class SquadSelect : MonoBehaviour
         source = GetComponent<AudioSource>();
         source.volume = Master.data.sfxVolume;
         resultsAudio.volume = Master.data.sfxVolume;
+        StartCoroutine(Master.DisableSplashScreen(splashScreen,
+            began ? 0.1f : 0.25f));
         leftDisplay.ChangeUnit
             (Master.data.character,
             "neutral", true);
@@ -239,7 +242,7 @@ public class SquadSelect : MonoBehaviour
 
                     Battle.leftSide = leftChoice.squad;
                 Battle.rightSide = rightChoice.squad;
-                Master.GotoScene("Battle");
+                StartCoroutine(Master.GotoScene("Battle", false));
             }
             // When the countdown takes place.
             else if (countTimer <= 3)
@@ -556,7 +559,7 @@ public class SquadSelect : MonoBehaviour
     public void Leave()
     {
         began = false;
-        Master.GotoScene("Town");
+        StartCoroutine(Master.GotoScene("Town"));
     }
 
     public SquadStatus FindPreciseMatch(bool invert = false)

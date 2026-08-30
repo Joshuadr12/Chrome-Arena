@@ -17,7 +17,7 @@ public class Town : MonoBehaviour
 
     [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
     public Transform castle;
-    [SerializeField] GameObject buildingParticles;
+    [SerializeField] GameObject splashScreen, buildingParticles;
     [SerializeField] List<Image> resourceDisplay;
     [SerializeField] List<ButtonRequirement> buttonsToEnable;
 
@@ -26,6 +26,7 @@ public class Town : MonoBehaviour
     void Start()
     {
         Master.backgroundMusic.volume = Master.data.musicVolume;
+        StartCoroutine(Master.DisableSplashScreen(splashScreen));
         menuLayer = 0;
         RenderResources();
     }
@@ -35,7 +36,7 @@ public class Town : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Escape) && menuLayer == 0
             && DialogueScene.isDone)
-            Master.GotoScene("MainMenu");
+            StartCoroutine(Master.GotoScene("MainMenu"));
     }
 
     public void RenderResources(string justUpgraded = "")

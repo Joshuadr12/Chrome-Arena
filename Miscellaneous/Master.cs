@@ -16,6 +16,7 @@ public class Master : MonoBehaviour
     // Global variables.
     public static string saveFile = "save1";
     public static Player data, newData;
+    public static GameObject splashParticle, splashScreenPanel;
     public static Dictionary<string, Colour> colours = new Dictionary<string, Colour>();
     public static Dictionary<string, List<string>> colourSets = new Dictionary<string, List<string>>();
     public static Dictionary<string, List<Unit>> unitSets = new Dictionary<string, List<Unit>>();
@@ -34,6 +35,7 @@ public class Master : MonoBehaviour
 
     // Serialized variables for the editor.
     [SerializeField] bool testing;
+    [SerializeField, Tooltip("The object to create when transitioning between scenes.")] GameObject splashScreenParticle;
     [SerializeField] Color bronzeStarColor, goldStarColor;
     [SerializeField] Player playerData, backupData;
     [SerializeField] AudioSource audioSource;
@@ -95,6 +97,7 @@ public class Master : MonoBehaviour
 
             data = playerData;
             newData = backupData;
+            splashParticle = splashScreenParticle;
             if (testing)
                 LoadData(SaveData.Load(saveFile));
 
@@ -561,12 +564,46 @@ public class Master : MonoBehaviour
         return 0;
     }
 
-    public static void GotoScene(string sceneName)
+    public void GotoSceneButton(string sceneName)
+    {
+        StartCoroutine(GotoScene(sceneName));
+    }
+    public static IEnumerator GotoScene(string sceneName, bool splashScreen = true)
     {
         /// <summary>Load the given scene.</summary>
         /// <param name="sceneName">The scene to load.</param>
 
-        SceneManager.LoadScene(sceneName);
+        if (!splashScreen)
+            SceneManager.LoadScene(sceneName);
+        else if (!splashScreenPanel.activeSelf)
+        {
+            splashScreenPanel.SetActive(true);
+            Particle.paintDepth = 0;
+            List<Particle> particles = new List<Particle>();
+            for (int i = 0; i < 600; i++)
+            {
+                particles.Add(Instantiate
+                    (splashParticle,
+                    Vector3.zero,
+                    Quaternion.identity)
+                    .GetComponent<Particle>());
+            }
+            foreach (Particle p in particles)
+            {
+                DontDestroyOnLoad(p.gameObject);
+                p.animationTime = UnityEngine.Random.Range(0.4f, 0.6f);
+            }
+            yield return new WaitForSeconds(1);
+            SceneManager.LoadScene(sceneName);
+            foreach (Particle p in particles)
+                p.StartCoroutine(p.Fade());
+        }
+    }
+    public static IEnumerator DisableSplashScreen(GameObject panel, float delay = 0.25f)
+    {
+        splashScreenPanel = panel;
+        yield return new WaitForSeconds(delay);
+        panel.SetActive(false);
     }
 }
 

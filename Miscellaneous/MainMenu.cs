@@ -16,8 +16,8 @@ public class MainMenu : MonoBehaviour
     [SerializeField] List<UnitDisplay> saveCharacters;
     [SerializeField] List<TMP_Text> saveDescriptions;
     [SerializeField] List<Button> deleteButtons;
-    [Header("Miscellaneous"), SerializeField] GameObject mainPanel;
-    [SerializeField] GameObject saveFilePanel, baseSavePanel, deleteSavePanel, creditsPanel;
+    [Header("Miscellaneous"), SerializeField] GameObject splashScreen;
+    [SerializeField] GameObject mainPanel, saveFilePanel, baseSavePanel, deleteSavePanel, creditsPanel;
 
     [HideInInspector] public string deleteSelection { get; set; }
     [HideInInspector] public int menuLayer { get; set; }
@@ -55,6 +55,7 @@ public class MainMenu : MonoBehaviour
         InvokeRepeating("SpawnFighter", 0, 0.1f);
 
         menuLayer = 0;
+        StartCoroutine(Master.DisableSplashScreen(splashScreen));
     }
 
     // Update is called once per frame.
@@ -183,7 +184,7 @@ public class MainMenu : MonoBehaviour
 
         Master.LoadData(saves[saveFile]);
         Master.saveFile = saveFile;
-        Master.GotoScene("Town");
+        StartCoroutine(Master.GotoScene("Town"));
     }
 
     public void Quit()

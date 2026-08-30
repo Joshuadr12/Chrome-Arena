@@ -699,7 +699,7 @@ public class Battle : MonoBehaviour
             StarChallenges.AddTempScore();
 
         SquadSelect.roundsDone++;
-        SceneManager.LoadScene("SquadSelect");
+        StartCoroutine(Master.GotoScene("SquadSelect", false));
     }
 
     IEnumerator SummonArmy(List<Lane> lanes)

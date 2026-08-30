@@ -13,7 +13,7 @@ public class BattleSelect : MonoBehaviour
     /// </summary>
 
     [SerializeField] List<GameObject> buttons;
-    [SerializeField, FormerlySerializedAs("squadMenu")] GameObject battlePrepMenu;
+    [SerializeField, FormerlySerializedAs("squadMenu")] GameObject splashScreen, battlePrepMenu;
     [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
     [SerializeField] List<Image> resourceDisplay;
 
@@ -23,6 +23,7 @@ public class BattleSelect : MonoBehaviour
     {
         Master.battleSelected = null;
         RenderResources();
+        StartCoroutine(Master.DisableSplashScreen(splashScreen));
     }
 
     //Update is called once per frame.
@@ -87,7 +88,7 @@ public class BattleSelect : MonoBehaviour
                 Master.leftSquads.Add(Master.data.squads[i]);
             }
             SquadSelect.fairStars = 1;
-            Master.GotoScene("SquadSelect");
+            StartCoroutine(Master.GotoScene("SquadSelect"));
         }
     }
 
@@ -101,6 +102,6 @@ public class BattleSelect : MonoBehaviour
 
     public void BackToTown()
     {
-        Master.GotoScene("Town");
+        StartCoroutine(Master.GotoScene("Town"));
     }
 }

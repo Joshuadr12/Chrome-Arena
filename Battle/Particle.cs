@@ -15,11 +15,12 @@ public class Particle : MonoBehaviour
     public float animationTime = 0.5f;
     public List<Sprite> sprites;
     public bool changeSpriteOnStart;
+    public float size = 1;
     [FormerlySerializedAs("spawn")] public GameObject spawnObject;
     public int spawnCount = 1;
 
-    [HideInInspector] public float size = 1;
     [HideInInspector] public Color baseColor, offColor, lerp = Color.white;
+    [HideInInspector] public Vector3 startPos, endPos;
 
     bool isFinished = false;
     float timer = 0, speedFactor;
@@ -29,7 +30,8 @@ public class Particle : MonoBehaviour
     public enum AnimationType
     {
         None,
-        Explosion
+        Explosion,
+        SplashScreen
     }
     public enum ColorType
     {
@@ -41,13 +43,13 @@ public class Particle : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        renderer = GetComponent<SpriteRenderer>();
         switch (animationType)
         {
             case AnimationType.Explosion:
                 transform.Rotate(0, 0, Random.value * 360);
                 transform.localScale = Vector3.one
                     * Mathf.Sqrt(size / Mathf.PI) / 2;
-                renderer = GetComponent<SpriteRenderer>();
                 renderer.flipX = Random.value <= 0.5f;
 
                 velocity = new Vector3
@@ -55,6 +57,20 @@ public class Particle : MonoBehaviour
                     Random.value - 0.5f,
                     0);
                 velocity *= size;
+                break;
+
+            case AnimationType.SplashScreen:
+                DontDestroyOnLoad(gameObject);
+                animationTime = Random.Range(0.4f, 0.6f);
+                transform.Rotate(0, 0, Random.value * 360);
+                transform.localScale = Vector3.one * Random.Range(0.5f, 1) * size;
+                renderer.flipX = Random.value <= 0.5f;
+
+                startPos = Vector3.zero;
+                endPos = Camera.main.ScreenToWorldPoint(new Vector2(
+                    Random.value * Camera.main.pixelWidth,
+                    Random.value * Camera.main.pixelHeight));
+                endPos.z = 0;
                 break;
 
             default:
@@ -68,13 +84,15 @@ public class Particle : MonoBehaviour
                 break;
 
             case ColorType.Random:
-                lerp = new Color(Random.value, Random.value, Random.value);
+                List<Color> colours = new List<Color>();
+                foreach (Colour colour in Master.colours.Values)
+                    if (colour.createPaint)
+                        colours.Add(colour.physicalColour);
+                lerp = colours[Random.Range(0, colours.Count)];
                 break;
-
             default:
                 break;
         }
-        renderer = GetComponent<SpriteRenderer>();
         renderer.color = lerp;
 
         if (changeSpriteOnStart && sprites.Count > 0)
@@ -92,9 +110,10 @@ public class Particle : MonoBehaviour
             else
             {
                 speedFactor =
-                    Master.data.battleSpeed
-                    * Time.deltaTime
+                    Time.deltaTime
                     / animationTime;
+                if (animationType == AnimationType.Explosion)
+                    speedFactor *= Master.data.battleSpeed;
                 timer += speedFactor;
 
                 switch (animationType)
@@ -105,6 +124,13 @@ public class Particle : MonoBehaviour
                             Vector3.zero,
                             timer);
                         transform.position += tempVelocity * speedFactor * 2;
+                        break;
+
+                    case AnimationType.SplashScreen:
+                        speedFactor = Master.AnimationCurve
+                            (timer, smoothEnd: true);
+                        transform.position = Vector3.Lerp
+                            (startPos, endPos, speedFactor);
                         break;
 
                     default:
@@ -121,6 +147,11 @@ public class Particle : MonoBehaviour
                     transform.localScale *= 2;
                     renderer.sortingOrder = paintDepth++;
                     GetComponent<Rigidbody2D>().simulated = true;
+                }
+                else if (animationType == AnimationType.SplashScreen)
+                {
+                    transform.localScale *= 2;
+                    renderer.sortingOrder = paintDepth++;
                 }
                 else
                     renderer.sortingOrder = Mathf.RoundToInt(transform.position.y * -999);
@@ -146,5 +177,13 @@ public class Particle : MonoBehaviour
                 }
             }
         }
+    }
+
+    public IEnumerator Fade()
+    {
+        while (Time.deltaTime > 0.4f)
+            yield return null;
+        yield return new WaitForSeconds(animationTime - 0.4f);
+        Destroy(gameObject);
     }
 }
