@@ -60,6 +60,8 @@ public class Fighter : UnitDisplay
         else
             SetAnimation(AnimState.Move);
 
+        health = unit.health;
+        attack = unit.attack;
         fast = unit.fast;
         agile = unit.agile;
         block = unit.block;

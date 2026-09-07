@@ -253,8 +253,8 @@ public class Battle : MonoBehaviour
                 // Set the variables for the new fighter.
                 Fighter comp = newFighter.GetComponent<Fighter>();
                 summoned.Add(comp);
-                comp.health = u.health;
-                comp.attack = u.attack;
+                //comp.health = u.health;
+                //comp.attack = u.attack;
                 comp.NewPos(spawnPoint);
             }
 

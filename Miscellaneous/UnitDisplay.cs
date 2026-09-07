@@ -38,6 +38,7 @@ public class UnitDisplay : MonoBehaviour
     {
         if (animSpeed <= 0)
             animSpeed = Random.value / 2 + 0.75f;
+        //ChangeUnit(unit, "neutral", true);
     }
 
     //Update is called once per frame.
