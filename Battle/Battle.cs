@@ -20,6 +20,7 @@ public class Battle : MonoBehaviour
     public static Fighter leftArtifact, rightArtifact;
     public static int leftArtifactPoints, rightArtifactPoints;
     public static int bountyAbilities = 0, bountiesGone = 0;
+    public static float cameraShake;
 
     // Serialized variables for the editor.
     [Header("Battle")]
@@ -60,7 +61,6 @@ public class Battle : MonoBehaviour
     int triggersActive = 0;
     float totalShake = 0;
     float modShake;
-    float cameraShake = 0;
     [HideInInspector] public List<Lane> lanes = new List<Lane>();
     AudioSource source;
     Vector3 cameraPos, randomShake;
@@ -70,6 +70,7 @@ public class Battle : MonoBehaviour
     //Start is called before the first frame update.
     void Start()
     {
+        cameraShake = 0;
         leftSide.paint = leftSide.startMoney;
         if (!Master.FinishedTutorial())
             leftSide.paint += leftSide.paint / 5;
@@ -391,7 +392,8 @@ public class Battle : MonoBehaviour
         Fighter source,
         Fighter target,
         float size = 0,
-        Vector3 offset = new Vector3())
+        Vector3 offset = new Vector3(),
+        bool delay = true)
     {
         Particle particle = Instantiate
             (obj,
@@ -408,9 +410,21 @@ public class Battle : MonoBehaviour
         particle.offColor = source.colour.physicalColour;
         particle.startPos = source.transform.position + offset;
         particle.endPos = target.transform.position + offset;
+
+        if (delay)
+        {
+            particle.gameObject.SetActive(false);
+            target.markers.Add(particle.gameObject);
+        }
     }
 
-    public void CreateBuffMarker(Fighter location, string text = "", int health = 0, int attack = 0, bool isLeft = true)
+    public void CreateBuffMarker
+        (Fighter location,
+        string text = "",
+        int health = 0,
+        int attack = 0,
+        bool isLeft = true,
+        bool delay = true)
     {
         BuffMarker marker = Instantiate
             (buffMarker,
@@ -422,6 +436,12 @@ public class Battle : MonoBehaviour
         marker.attack = attack;
         if (!isLeft)
             marker.SwitchSides();
+
+        if (delay)
+        {
+            marker.gameObject.SetActive(false);
+            location.markers.Add(marker.gameObject);
+        }
     }
 
     public void DealDamage
@@ -502,6 +522,7 @@ public class Battle : MonoBehaviour
         {
 
             target.health -= damage;
+            target.cameraShake += damage;
 
             // Check for Persist.
             if (target.health <= 0 && target.persist > 0)
@@ -521,7 +542,6 @@ public class Battle : MonoBehaviour
                     target);
             else
             {
-                target.SetAnimation(UnitDisplay.AnimState.Die);
                 TriggerAbilities(Cause.CauseType.Death,
                     source.isArtifact ? null : source,
                     target);
@@ -534,6 +554,8 @@ public class Battle : MonoBehaviour
                 Quaternion.identity);
             marker.GetComponent<FlyingText>().value = damage;
             marker.GetComponent<FlyingText>().isCritical = isCritical;
+            marker.SetActive(false);
+            target.markers.Add(marker);
 
             if (source.colour.createPaint
                 && target.colour.createPaint)
@@ -544,7 +566,6 @@ public class Battle : MonoBehaviour
                     Math.Min(damage, 5));
 
             // Miscellaneous
-            cameraShake += damage;
             if (source.isLeft)
                 StarChallenges.tempScore.damageDealt += damage;
         }
@@ -573,6 +594,9 @@ public class Battle : MonoBehaviour
         if (right.isAttacking)
             DealDamage(right, left, right.attack,
                 left.fast && !right.fast && right.health <= 0);
+
+        left.UpdateDisplayStats();
+        right.UpdateDisplayStats();
     }
 
     public class Lane
@@ -939,6 +963,8 @@ public class Battle : MonoBehaviour
                         StartCoroutine(ActivateEffects(t));
                 while (triggersActive > 0)
                     yield return null;
+                foreach (Fighter f in AllFighters())
+                    f.UpdateDisplayStats();
                 PlayDamageSound();
                 yield return Master.SetTimer(1);
 
@@ -984,16 +1010,6 @@ public class Battle : MonoBehaviour
                 loc,
                 trigger.causeSource,
                 trigger.causeTarget);
-            if (effect.createParticle != null)
-            {
-                foreach (Fighter f in targets)
-                    CreateParticle
-                        (effect.createParticle.gameObject,
-                        trigger.ability.owner, f,
-                        offset: Vector3.up * 0.5f);
-                yield return StartCoroutine
-                    (Master.SetTimer(effect.createParticle.animationTime));
-            }
 
             switch (effect.type)
             {
@@ -1187,6 +1203,18 @@ public class Battle : MonoBehaviour
                     Debug.LogError($"Unknown effect type {effect.type}");
                     break;
             }
+
+            if (effect.createParticle != null)
+            {
+                foreach (Fighter f in targets)
+                    CreateParticle
+                        (effect.createParticle.gameObject,
+                        trigger.ability.owner, f,
+                        offset: Vector3.up * 0.5f,
+                        delay: false);
+                yield return StartCoroutine
+                    (Master.SetTimer(effect.createParticle.animationTime));
+            }
         }
         triggersActive--;
     }
@@ -1249,14 +1277,14 @@ public class Battle : MonoBehaviour
                     || (UnityEngine.Random.value <= 0.5f))
                     leftFighter.isAttacking = true;
                 else
-                    CreateBuffMarker(leftFighter, "SLOW");
+                    CreateBuffMarker(leftFighter, "SLOW", delay: false);
 
                 if (leftFighter.isAttacking)
                 {
                     laneFighting = true;
                     if (isCombo)
                     {
-                        CreateBuffMarker(leftFighter, "COMBO");
+                        CreateBuffMarker(leftFighter, "COMBO", delay: false);
                         leftFighter.hasCombo = false;
                     }
                     else
@@ -1276,14 +1304,14 @@ public class Battle : MonoBehaviour
                     || (UnityEngine.Random.value <= 0.5f))
                     rightFighter.isAttacking = true;
                 else
-                    CreateBuffMarker(rightFighter, "SLOW");
+                    CreateBuffMarker(rightFighter, "SLOW", delay: false);
 
                 if (rightFighter.isAttacking)
                 {
                     laneFighting = true;
                     if (isCombo)
                     {
-                        CreateBuffMarker(rightFighter, "COMBO");
+                        CreateBuffMarker(rightFighter, "COMBO", delay: false);
                         rightFighter.hasCombo = false;
                     }
                     else

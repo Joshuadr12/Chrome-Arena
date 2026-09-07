@@ -177,7 +177,7 @@ public class Particle : MonoBehaviour
                         transform.position = new Vector2(x,
                             a * Mathf.Pow(x, 2) + b * x + c);
                         transform.Rotate(0, 0,
-                            speedFactor * 720 * (flipX ? 1 : -1));
+                            speedFactor * 720 * (startPos.x > endPos.x ? 1 : -1));
                         break;
 
                     default:
@@ -243,7 +243,7 @@ public class Particle : MonoBehaviour
 
     void CalculateArch()
     {
-        ///<summary>Calculate the trajectory for an arch animation.</summary>
+        /// <summary>Calculate the trajectory for an arch animation.</summary>
 
         // Calculate the points for vertex form.
         Vector2 vertex, point;

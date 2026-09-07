@@ -26,7 +26,9 @@ public class Fighter : UnitDisplay
     [HideInInspector] public bool isArtifact;
     [HideInInspector] public ArtifactType hasArtifact;
     [HideInInspector] public int artifactUsed = -1;
+    [HideInInspector] public int cameraShake = 0;
     [HideInInspector] public Vector3 oldPos, newPos;
+    [HideInInspector] public List<GameObject> markers = new List<GameObject>();
     [HideInInspector] public int health, attack;
     [HideInInspector] public bool fast;
     [HideInInspector] public int agile, block, armor, persist;
@@ -36,6 +38,7 @@ public class Fighter : UnitDisplay
     [HideInInspector] public float moveTime;
     [HideInInspector] public List<Ability> abilities = new List<Ability>();
 
+    int healthDisplay, attackDisplay, blockDisplay;
     float progress;
     Sprite healthSprite;
     //animFactor;
@@ -70,16 +73,14 @@ public class Fighter : UnitDisplay
         steady = unit.steady && !isArtifact;
         moveTime = 0;
         oldPos = transform.position;
+
+        UpdateDisplayStats();
     }
 
     //Update is called once per frame.
     new void Update()
     {
         base.Update();
-
-        healthImage.sprite = block > 0 ? blockSprite : healthSprite;
-        healthText.text = block > 0 ? block.ToString() : health.ToString();
-        attackText.text = attack.ToString();
 
         // Movement
         if (moveTime < 0.5f)
@@ -104,6 +105,29 @@ public class Fighter : UnitDisplay
             if (state == AnimState.Move)
                 SetAnimation();
         }
+    }
+
+    public void UpdateDisplayStats()
+    {
+        /// <summary>Update the displayed stats with recent changes.</summary>
+
+        healthDisplay = health;
+        attackDisplay = attack;
+        blockDisplay = block;
+
+        healthImage.sprite = blockDisplay > 0 ? blockSprite : healthSprite;
+        healthText.text = blockDisplay > 0 ? blockDisplay.ToString() : healthDisplay.ToString();
+        attackText.text = attackDisplay.ToString();
+
+        Battle.cameraShake += cameraShake;
+        cameraShake = 0;
+
+        foreach (GameObject marker in markers)
+            marker.SetActive(true);
+        markers.Clear();
+
+        if (health <= 0)
+            SetAnimation(AnimState.Die);
     }
 
     public void RemoveFromBattle()
