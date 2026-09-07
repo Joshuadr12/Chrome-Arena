@@ -180,6 +180,7 @@ public class Effect
     // Variables.
     public EffectType type;
     [FormerlySerializedAs("newTarget")] public AbilityTarget target;
+    public Particle createParticle;
     public int typeInt1, typeInt2;
     public string typeStr;
     public bool forOpponent;

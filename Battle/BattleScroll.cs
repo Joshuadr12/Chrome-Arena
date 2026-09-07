@@ -38,7 +38,7 @@ public class BattleScroll : MonoBehaviour
         // Width
         curve = Master.AnimationCurve
             (Mathf.Min(timer, 1),
-            smoothEnd: true);
+            easeOut: true);
         rect.anchorMin = new Vector2(curve / -4 + 0.5f, 0.4f);
         rect.anchorMax = new Vector2(curve / 4 + 0.5f, 0.6f);
 

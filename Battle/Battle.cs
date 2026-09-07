@@ -57,6 +57,7 @@ public class Battle : MonoBehaviour
     // -2 = Undecided; -1 = Right Wins; 0 = Draw; 1 = Left Wins
     int outcome = -2;
     int rightPaintInit;
+    int triggersActive = 0;
     float totalShake = 0;
     float modShake;
     float cameraShake = 0;
@@ -387,22 +388,26 @@ public class Battle : MonoBehaviour
 
     public void CreateParticle
         (GameObject obj,
-        float size,
         Fighter source,
-        Fighter target)
+        Fighter target,
+        float size = 0,
+        Vector3 offset = new Vector3())
     {
-        float offsetX = UnityEngine.Random.value - 0.5f;
-        float offsetY = UnityEngine.Random.value - 0.5f;
-        Vector3 particleOffset = new Vector3(offsetX, offsetY, 0);
         Particle particle = Instantiate
             (obj,
-            target.transform.position + particleOffset,
+            target.transform.position + offset,
             Quaternion.identity)
             .GetComponent<Particle>();
-        particle.size = size;
-        particle.spawnCount = Mathf.CeilToInt(size);
+        if (size > 0)
+        {
+            particle.size = size;
+            particle.spawnCount = Mathf.CeilToInt(size);
+        }
+        particle.flipX = !source.isLeft;
         particle.baseColor = target.colour.physicalColour;
         particle.offColor = source.colour.physicalColour;
+        particle.startPos = source.transform.position + offset;
+        particle.endPos = target.transform.position + offset;
     }
 
     public void CreateBuffMarker(Fighter location, string text = "", int health = 0, int attack = 0, bool isLeft = true)
@@ -469,9 +474,9 @@ public class Battle : MonoBehaviour
                 target.block--;
                 CreateParticle
                     (shellParticle,
-                    Math.Min(damage, 5),
                     source,
-                    target);
+                    target,
+                    Math.Min(damage, 5));
                 TriggerAbilities(Cause.CauseType.Block, source, target);
 
                 if (target.isLeft)
@@ -486,9 +491,9 @@ public class Battle : MonoBehaviour
         {
             CreateParticle
                 (shellParticle,
-                Math.Min(damage, 5),
                 source,
-                target);
+                target,
+                Math.Min(damage, 5));
         }
         damage -= target.armor;
 
@@ -534,9 +539,9 @@ public class Battle : MonoBehaviour
                 && target.colour.createPaint)
                 CreateParticle
                     (paintParticle,
-                    Math.Min(damage, 5),
                     source,
-                    target);
+                    target,
+                    Math.Min(damage, 5));
 
             // Miscellaneous
             cameraShake += damage;
@@ -931,7 +936,9 @@ public class Battle : MonoBehaviour
                     PlaySound(activeTriggers[0].ability.audio, true);
                 foreach (Trigger t in activeTriggers)
                     if (!t.ability.owner.retreated)
-                        ActivateEffects(t);
+                        StartCoroutine(ActivateEffects(t));
+                while (triggersActive > 0)
+                    yield return null;
                 PlayDamageSound();
                 yield return Master.SetTimer(1);
 
@@ -964,10 +971,11 @@ public class Battle : MonoBehaviour
         }
     }
 
-    void ActivateEffects(Trigger trigger)
+    IEnumerator ActivateEffects(Trigger trigger)
     {
         ///<summary>Execute the effects of an ability.</summary>
 
+        triggersActive++;
         Location loc = GetLocation(trigger.ability.owner);
         foreach (Effect effect in trigger.ability.effects)
         {
@@ -976,6 +984,17 @@ public class Battle : MonoBehaviour
                 loc,
                 trigger.causeSource,
                 trigger.causeTarget);
+            if (effect.createParticle != null)
+            {
+                foreach (Fighter f in targets)
+                    CreateParticle
+                        (effect.createParticle.gameObject,
+                        trigger.ability.owner, f,
+                        offset: Vector3.up * 0.5f);
+                yield return StartCoroutine
+                    (Master.SetTimer(effect.createParticle.animationTime));
+            }
+
             switch (effect.type)
             {
                 case Effect.EffectType.Summon:
@@ -1169,6 +1188,7 @@ public class Battle : MonoBehaviour
                     break;
             }
         }
+        triggersActive--;
     }
 
     IEnumerator Step()

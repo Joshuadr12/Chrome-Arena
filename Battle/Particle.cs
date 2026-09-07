@@ -13,6 +13,7 @@ public class Particle : MonoBehaviour
     [Tooltip("Whether or not to color other objects that it collides with.")] public bool spreadColor;
     [Tooltip("The material to coat decoration in upon collision.")] public Material decorMaterial;
     public float animationTime = 0.5f;
+    public bool matchBattleSpeed = true;
     public List<Sprite> sprites;
     public bool changeSpriteOnStart;
     public float size = 1;
@@ -21,9 +22,12 @@ public class Particle : MonoBehaviour
 
     [HideInInspector] public Color baseColor, offColor, lerp = Color.white;
     [HideInInspector] public Vector3 startPos, endPos;
+    [HideInInspector] public bool flipX;
 
     bool isFinished = false;
     float timer = 0, speedFactor;
+    // Variables for arch trajectory
+    float a, b, c, x;
     Vector3 velocity, tempVelocity;
     SpriteRenderer renderer;
 
@@ -31,13 +35,17 @@ public class Particle : MonoBehaviour
     {
         None,
         Explosion,
-        SplashScreen
+        SplashScreen,
+        ArchPoint,
+        ArchSpin
     }
     public enum ColorType
     {
         None,
         Lerp,
-        Random
+        Random,
+        BaseColor,
+        OffColor
     }
 
     // Start is called before the first frame update
@@ -47,6 +55,7 @@ public class Particle : MonoBehaviour
         switch (animationType)
         {
             case AnimationType.Explosion:
+                transform.Translate(Random.value - 0.5f, Random.value - 0.5f, 0);
                 transform.Rotate(0, 0, Random.value * 360);
                 transform.localScale = Vector3.one
                     * Mathf.Sqrt(size / Mathf.PI) / 2;
@@ -73,6 +82,19 @@ public class Particle : MonoBehaviour
                 endPos.z = 0;
                 break;
 
+            case AnimationType.ArchPoint:
+                transform.localScale = Vector3.one * size;
+                renderer.flipX = flipX;
+                CalculateArch();
+                break;
+
+            case AnimationType.ArchSpin:
+                transform.Rotate(0, 0, Random.value * 360);
+                transform.localScale = Vector3.one * size;
+                renderer.flipX = Random.value <= 0.5f;
+                CalculateArch();
+                break;
+
             default:
                 break;
         }
@@ -90,6 +112,15 @@ public class Particle : MonoBehaviour
                         colours.Add(colour.physicalColour);
                 lerp = colours[Random.Range(0, colours.Count)];
                 break;
+
+            case ColorType.BaseColor:
+                lerp = baseColor;
+                break;
+
+            case ColorType.OffColor:
+                lerp = offColor;
+                break;
+
             default:
                 break;
         }
@@ -112,7 +143,7 @@ public class Particle : MonoBehaviour
                 speedFactor =
                     Time.deltaTime
                     / animationTime;
-                if (animationType == AnimationType.Explosion)
+                if (matchBattleSpeed) 
                     speedFactor *= Master.data.battleSpeed;
                 timer += speedFactor;
 
@@ -128,9 +159,25 @@ public class Particle : MonoBehaviour
 
                     case AnimationType.SplashScreen:
                         speedFactor = Master.AnimationCurve
-                            (timer, smoothEnd: true);
+                            (timer, easeOut: true);
                         transform.position = Vector3.Lerp
                             (startPos, endPos, speedFactor);
+                        break;
+
+                    case AnimationType.ArchPoint:
+                        x = timer * endPos.x + (1 - timer) * startPos.x;
+                        transform.position = new Vector2(x,
+                            a * Mathf.Pow(x, 2) + b * x + c);
+                        transform.rotation = Quaternion.Euler(0, 0,
+                            Mathf.Atan(2 * transform.position.x * a + b) * Mathf.Rad2Deg);
+                        break;
+
+                    case AnimationType.ArchSpin:
+                        x = timer * endPos.x + (1 - timer) * startPos.x;
+                        transform.position = new Vector2(x,
+                            a * Mathf.Pow(x, 2) + b * x + c);
+                        transform.Rotate(0, 0,
+                            speedFactor * 720 * (flipX ? 1 : -1));
                         break;
 
                     default:
@@ -148,13 +195,28 @@ public class Particle : MonoBehaviour
                     renderer.sortingOrder = paintDepth++;
                     GetComponent<Rigidbody2D>().simulated = true;
                 }
-                else if (animationType == AnimationType.SplashScreen)
-                {
-                    transform.localScale *= 2;
-                    renderer.sortingOrder = paintDepth++;
-                }
                 else
-                    renderer.sortingOrder = Mathf.RoundToInt(transform.position.y * -999);
+                {
+                    switch (animationType)
+                    {
+                        case AnimationType.SplashScreen:
+                            transform.localScale *= 2;
+                            renderer.sortingOrder = paintDepth++;
+                            break;
+
+                        case AnimationType.ArchPoint:
+                            Destroy(gameObject);
+                            break;
+
+                        case AnimationType.ArchSpin:
+                            Destroy(gameObject);
+                            break;
+
+                        default:
+                            renderer.sortingOrder = Mathf.RoundToInt(transform.position.y * -999);
+                            break;
+                    }
+                }
 
                 if (!changeSpriteOnStart && sprites.Count > 0)
                     renderer.sprite = sprites[Random.Range(0, sprites.Count)];
@@ -177,6 +239,36 @@ public class Particle : MonoBehaviour
                 }
             }
         }
+    }
+
+    void CalculateArch()
+    {
+        ///<summary>Calculate the trajectory for an arch animation.</summary>
+
+        // Calculate the points for vertex form.
+        Vector2 vertex, point;
+        if (startPos.y > endPos.y)
+        {
+            vertex = startPos;
+            point = endPos;
+        }
+        else if (startPos.y == endPos.y)
+        {
+            vertex = new Vector2
+                ((startPos.x + endPos.x) / 2,
+                startPos.y + 1);
+            point = startPos;
+        }
+        else
+        {
+            vertex = endPos;
+            point = startPos;
+        }
+
+        // Convert vertex form to standard form.
+        a = (point.y - vertex.y) / Mathf.Pow(point.x - vertex.x, 2);
+        b = -2 * a * vertex.x;
+        c = a * Mathf.Pow(vertex.x, 2) + vertex.y;
     }
 
     public IEnumerator Fade()

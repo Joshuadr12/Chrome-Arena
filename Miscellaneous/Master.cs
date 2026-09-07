@@ -398,8 +398,8 @@ public class Master : MonoBehaviour
 
     public static float AnimationCurve
         (float state,
-        bool smoothStart = false,
-        bool smoothEnd = false)
+        bool eastIn = false,
+        bool easeOut = false)
     {
         /// <summary>Calculates and returns a point on an animation curve.</summary>
         /// <param name="state">The input value for the curve.</param>
@@ -407,12 +407,12 @@ public class Master : MonoBehaviour
         /// <param name="smoothEnd">Whether the end of the curve is smooth or flat.</param>
 
         // When the start is smooth.
-        return smoothStart
-            ? (smoothEnd
+        return eastIn
+            ? (easeOut
                 ? (1 - Mathf.Cos(state * Mathf.PI)) / 2
                 : 1 - Mathf.Cos(state * Mathf.PI / 2))
         // When the start is abrupt.
-            : (smoothEnd
+            : (easeOut
                 ? Mathf.Sin(state * Mathf.PI / 2)
                 : state);
     }
