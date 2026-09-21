@@ -22,6 +22,8 @@ public class ResearchManager : MonoBehaviour
     [SerializeField] AudioClip newSound, notNewSound;
     [SerializeField] TMP_Text resultHeader;
     [SerializeField] ScrollPanel allResultsScroll;
+    [Header("Research Tree"), SerializeField] GameObject treePanel;
+    public Material silhouette;
 
     GameObject textBox;
     bool showingAllResults = false;
@@ -44,6 +46,8 @@ public class ResearchManager : MonoBehaviour
         {
             if (Town.menuLayer == 1)
                 CloseMenu();
+            else if (Town.menuLayer == 3)
+                CloseTree();
             else if (FindFirstObjectByType<UpgradeManager>()
                 && FindFirstObjectByType<UpgradeManager>()
                 .gameObject.activeSelf)
@@ -237,6 +241,17 @@ public class ResearchManager : MonoBehaviour
         Master.CloseMenu(resultsPanel, mainPanel);
         showingAllResults = false;
         Town.menuLayer = 1;
+    }
+
+    public void OpenTree()
+    {
+        Town.menuLayer = 3;
+        Master.OpenMenu(treePanel, mainPanel);
+    }
+    public void CloseTree()
+    {
+        Town.menuLayer = 1;
+        Master.CloseMenu(treePanel, mainPanel);
     }
 
     public void CloseMenu()

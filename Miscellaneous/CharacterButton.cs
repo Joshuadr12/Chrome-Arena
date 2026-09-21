@@ -21,6 +21,7 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
         ResearchOption,
         ResearchSelected,
         ResearchResults,
+        ResearchTree,
         SquadOption,
         SquadLine
     }
@@ -130,6 +131,11 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
                     manager.GetComponent<ResearchManager>()
                         .UnitHoverEnter(unit.unit);
                     break;
+                case ButtonType.ResearchTree:
+                    if (Master.GetColours(unit.unit).Count > 0)
+                        manager.GetComponent<ResearchManager>()
+                            .UnitHoverEnter(unit.unit);
+                    break;
                 case ButtonType.SquadOption:
                     manager.GetComponent<SquadCustomize>()
                         .UnitHoverEnter(unit.unit);
@@ -156,6 +162,10 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
                     .UnitHoverExit();
                 break;
             case ButtonType.ResearchResults:
+                manager.GetComponent<ResearchManager>()
+                    .UnitHoverExit();
+                break;
+            case ButtonType.ResearchTree:
                 manager.GetComponent<ResearchManager>()
                     .UnitHoverExit();
                 break;
@@ -207,5 +217,20 @@ public class CharacterButton : MonoBehaviour, IPointerClickHandler, IPointerDown
                 default:
                     break;
             }
+    }
+
+    public void UpdateTree()
+    {
+        unit.unit = unitDisplay.unit;
+        unit.colour = "neutral";
+        unitDisplay.gameObject.SetActive(true);
+        unitDisplay.ChangeUnit(unit, true);
+
+        Material material =
+            Master.GetColours(unit.unit).Count > 0
+            ? Master.colours["neutral"].material
+            : manager.GetComponent<ResearchManager>().silhouette;
+        foreach (SpriteRenderer sprite in GetComponentsInChildren<SpriteRenderer>())
+            sprite.material = material;
     }
 }

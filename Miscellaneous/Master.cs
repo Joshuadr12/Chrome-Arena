@@ -468,6 +468,13 @@ public class Master : MonoBehaviour
         }
         return result;
     }
+    public static List<string> GetColours(Unit unit)
+    {
+        foreach (Player.UnitColours colours in data.units)
+            if (colours.unitName == unit.name)
+                return colours.colours;
+        return new List<string>();
+    }
     public static List<Artifact> GetArtifacts(string colour = "all")
     {
         List<Artifact> result = new List<Artifact>();

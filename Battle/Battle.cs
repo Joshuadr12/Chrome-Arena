@@ -1215,6 +1215,8 @@ public class Battle : MonoBehaviour
                 yield return StartCoroutine
                     (Master.SetTimer(effect.createParticle.animationTime));
             }
+            else
+                yield return null;
         }
         triggersActive--;
     }
