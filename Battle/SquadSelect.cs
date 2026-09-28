@@ -27,6 +27,8 @@ public class SquadSelect : MonoBehaviour
     [SerializeField] string cancelPrompt, winMessage, loseMessage;
     [SerializeField] KeyCode cancelKey;
     [SerializeField] AudioClip selectAudio, cancelAudio;
+    [SerializeField] Battle battle;
+    [SerializeField] GameObject battleMenu;
     [Header("Battle Results")]
     [SerializeField] GameObject retreatWarning;
     [SerializeField] Image resultsPanel;
@@ -56,72 +58,149 @@ public class SquadSelect : MonoBehaviour
         source = GetComponent<AudioSource>();
         source.volume = Master.data.sfxVolume;
         resultsAudio.volume = Master.data.sfxVolume;
-        StartCoroutine(Master.DisableSplashScreen(splashScreen,
-            began ? 0.1f : 0.25f));
+        StartCoroutine(Master.DisableSplashScreen(splashScreen, 0.25f));
         leftDisplay.ChangeUnit
             (Master.data.character,
             "neutral", true);
         rightDisplay.ChangeUnit
             (Master.battleSelected.opponentDisplay,
             "neutral", true);
+        advantageDiagram.gameObject.SetActive
+            (Master.data.events.Contains("squad_select")
+            || Master.data.events.Contains("skip_tutorial"));
 
-        // Disable used squads.
-        if (began)
+        // Squads
+        List<Squad> squads = Master
+            .battleSelected
+            .ChooseSquads();
+        for (int s = 0; s < squads.Count; s++)
         {
-            gameOver = true;
-            for (int n = 0; n < leftArmy.Count; n++)
-            {
-                // Game over if all squads have been used.
-                leftArmy[n].button = leftSquads[n].button;
-                if (leftArmy[n].outcome == 0)
-                    gameOver = false;
-                else
-                    leftArmy[n].button.SetActive(false);
+            leftSquads[s].squad = Master.leftSquads[s];
+            rightSquads[s].squad = squads[s];
+        }
 
-                rightArmy[n].button = rightSquads[n].button;
-                if (rightArmy[n].outcome != 0)
-                    rightArmy[n].button.SetActive(false);
+        leftArmy = new List<SquadStatus>();
+        rightArmy = new List<SquadStatus>();
+        foreach (SquadStatus s in leftSquads)
+            leftArmy.Add(s);
+        foreach (SquadStatus s in rightSquads)
+            rightArmy.Add(s);
+        roundsDone = 0;
+        began = true;
+
+        // Button colors and text
+        for (int n = 0; n < leftArmy.Count; n++)
+        {
+            leftArmy[n].button.GetComponent<Image>().color = Master
+                .colours[leftArmy[n].squad.colour]
+                .physicalColour;
+            leftArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().text = leftArmy[n]
+                .squad
+                .squadName;
+            if (Master
+                .colours[leftArmy[n].squad.colour]
+                .whiteText)
+                leftArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().color = Color.white;
+            leftArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().text = leftArmy[n]
+                .squad
+                .squadName;
+            rightArmy[n].button.GetComponent<Image>().color = Master
+                .colours[rightArmy[n].squad.colour]
+                .physicalColour;
+            rightArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().text = rightArmy[n]
+                .squad
+                .squadName;
+            if (Master
+                .colours[rightArmy[n].squad.colour]
+                .whiteText)
+                rightArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().color = Color.white;
+        }
+
+        // Resources
+        foreach (SquadStatus squad in leftArmy)
+            Master.data.AddResource(squad.squad.colour, -squad.squad.startMoney / 2);
+        Master.Save();
+
+        Master.RefreshMusic(Master.battleSelected.settings.music);
+        StarChallenges.totalScore.Reset();
+        ChooseRightSquad();
+    }
+
+    // Update is called once per frame.
+    void Update()
+    {
+        if (!Battle.inBattle)
+        {
+            // Leave the battle.
+            if (Input.GetKeyDown(KeyCode.Escape)
+                && DialogueScene.isDone)
+            {
+                if (leftChoice != null)
+                {
+                    leftChoice = null;
+                    PlaySound(cancelAudio);
+                }
+                else if (resultsBody.activeSelf)
+                    Leave();
+                else if (!gameOver)
+                    retreatWarning.SetActive(!retreatWarning.activeSelf);
             }
+
+            // When the battle is over.
             if (gameOver)
             {
-                countTimer = 0;
-                foreach (SquadStatus s in leftArmy)
-                    countTimer += s.outcome;
+                countdown.enabled = false;
+                instructions.gameObject.SetActive(false);
             }
-        }
-        // When the battle begins.
-        else
-        {
-            // Squads
-            List<Squad> squads = Master
-                .battleSelected
-                .ChooseSquads();
-            for (int s = 0; s < squads.Count; s++)
+            else
             {
-                leftSquads[s].squad = Master.leftSquads[s];
-                rightSquads[s].squad = squads[s];
+                SquadManagement();
+                CountdownManagement();
             }
 
-            leftArmy = new List<SquadStatus>();
-            rightArmy = new List<SquadStatus>();
-            foreach (SquadStatus s in leftSquads)
-                leftArmy.Add(s);
-            foreach (SquadStatus s in rightSquads)
-                rightArmy.Add(s);
-            roundsDone = 0;
-            began = true;
+            levelText.transform.localScale = Vector3.one * Mathf.Max(
+                levelText.transform.localScale.x - Time.deltaTime * 2, 1);
+        }
+    }
 
-            // Resources
-            foreach (SquadStatus squad in leftArmy)
-                Master.data.AddResource(squad.squad.colour, -squad.squad.startMoney / 2);
-            Master.Save();
+    void ChooseRightSquad()
+    {
+        // Right squad choice
+        List<SquadStatus> temp = new List<SquadStatus>();
+        foreach (SquadStatus s in rightArmy)
+            if (s.outcome == 0)
+                temp.Add(s);
+        rightChoice = temp[UnityEngine.Random.Range(0, temp.Count)];
+    }
 
-            Master.RefreshMusic(Master.battleSelected.settings.music);
-            StarChallenges.totalScore.Reset();
+    public void NextRound()
+    {
+        Master.OpenMenu(transform.parent.gameObject, battleMenu);
+        advantageDiagram.gameObject.SetActive
+            (Master.data.events.Contains("squad_select")
+            || Master.data.events.Contains("skip_tutorial"));
+
+        gameOver = true;
+        for (int n = 0; n < leftArmy.Count; n++)
+        {
+            // Game over if all squads have been used.
+            leftArmy[n].button = leftSquads[n].button;
+            if (leftArmy[n].outcome == 0)
+                gameOver = false;
+            else
+                leftArmy[n].button.SetActive(false);
+
+            rightArmy[n].button = rightSquads[n].button;
+            if (rightArmy[n].outcome != 0)
+                rightArmy[n].button.SetActive(false);
         }
 
         if (gameOver)
         {
+            countTimer = 0;
+            foreach (SquadStatus s in leftArmy)
+                countTimer += s.outcome;
+
             // Die animation on game over.
             if (countTimer > 0)
             {
@@ -137,79 +216,9 @@ public class SquadSelect : MonoBehaviour
         }
         else
         {
-            advantageDiagram.gameObject.SetActive
-                (Master.data.events.Contains("squad_select")
-                || Master.data.events.Contains("skip_tutorial"));
-
-            // Button colors and text
-            for (int n = 0; n < leftArmy.Count; n++)
-            {
-                leftArmy[n].button.GetComponent<Image>().color = Master
-                    .colours[leftArmy[n].squad.colour]
-                    .physicalColour;
-                leftArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().text = leftArmy[n]
-                    .squad
-                    .squadName;
-                if (Master
-                    .colours[leftArmy[n].squad.colour]
-                    .whiteText)
-                    leftArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().color = Color.white;
-                leftArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().text = leftArmy[n]
-                    .squad
-                    .squadName;
-                rightArmy[n].button.GetComponent<Image>().color = Master
-                    .colours[rightArmy[n].squad.colour]
-                    .physicalColour;
-                rightArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().text = rightArmy[n]
-                    .squad
-                    .squadName;
-                if (Master
-                    .colours[rightArmy[n].squad.colour]
-                    .whiteText)
-                    rightArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().color = Color.white;
-            }
-
-            // Right squad choice
-            List<SquadStatus> temp = new List<SquadStatus>();
-            foreach (SquadStatus s in rightArmy)
-                if (s.outcome == 0)
-                    temp.Add(s);
-            rightChoice = temp[UnityEngine.Random.Range(0, temp.Count)];
+            leftChoice = null;
+            ChooseRightSquad();
         }
-    }
-
-    // Update is called once per frame.
-    void Update()
-    {
-        // Leave the battle.
-        if (Input.GetKeyDown(KeyCode.Escape)
-            && DialogueScene.isDone)
-        {
-            if (leftChoice != null)
-            {
-                leftChoice = null;
-                PlaySound(cancelAudio);
-            }
-            else if (resultsBody.activeSelf)
-                Leave();
-            else if (!gameOver)
-                retreatWarning.SetActive(!retreatWarning.activeSelf);
-        }
-
-        // When the battle is over.
-        if (gameOver)
-        {
-            countdown.enabled = false;
-            instructions.gameObject.SetActive(false);
-        }
-        else
-        {
-            SquadManagement();
-            CountdownManagement();
-        }
-
-        levelText.transform.localScale = Vector3.one * Mathf.Max(
-            levelText.transform.localScale.x - Time.deltaTime * 2, 1);
     }
 
     void SquadManagement()
@@ -240,9 +249,11 @@ public class SquadSelect : MonoBehaviour
                 else if (!Master.FinishedTutorial("basic_2"))
                     rightChoice = FindEasiestMatch();
 
-                    Battle.leftSide = leftChoice.squad;
+                Battle.leftSide = leftChoice.squad;
                 Battle.rightSide = rightChoice.squad;
-                StartCoroutine(Master.GotoScene("Battle", false));
+                Master.OpenMenu(battleMenu,
+                    transform.parent.gameObject);
+                battle.StartBattle();
             }
             // When the countdown takes place.
             else if (countTimer <= 3)

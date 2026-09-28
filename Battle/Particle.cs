@@ -72,7 +72,8 @@ public class Particle : MonoBehaviour
                 DontDestroyOnLoad(gameObject);
                 animationTime = Random.Range(0.4f, 0.6f);
                 transform.Rotate(0, 0, Random.value * 360);
-                transform.localScale = Vector3.one * Random.Range(0.5f, 1) * size;
+                transform.localScale = Vector3.one * Random.Range(0.5f, 1) * size
+                    * Camera.main.orthographicSize / 5f;
                 renderer.flipX = Random.value <= 0.5f;
 
                 startPos = Vector3.zero;
@@ -234,7 +235,7 @@ public class Particle : MonoBehaviour
                         particle.size = size;
                         particle.lerp = lerp;
                         if (spreadColor)
-                            particle.GetComponent<SpriteRenderer>().sortingOrder = paintDepth;
+                            particle.GetComponent<SpriteRenderer>().sortingOrder = paintDepth++;
                     }
                 }
             }

@@ -64,6 +64,12 @@ public class BattleScroll : MonoBehaviour
         /// <param name="pitchVaries">If set to true, the pitch of the sound will vary randomly.</param>
         /// <param name="pitchBase">The default pitch of the sound. If pitchVaries is set to true, this is also the offset for randomization.</param>
 
+        if (audioComp == null)
+        {
+            audioComp = GetComponent<AudioSource>();
+            audioComp.volume = Master.data.sfxVolume;
+        }
+
         audioComp.pitch = pitchBase;
         if (pitchVaries)
             audioComp.pitch *= Random.value / 2 + 0.75f;

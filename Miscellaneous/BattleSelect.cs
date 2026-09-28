@@ -88,7 +88,7 @@ public class BattleSelect : MonoBehaviour
                 Master.leftSquads.Add(Master.data.squads[i]);
             }
             SquadSelect.fairStars = 1;
-            StartCoroutine(Master.GotoScene("SquadSelect"));
+            StartCoroutine(Master.GotoScene("Battle"));
         }
     }
 

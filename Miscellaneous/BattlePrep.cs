@@ -190,6 +190,6 @@ public class BattlePrep : MonoBehaviour
                 SquadSelect.fairStars = 1;
         }
 
-        StartCoroutine(Master.GotoScene("SquadSelect"));
+        StartCoroutine(Master.GotoScene("Battle"));
     }
 }

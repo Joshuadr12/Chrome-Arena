@@ -14,8 +14,12 @@ public class Battle : MonoBehaviour
     /// </summary>
 
     // Global variables.
-    public static Dictionary<Cause.CauseType, Dictionary<Effect.EffectType, List<Ability>>> fighterAbilities;
-    public static List<Trigger> activeTriggers, pendingTriggers, turnTriggers;
+    public static bool inBattle = false;
+    public static Dictionary<Cause.CauseType, Dictionary<Effect.EffectType, List<Ability>>> fighterAbilities
+        = new Dictionary<Cause.CauseType, Dictionary<Effect.EffectType, List<Ability>>>();
+    public static List<Trigger> activeTriggers = new List<Trigger>(),
+        pendingTriggers = new List<Trigger>(),
+        turnTriggers = new List<Trigger>();
     public static Squad leftSide, rightSide;
     public static Fighter leftArtifact, rightArtifact;
     public static int leftArtifactPoints, rightArtifactPoints;
@@ -46,17 +50,17 @@ public class Battle : MonoBehaviour
     [SerializeField] ScrollPanel artifactPanel;
     [SerializeField] GameObject abilityDesc;
     [SerializeField] UnitDisplay leftAbilityUnit, rightAbilityUnit;
-    [SerializeField, Tooltip("For camera shaking")] Camera cam;
     [SerializeField] float camShakeIntensity = 0.025f;
     [SerializeField] float camShakeTime = 1;
     [Header("Outcome")]
     [SerializeField] BattleScroll scroll;
     [SerializeField] TMP_Text outcomeText;
     [SerializeField] string leftWinText, rightWinText, drawText;
+    [SerializeField] SquadSelect squadSelect;
 
     // Miscellaneous variables.
     // -2 = Undecided; -1 = Right Wins; 0 = Draw; 1 = Left Wins
-    int outcome = -2;
+    int outcome;
     int rightPaintInit;
     int triggersActive = 0;
     float totalShake = 0;
@@ -70,7 +74,63 @@ public class Battle : MonoBehaviour
     //Start is called before the first frame update.
     void Start()
     {
+        // Artifacts
+        leftArtifact = leftArtifactHolder;
+        leftArtifact.isLeft = true;
+        leftArtifact.isArtifact = true;
+        leftArtifact.ChangeUnit
+            (Master.data.character, canBeBig: true);
+
+        rightArtifact = rightArtifactHolder;
+        rightArtifact.isLeft = false;
+        rightArtifact.isArtifact = true;
+        rightArtifact.ChangeUnit
+            (Master.battleSelected.opponentDisplay, canBeBig: true);
+
+        Particle.paintDepth = 0;
+        source = GetComponent<AudioSource>();
+        source.volume = Master.data.sfxVolume;
+        cameraPos = Camera.main.transform.position;
+    }
+
+    //Update is called once per frame.
+    void Update()
+    {
+        if (inBattle)
+        {
+            // Display paint and artifact points.
+            leftPaintText.text = $"${leftSide.paint}";
+            rightPaintText.text = $"${rightSide.paint}";
+
+            if (artifactButtons.Count > 0)
+                leftArtifactPointText.text = $"{leftArtifactPoints}A";
+
+            // Shake the camera.
+            totalShake = Mathf.Max(totalShake, cameraShake);
+            randomShake = new Vector3
+                (UnityEngine.Random.value - 0.5f,
+                UnityEngine.Random.value - 0.5f);
+            randomShake *= cameraShake * camShakeIntensity;
+            Camera.main.transform.position = cameraPos + randomShake;
+            if (cameraShake > 0)
+            {
+                modShake = totalShake
+                    * Time.deltaTime
+                    * Master.data.battleSpeed;
+                cameraShake -= modShake / camShakeTime;
+                cameraShake = Mathf.Max(cameraShake, 0);
+            }
+            else
+                totalShake = 0;
+        }
+    }
+
+    public void StartBattle()
+    {
+        inBattle = true;
+        outcome = -2;
         cameraShake = 0;
+        StarChallenges.tempScore.Reset();
         leftSide.paint = leftSide.startMoney;
         if (!Master.FinishedTutorial())
             leftSide.paint += leftSide.paint / 5;
@@ -78,25 +138,8 @@ public class Battle : MonoBehaviour
         if (rightSide.isBoss)
             rightSide.paint += rightSide.paint / 10;
 
-        // Artifacts
-        leftArtifact = leftArtifactHolder;
-        leftArtifact.isLeft = true;
-        leftArtifact.isArtifact = true;
-        leftArtifact.ChangeUnit
-            (Master.data.character,
-            leftSide.colour,
-            true);
-
-        rightArtifact = rightArtifactHolder;
-        rightArtifact.isLeft = false;
-        rightArtifact.isArtifact = true;
-        rightArtifact.ChangeUnit
-            (Master.battleSelected.opponentDisplay,
-            rightSide.colour,
-            true);
-
         // Abilities and triggers
-        fighterAbilities = new Dictionary<Cause.CauseType, Dictionary<Effect.EffectType, List<Ability>>>();
+        fighterAbilities.Clear();
         foreach (Cause.CauseType cause in Master.abilityCauses)
         {
             fighterAbilities.Add
@@ -108,9 +151,10 @@ public class Battle : MonoBehaviour
                     new List<Ability>());
         }
 
-        activeTriggers = new List<Trigger>();
-        pendingTriggers = new List<Trigger>();
-        turnTriggers = new List<Trigger>();
+        activeTriggers.Clear();
+        pendingTriggers.Clear();
+        turnTriggers.Clear();
+        lanes.Clear();
         outcomeText.enabled = false;
         Lane newLane;
         for (int l = 0; l < settings.lanes; l++)
@@ -122,10 +166,13 @@ public class Battle : MonoBehaviour
 
         // Artifact buttons
         leftArtifactPoints = 10;
+        leftArtifact.ChangeUnit(null, leftSide.colour, true);
+        leftArtifact.abilities.Clear();
+        artifactButtons.Clear();
         List<Artifact> artifacts = Master.GetArtifacts(leftSide.colour);
         foreach (GameObject newObject in artifactPanel.Populate(artifacts.Count))
             artifactButtons.Add(newObject.GetComponent<ArtifactButton>());
-        for (int a = 0; a < artifacts.Count;  a++)
+        for (int a = 0; a < artifacts.Count; a++)
         {
             artifactButtons[a].type = ArtifactButton.ButtonType.Battle;
             artifactButtons[a].artifact = artifacts[a];
@@ -137,6 +184,9 @@ public class Battle : MonoBehaviour
 
         // Enemy artifacts
         rightArtifactPoints = 10;
+        rightArtifact.ChangeUnit(null, rightSide.colour, true);
+        rightArtifact.abilities.Clear();
+        enemyCooldowns.Clear();
         for (int a = 0; a < rightSide.artifacts.Count; a++)
         {
             enemyCooldowns.Add(0);
@@ -151,41 +201,7 @@ public class Battle : MonoBehaviour
             }
         }
 
-        Particle.paintDepth = 0;
-        source = GetComponent<AudioSource>();
-        source.volume = Master.data.sfxVolume;
-        cameraPos = cam.transform.position;
-        StarChallenges.tempScore.Reset();
         StartCoroutine(BattleFlow());
-    }
-
-    //Update is called once per frame.
-    void Update()
-    {
-        // Display paint and artifact points.
-        leftPaintText.text = $"${leftSide.paint}";
-        rightPaintText.text = $"${rightSide.paint}";
-
-        if (artifactButtons.Count > 0)
-            leftArtifactPointText.text = $"{leftArtifactPoints}A";
-
-        // Shake the camera.
-        totalShake = Mathf.Max(totalShake, cameraShake);
-        randomShake = new Vector3
-            (UnityEngine.Random.value - 0.5f,
-            UnityEngine.Random.value - 0.5f);
-        randomShake *= cameraShake * camShakeIntensity;
-        cam.transform.position = cameraPos + randomShake;
-        if (cameraShake > 0)
-        {
-            modShake = totalShake
-                * Time.deltaTime
-                * Master.data.battleSpeed;
-            cameraShake -= modShake / camShakeTime;
-            cameraShake = Mathf.Max(cameraShake, 0);
-        }
-        else
-            totalShake = 0;
     }
 
     List<Fighter> SummonFighters
@@ -728,7 +744,8 @@ public class Battle : MonoBehaviour
             StarChallenges.AddTempScore();
 
         SquadSelect.roundsDone++;
-        StartCoroutine(Master.GotoScene("SquadSelect", false));
+        squadSelect.NextRound();
+        inBattle = false;
     }
 
     IEnumerator SummonArmy(List<Lane> lanes)
