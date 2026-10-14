@@ -14,15 +14,13 @@ public class SquadSelect : MonoBehaviour
     // Global variables.
     public static bool began = false, artifactTutorial = true;
     public static int roundsDone, fairStars;
-    public static List<SquadStatus> leftArmy, rightArmy;
 
     // Serialized variables for the editor.
     [Header("Menu")]
-    [SerializeField] List<SquadStatus> leftSquads;
-    [SerializeField] List<SquadStatus> rightSquads;
+    public List<SquadStatus> leftSquads;
+    public List<SquadStatus> rightSquads;
     [SerializeField] GameObject splashScreen;
     [SerializeField] UnitDisplay leftDisplay, rightDisplay;
-    [SerializeField] TMP_Text instructions, countdown;
     [SerializeField] Image advantageDiagram;
     [SerializeField] string cancelPrompt, winMessage, loseMessage;
     [SerializeField] KeyCode cancelKey;
@@ -46,8 +44,8 @@ public class SquadSelect : MonoBehaviour
 
     // Miscellaneous variables.
     bool gameOver = false;
-    // countTimer is also used after the game concludes to determine which side won.
-    float countTimer = 4;
+    // Used after the game concludes to determine which side won.
+    float totalOutcome;
     SquadStatus leftChoice, rightChoice;
     AudioSource source;
     Color bronzeFade, goldFade;
@@ -79,46 +77,17 @@ public class SquadSelect : MonoBehaviour
             rightSquads[s].squad = squads[s];
         }
 
-        leftArmy = new List<SquadStatus>();
-        rightArmy = new List<SquadStatus>();
-        foreach (SquadStatus s in leftSquads)
-            leftArmy.Add(s);
-        foreach (SquadStatus s in rightSquads)
-            rightArmy.Add(s);
         roundsDone = 0;
         began = true;
 
-        // Button colors and text
-        for (int n = 0; n < leftArmy.Count; n++)
+        // Button colors, text, and resources
+        foreach (SquadStatus squad in leftSquads)
         {
-            leftArmy[n].button.GetComponent<Image>().color = Master
-                .colours[leftArmy[n].squad.colour]
-                .physicalColour;
-            leftArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().text = leftArmy[n]
-                .squad
-                .squadName;
-            if (Master
-                .colours[leftArmy[n].squad.colour]
-                .whiteText)
-                leftArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().color = Color.white;
-            leftArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().text = leftArmy[n]
-                .squad
-                .squadName;
-            rightArmy[n].button.GetComponent<Image>().color = Master
-                .colours[rightArmy[n].squad.colour]
-                .physicalColour;
-            rightArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().text = rightArmy[n]
-                .squad
-                .squadName;
-            if (Master
-                .colours[rightArmy[n].squad.colour]
-                .whiteText)
-                rightArmy[n].button.transform.GetChild(0).GetComponent<TMP_Text>().color = Color.white;
-        }
-
-        // Resources
-        foreach (SquadStatus squad in leftArmy)
+            squad.button.UpdateSquad(squad.squad);
             Master.data.AddResource(squad.squad.colour, -squad.squad.startMoney / 2);
+        }
+        foreach (SquadStatus squad in rightSquads)
+            squad.button.UpdateSquad(squad.squad);
         Master.Save();
 
         Master.RefreshMusic(Master.battleSelected.settings.music);
@@ -147,17 +116,6 @@ public class SquadSelect : MonoBehaviour
             }
 
             // When the battle is over.
-            if (gameOver)
-            {
-                countdown.enabled = false;
-                instructions.gameObject.SetActive(false);
-            }
-            else
-            {
-                SquadManagement();
-                CountdownManagement();
-            }
-
             levelText.transform.localScale = Vector3.one * Mathf.Max(
                 levelText.transform.localScale.x - Time.deltaTime * 2, 1);
         }
@@ -167,7 +125,7 @@ public class SquadSelect : MonoBehaviour
     {
         // Right squad choice
         List<SquadStatus> temp = new List<SquadStatus>();
-        foreach (SquadStatus s in rightArmy)
+        foreach (SquadStatus s in rightSquads)
             if (s.outcome == 0)
                 temp.Add(s);
         rightChoice = temp[UnityEngine.Random.Range(0, temp.Count)];
@@ -181,28 +139,26 @@ public class SquadSelect : MonoBehaviour
             || Master.data.events.Contains("skip_tutorial"));
 
         gameOver = true;
-        for (int n = 0; n < leftArmy.Count; n++)
+        for (int n = 0; n < leftSquads.Count; n++)
         {
             // Game over if all squads have been used.
-            leftArmy[n].button = leftSquads[n].button;
-            if (leftArmy[n].outcome == 0)
+            if (leftSquads[n].outcome == 0)
                 gameOver = false;
             else
-                leftArmy[n].button.SetActive(false);
+                leftSquads[n].button.gameObject.SetActive(false);
 
-            rightArmy[n].button = rightSquads[n].button;
-            if (rightArmy[n].outcome != 0)
-                rightArmy[n].button.SetActive(false);
+            if (rightSquads[n].outcome != 0)
+                rightSquads[n].button.gameObject.SetActive(false);
         }
 
         if (gameOver)
         {
-            countTimer = 0;
-            foreach (SquadStatus s in leftArmy)
-                countTimer += s.outcome;
+            totalOutcome = 0;
+            foreach (SquadStatus s in leftSquads)
+                totalOutcome += s.outcome;
 
             // Die animation on game over.
-            if (countTimer > 0)
+            if (totalOutcome > 0)
             {
                 rightDisplay.SetAnimation(UnitDisplay.AnimState.Die);
                 resultsText.text = winMessage;
@@ -218,59 +174,6 @@ public class SquadSelect : MonoBehaviour
         {
             leftChoice = null;
             ChooseRightSquad();
-        }
-    }
-
-    void SquadManagement()
-    {
-        /// <summary>Manage choice canceling.</summary>
-
-        instructions.gameObject.SetActive(leftChoice != null);
-        instructions.text = cancelPrompt;
-    }
-
-    void CountdownManagement()
-    {
-        /// <summary>Manage the countdown timer when the players' choices have been made and move to the next scene when it's time.</summary>
-
-        if ((leftChoice != null) && (rightChoice != null))
-        {
-            float oldTimer = countTimer;
-            countTimer -= Time.deltaTime;
-
-            // When the round begins.
-            if (countTimer <= 0)
-            {
-                // In the tutorial, right squads are chosen differently.
-                if
-                    (!Master.FinishedTutorial()
-                    && (roundsDone <= 1))
-                    rightChoice = FindPreciseMatch(roundsDone == 1);
-                else if (!Master.FinishedTutorial("basic_2"))
-                    rightChoice = FindEasiestMatch();
-
-                Battle.leftSide = leftChoice.squad;
-                Battle.rightSide = rightChoice.squad;
-                Master.OpenMenu(battleMenu,
-                    transform.parent.gameObject);
-                battle.StartBattle();
-            }
-            // When the countdown takes place.
-            else if (countTimer <= 3)
-            {
-                countdown.enabled = true;
-                countdown.text = $"{Mathf.CeilToInt(countTimer)}";
-                // This formula is used to determine when each second passes.
-                if (Mathf.Ceil(countTimer) == Mathf.Floor(oldTimer))
-                    PlaySound(selectAudio);
-            }
-            else
-                countdown.enabled = false;
-        }
-        else
-        {
-            countdown.enabled = false;
-            countTimer = 4;
         }
     }
 
@@ -307,8 +210,21 @@ public class SquadSelect : MonoBehaviour
         /// <summary>Set the player's choice.</summary>
         /// <param name="squadIndex">The index of the choice being made.</param>
 
-        leftChoice = leftArmy[squadIndex];
-        PlaySound(selectAudio);
+        leftChoice = leftSquads[squadIndex];
+        //PlaySound(selectAudio);
+        // In the tutorial, right squads are chosen differently.
+        if
+            (!Master.FinishedTutorial()
+            && (roundsDone <= 1))
+            rightChoice = FindPreciseMatch(roundsDone == 1);
+        else if (!Master.FinishedTutorial("basic_2"))
+            rightChoice = FindEasiestMatch();
+
+        Battle.leftSide = leftChoice.squad;
+        Battle.rightSide = rightChoice.squad;
+        Master.OpenMenu(battleMenu,
+            transform.parent.gameObject);
+        battle.StartBattle();
     }
 
     public void Retreat()
@@ -355,7 +271,7 @@ public class SquadSelect : MonoBehaviour
 
         // Update stars.
         int oldStars = Master.GetStars();
-        if (!retreated && countTimer > 0)
+        if (!retreated && totalOutcome > 0)
         {
             UpdateStarText("FREE", true);
             UpdateStarText("FAIR MODE", fairStars >= 1);
@@ -396,7 +312,7 @@ public class SquadSelect : MonoBehaviour
         levelMeter.value = levelProgress;
 
         // Refund unused squads.
-        foreach (SquadStatus squad in leftArmy)
+        foreach (SquadStatus squad in leftSquads)
             if (squad.outcome != 0)
                 Master.data.AddResource(squad.squad.colour, -squad.squad.startMoney / 2);
 
@@ -429,7 +345,7 @@ public class SquadSelect : MonoBehaviour
 
         // Stars on win
         Image star;
-        if (!retreated && countTimer > 0)
+        if (!retreated && totalOutcome > 0)
         {
             PlaySound(winSound);
             yield return new WaitForSeconds(0.5f);
@@ -557,10 +473,10 @@ public class SquadSelect : MonoBehaviour
         // Color Salvaged
         for (int i = 0; i < resourceQuantities.Count; i++)
             Master.RenderResourceQuantity(resourceQuantities[i],
-                leftArmy[i].squad.colour,
-                leftArmy[i].outcome == 0
-                ? leftArmy[i].squad.startMoney / 2
-                : Math.Min(leftArmy[i].squad.paint, leftArmy[i].squad.startMoney));
+                leftSquads[i].squad.colour,
+                leftSquads[i].outcome == 0
+                ? leftSquads[i].squad.startMoney / 2
+                : Math.Min(leftSquads[i].squad.paint, leftSquads[i].squad.startMoney));
         resultsBody.SetActive(true);
 
         levelProgress = newLevel[1] / (float)(newLevel[0] / 10 + 2);
@@ -582,7 +498,7 @@ public class SquadSelect : MonoBehaviour
         float score;
         score = invert ? 0 : 1;
         float a;
-        foreach (SquadStatus s in rightArmy)
+        foreach (SquadStatus s in rightSquads)
         {
             if (s.outcome == 0)
             {
@@ -619,7 +535,7 @@ public class SquadSelect : MonoBehaviour
         float score;
         score = invert ? 1 : -1;
         float a;
-        foreach (SquadStatus s in rightArmy)
+        foreach (SquadStatus s in rightSquads)
         {
             if (s.outcome == 0)
             {
@@ -657,6 +573,6 @@ public class SquadStatus
 
     // Variables.
     public Squad squad;
-    public GameObject button;
+    public SquadOption button;
     [HideInInspector] public int outcome = 0;
 }

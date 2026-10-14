@@ -720,7 +720,7 @@ public class Battle : MonoBehaviour
         }
 
         // Updates SquadStatus with the outcome of the battle.
-        foreach (SquadStatus squad in SquadSelect.leftArmy)
+        foreach (SquadStatus squad in squadSelect.leftSquads)
             if (squad.squad == leftSide)
             {
                 squad.outcome = outcome;
@@ -728,7 +728,7 @@ public class Battle : MonoBehaviour
                 if (outcome > 0)
                     StarChallenges.tempScore.roundsWon++;
             }
-        foreach (SquadStatus squad in SquadSelect.rightArmy)
+        foreach (SquadStatus squad in squadSelect.rightSquads)
             if (squad.squad == rightSide)
                 squad.outcome = -outcome;
 
