@@ -28,9 +28,10 @@ public class Player : ScriptableObject
 
     public void AddResource(string colour, int amount)
     {
-        for (int i = 0; i < resources.Count; i++)
-            if (resources[i].colour == colour)
-                resources[i].quantity += amount;
+        if (Master.useSaves)
+            for (int i = 0; i < resources.Count; i++)
+                if (resources[i].colour == colour)
+                    resources[i].quantity += amount;
     }
 
     public void NextWeek()

@@ -14,6 +14,7 @@ public class Master : MonoBehaviour
     /// </summary>
 
     // Global variables.
+    public static bool useSaves;
     public static string saveFile = "save1";
     public static Player data, newData;
     public static GameObject splashParticle, splashScreenPanel;
@@ -34,10 +35,11 @@ public class Master : MonoBehaviour
     public static AudioSource backgroundMusic = null;
 
     // Serialized variables for the editor.
-    [SerializeField] bool testing;
+    [SerializeField] bool testing, useSaveFiles = true;
     [SerializeField, Tooltip("The object to create when transitioning between scenes.")] GameObject splashScreenParticle;
     [SerializeField] Color bronzeStarColor, goldStarColor;
     [SerializeField] Player playerData, backupData;
+    [SerializeField, Tooltip("The default battle to engage when launching from the battle scene.")] BattleLevel defaultBattle;
     [SerializeField] AudioSource audioSource;
     [SerializeField] Colour[] colourSet;
     [SerializeField] ColourCollection[] colourCollections;
@@ -95,11 +97,23 @@ public class Master : MonoBehaviour
                     upgrades[collection.name].Add(upgrade);
             }
 
+            useSaves = useSaveFiles;
             data = playerData;
             newData = backupData;
             splashParticle = splashScreenParticle;
+
             if (testing)
                 LoadData(SaveData.Load(saveFile));
+            if (!useSaves)
+            {
+                battleSelected = defaultBattle;
+                leftSquads.Clear();
+                for (int i = 0; i < 3; i++)
+                {
+                    Master.data.squads[i].startMoney = Master.battleSelected.squadSize;
+                    Master.leftSquads.Add(Master.data.squads[i]);
+                }
+            }
 
             abilityCauses = causeOrder;
             abilityEffects = effectOrder;
@@ -121,7 +135,8 @@ public class Master : MonoBehaviour
 
     public static void Save()
     {
-        SaveData.Save(data, saveFile);
+        if (useSaves)
+            SaveData.Save(data, saveFile);
     }
 
     public static void LoadData(PlayerData_0_3_3 saveData)
