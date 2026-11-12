@@ -53,7 +53,6 @@ public class Battle : MonoBehaviour
     [SerializeField] float camShakeIntensity = 0.025f;
     [SerializeField] float camShakeTime = 1;
     [Header("Outcome")]
-    [SerializeField] BattleScroll scroll;
     [SerializeField] TMP_Text outcomeText;
     [SerializeField] string leftWinText, rightWinText, drawText;
     [SerializeField] SquadSelect squadSelect;
@@ -68,6 +67,7 @@ public class Battle : MonoBehaviour
     [HideInInspector] public List<Lane> lanes = new List<Lane>();
     AudioSource source;
     Vector3 cameraPos, randomShake;
+    Animator artifactAnimator;
     List<ArtifactButton> artifactButtons = new List<ArtifactButton>();
     List<int> enemyCooldowns = new List<int>();
 
@@ -75,6 +75,7 @@ public class Battle : MonoBehaviour
     void Start()
     {
         // Artifacts
+        artifactAnimator = artifactPanel.GetComponent<Animator>();
         leftArtifact = leftArtifactHolder;
         leftArtifact.isLeft = true;
         leftArtifact.isArtifact = true;
@@ -102,6 +103,7 @@ public class Battle : MonoBehaviour
             leftPaintText.text = $"${leftSide.paint}";
             rightPaintText.text = $"${rightSide.paint}";
 
+            artifactAnimator.speed = Master.data.battleSpeed;
             if (artifactButtons.Count > 0)
                 leftArtifactPointText.text = $"{leftArtifactPoints}A";
 
@@ -181,6 +183,7 @@ public class Battle : MonoBehaviour
             leftArtifact.AddAbility(artifacts[a].type.ability);
             leftArtifactPointText.gameObject.SetActive(true);
         }
+        artifactAnimator.SetTrigger("scale");
 
         // Enemy artifacts
         rightArtifactPoints = 10;
@@ -705,11 +708,6 @@ public class Battle : MonoBehaviour
     {
         /// <summary>The main flow of battle.</summary>
 
-        scroll.Broadcast(Master
-            .colours[leftSide.colour]
-            .Advantage(Master.colours[rightSide.colour]),
-            true);
-
         // Summon the fighters, then undergo the battle loop.
         yield return StartCoroutine(SummonArmy(lanes));
         yield return StartCoroutine(dialoguePanel.ExecuteScenes(events));
@@ -718,6 +716,9 @@ public class Battle : MonoBehaviour
             yield return StartCoroutine(Step());
             yield return StartCoroutine(Attack());
         }
+
+        BattleScroll.main.SetPanel(true);
+        artifactAnimator.SetTrigger("scale");
 
         // Updates SquadStatus with the outcome of the battle.
         foreach (SquadStatus squad in squadSelect.leftSquads)
@@ -735,7 +736,7 @@ public class Battle : MonoBehaviour
         if (outcome != 0)
             StartCoroutine(HighlightPaintText
                 (outcome > 0 ? leftPaintText : rightPaintText));
-        scroll.Broadcast(outcome, false);
+        BattleScroll.main.Broadcast(outcome, false);
         yield return Master.SetTimer(2, false);
 
         if (outcome == 0)

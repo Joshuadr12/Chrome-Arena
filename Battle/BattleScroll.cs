@@ -10,13 +10,16 @@ public class BattleScroll : MonoBehaviour
     /// Displays messages during a round of battle.
     /// </summary>
 
+    public static BattleScroll main;
+
     // Serialized variables for the editor.
+    [SerializeField] GameObject panel;
     [SerializeField] TMP_Text text;
     [SerializeField] string victoryText, failText, drawText;
     [SerializeField] AudioClip victorySound, failSound, drawSound;
 
     // Miscellaneous variables.
-    float timer = 0;
+    float timer = 4;
     float curve;
     RectTransform rect;
     AudioSource audioComp;
@@ -24,6 +27,7 @@ public class BattleScroll : MonoBehaviour
     // Start is called before the first frame update.
     void Start()
     {
+        main = this;
         rect = GetComponent<RectTransform>();
         audioComp = GetComponent<AudioSource>();
         audioComp.volume = Master.data.sfxVolume;
@@ -82,33 +86,34 @@ public class BattleScroll : MonoBehaviour
         /// <param name="outcome">The color advantage/disadvantage if isStart is set to true, or the outcome of the round if isStart is set to false.</param>
         /// <param name="isStart">If set to true, announce the color advantage. If set to false, announce the outcome of the round.</param>
 
+        panel.SetActive(true);
         // Decide the sound to play and text to display based on the phase in the round and the outcome
-        if (outcome != 0 || !isStart)
+        // When there is no color advantage or the round is a draw.
+        if (outcome == 0)
         {
-            // When there is no color advantage or the round is a draw.
-            if (outcome == 0)
-            {
-                PlaySound(drawSound);
-                text.text = drawText;
-            }
-            // When the player is at a disadvantage or failed the round.
-            else if (outcome < 0)
-            {
-                PlaySound(failSound);
-                text.text = isStart
-                    ? $"{Mathf.RoundToInt(outcome * -100)}% Disadvantage!"
-                    : failText;
-            }
-            else
-            {
-                PlaySound(victorySound);
-                text.text = isStart
-                    ? $"{Mathf.RoundToInt(outcome * 100)}% Advantage!"
-                    : victoryText;
-            }
-            timer = 0;
+            PlaySound(drawSound);
+            text.text = isStart ? "0% Advantage!" : drawText;
+        }
+        // When the player is at a disadvantage or failed the round.
+        else if (outcome < 0)
+        {
+            PlaySound(failSound);
+            text.text = isStart
+                ? $"{Mathf.RoundToInt(outcome * -100)}% Disadvantage!"
+                : failText;
         }
         else
-            timer = 4;
+        {
+            PlaySound(victorySound);
+            text.text = isStart
+                ? $"{Mathf.RoundToInt(outcome * 100)}% Advantage!"
+                : victoryText;
+        }
+        timer = 0;
+    }
+
+    public void SetPanel(bool show = false)
+    {
+        panel.SetActive(show);
     }
 }

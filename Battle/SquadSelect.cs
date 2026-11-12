@@ -19,11 +19,10 @@ public class SquadSelect : MonoBehaviour
     [Header("Menu")]
     public List<SquadStatus> leftSquads;
     public List<SquadStatus> rightSquads;
+    [SerializeField] Animator leftAnimator, rightAnimator;
     [SerializeField] GameObject splashScreen;
     [SerializeField] UnitDisplay leftDisplay, rightDisplay;
-    [SerializeField] Image advantageDiagram;
     [SerializeField] string cancelPrompt, winMessage, loseMessage;
-    [SerializeField] KeyCode cancelKey;
     [SerializeField] AudioClip selectAudio, cancelAudio;
     [SerializeField] Battle battle;
     [SerializeField] GameObject battleMenu;
@@ -57,15 +56,13 @@ public class SquadSelect : MonoBehaviour
         source.volume = Master.data.sfxVolume;
         resultsAudio.volume = Master.data.sfxVolume;
         StartCoroutine(Master.DisableSplashScreen(splashScreen, 0.25f));
+        StartCoroutine(SetPanel(false));
         leftDisplay.ChangeUnit
             (Master.data.character,
             "neutral", true);
         rightDisplay.ChangeUnit
             (Master.battleSelected.opponentDisplay,
             "neutral", true);
-        advantageDiagram.gameObject.SetActive
-            (Master.data.events.Contains("squad_select")
-            || Master.data.events.Contains("skip_tutorial"));
 
         // Squads
         List<Squad> squads = Master
@@ -98,6 +95,9 @@ public class SquadSelect : MonoBehaviour
     // Update is called once per frame.
     void Update()
     {
+        leftAnimator.speed = Master.data.battleSpeed;
+        rightAnimator.speed = Master.data.battleSpeed;
+
         if (!Battle.inBattle)
         {
             // Leave the battle.
@@ -121,6 +121,21 @@ public class SquadSelect : MonoBehaviour
         }
     }
 
+    public void ShowAdvantages(SquadOption squad)
+    {
+        foreach (SquadStatus option in
+            squad.isLeft ? rightSquads : leftSquads)
+            option.button.ShowAdvantage(squad.colour);
+    }
+
+    public void HideAdvantages()
+    {
+        foreach (SquadStatus option in leftSquads)
+            option.button.HideAdvantage();
+        foreach (SquadStatus option in rightSquads)
+            option.button.HideAdvantage();
+    }
+
     void ChooseRightSquad()
     {
         // Right squad choice
@@ -133,10 +148,10 @@ public class SquadSelect : MonoBehaviour
 
     public void NextRound()
     {
-        Master.OpenMenu(transform.parent.gameObject, battleMenu);
-        advantageDiagram.gameObject.SetActive
-            (Master.data.events.Contains("squad_select")
-            || Master.data.events.Contains("skip_tutorial"));
+        battleMenu.SetActive(false);
+        leftAnimator.SetInteger("choice", -1);
+        rightAnimator.SetInteger("choice", -1);
+        StartCoroutine(SetPanel());
 
         gameOver = true;
         for (int n = 0; n < leftSquads.Count; n++)
@@ -211,10 +226,9 @@ public class SquadSelect : MonoBehaviour
         /// <param name="squadIndex">The index of the choice being made.</param>
 
         leftChoice = leftSquads[squadIndex];
-        //PlaySound(selectAudio);
+        PlaySound(selectAudio);
         // In the tutorial, right squads are chosen differently.
-        if
-            (!Master.FinishedTutorial()
+        if (!Master.FinishedTutorial()
             && (roundsDone <= 1))
             rightChoice = FindPreciseMatch(roundsDone == 1);
         else if (!Master.FinishedTutorial("basic_2"))
@@ -222,8 +236,40 @@ public class SquadSelect : MonoBehaviour
 
         Battle.leftSide = leftChoice.squad;
         Battle.rightSide = rightChoice.squad;
-        Master.OpenMenu(battleMenu,
-            transform.parent.gameObject);
+        leftAnimator.SetInteger("choice", squadIndex);
+        rightAnimator.SetInteger("choice", rightSquads.IndexOf(rightChoice));
+        StartCoroutine(ChoiceAnimation());
+    }
+
+    public IEnumerator SetPanel(bool triggerSquadSelect = true)
+    {
+        if (triggerSquadSelect)
+        {
+            leftAnimator.SetTrigger("scale");
+            rightAnimator.SetTrigger("scale");
+        }
+
+        BattleScroll.main.SetPanel(true);
+        yield return StartCoroutine(Master.SetTimer(1));
+        BattleScroll.main.SetPanel();
+    }
+
+    public IEnumerator ChoiceAnimation()
+    {
+        BattleScroll.main.SetPanel(true);
+        yield return StartCoroutine(Master.SetTimer(1));
+        float advantage = Master
+            .colours[Battle.leftSide.colour]
+            .Advantage(Master.colours[Battle.rightSide.colour]);
+        if (advantage > 0)
+            leftAnimator.SetTrigger("advantage");
+        if (advantage < 0)
+            rightAnimator.SetTrigger("advantage");
+        BattleScroll.main.Broadcast(advantage, true);
+
+        yield return StartCoroutine(Master.SetTimer(2));
+        StartCoroutine(SetPanel());
+        battleMenu.SetActive(true);
         battle.StartBattle();
     }
 
