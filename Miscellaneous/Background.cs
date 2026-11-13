@@ -8,7 +8,7 @@ public class Background : MonoBehaviour
     public Terrain terrain;
 
     float windSpeed, newSpeed;
-    SpriteRenderer renderer;
+    SpriteRenderer spriteComp;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -38,7 +38,7 @@ public class Background : MonoBehaviour
         windDirection = Random.value * Mathf.PI * 2;
         windSpeed = Random.Range(terrain.minWind, terrain.maxWind);
         newSpeed = windSpeed;
-        renderer = GetComponent<SpriteRenderer>();
+        spriteComp = GetComponent<SpriteRenderer>();
         Invoke("ChangeWindSpeed", Random.Range(10f, 30f));
     }
 

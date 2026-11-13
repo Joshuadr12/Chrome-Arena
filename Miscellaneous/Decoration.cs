@@ -8,7 +8,7 @@ public class Decoration : MonoBehaviour
 
     int spriteIndex = 0;
     float windOffset;
-    SpriteRenderer renderer;
+    SpriteRenderer spriteComp;
     Particle particle;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -16,9 +16,9 @@ public class Decoration : MonoBehaviour
     {
         windOffset = (transform.position.x * Mathf.Cos(Background.windDirection)
             + transform.position.y * Mathf.Sin(Background.windDirection) + 20) / 5;
-        renderer = GetComponent<SpriteRenderer>();
-        renderer.sprite = sprites[0];
-        renderer.flipX = Mathf.Cos(Background.windDirection) < 0;
+        spriteComp = GetComponent<SpriteRenderer>();
+        spriteComp.sprite = sprites[0];
+        spriteComp.flipX = Mathf.Cos(Background.windDirection) < 0;
     }
 
     // Update is called once per frame
@@ -27,7 +27,7 @@ public class Decoration : MonoBehaviour
         spriteIndex = Mathf.FloorToInt((Background.windTimer + windOffset) % sprites.Count);
         try
         {
-            renderer.sprite = sprites[spriteIndex];
+            spriteComp.sprite = sprites[spriteIndex];
         }
         catch
         {
@@ -41,8 +41,8 @@ public class Decoration : MonoBehaviour
             particle = collision.GetComponent<Particle>();
             if (particle != null && particle.spreadColor)
             {
-                renderer.material = particle.decorMaterial;
-                renderer.color = particle.lerp;
+                spriteComp.material = particle.decorMaterial;
+                spriteComp.color = particle.lerp;
             }
         }
     }

@@ -22,15 +22,15 @@ public class SquadSelect : MonoBehaviour
     [SerializeField] Animator leftAnimator, rightAnimator;
     [SerializeField] GameObject splashScreen;
     [SerializeField] UnitDisplay leftDisplay, rightDisplay;
-    [SerializeField] string cancelPrompt, winMessage, loseMessage;
+    [SerializeField] protected string winMessage, loseMessage;
     [SerializeField] AudioClip selectAudio, cancelAudio;
-    [SerializeField] Battle battle;
-    [SerializeField] GameObject battleMenu;
+    [SerializeField] protected Battle battle;
+    [SerializeField] protected GameObject battleMenu;
     [Header("Battle Results")]
     [SerializeField] GameObject retreatWarning;
     [SerializeField] Image resultsPanel;
     [SerializeField] GameObject resultsWindow, resultsBody;
-    [SerializeField] TMP_Text resultsText;
+    [SerializeField] protected TMP_Text resultsText;
     [SerializeField] AudioSource resultsAudio;
     [SerializeField] AudioClip winSound, failSound, bronzeSound, goldSound, levelSound;
     [SerializeField] List<Image> starCount;
@@ -42,12 +42,12 @@ public class SquadSelect : MonoBehaviour
     [SerializeField] List<Image> resourceQuantities;
 
     // Miscellaneous variables.
-    bool gameOver = false;
+    [HideInInspector] protected bool gameOver = false;
     // Used after the game concludes to determine which side won.
-    float totalOutcome;
-    SquadStatus leftChoice, rightChoice;
-    AudioSource source;
-    Color bronzeFade, goldFade;
+    [HideInInspector] protected float totalOutcome;
+    [HideInInspector] protected SquadStatus leftChoice, rightChoice;
+    [HideInInspector] protected AudioSource source;
+    [HideInInspector] protected Color bronzeFade, goldFade;
 
     // Start is called before the first frame update.
     void Start()

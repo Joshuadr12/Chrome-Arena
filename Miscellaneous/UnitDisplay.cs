@@ -12,6 +12,7 @@ public class UnitDisplay : MonoBehaviour
 
     // Serialized variables for the editor.
     public Unit unit;
+    bool changed = false;
     public bool canBeBig;
     public bool useBattleSpeed;
     [Tooltip("Leave 0 for a random speed.")] public float animSpeed;
@@ -38,7 +39,8 @@ public class UnitDisplay : MonoBehaviour
     {
         if (animSpeed <= 0)
             animSpeed = Random.value / 2 + 0.75f;
-        //ChangeUnit(unit, "neutral", true);
+        if (!changed)
+            ChangeUnit(unit, "neutral", true);
     }
 
     //Update is called once per frame.
@@ -109,6 +111,7 @@ public class UnitDisplay : MonoBehaviour
 
         if (newUnit != null)
         {
+            changed = true;
             unit = newUnit;
             if (model)
                 Destroy(model);

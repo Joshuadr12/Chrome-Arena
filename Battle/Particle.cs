@@ -29,7 +29,7 @@ public class Particle : MonoBehaviour
     // Variables for arch trajectory
     float a, b, c, x;
     Vector3 velocity, tempVelocity;
-    SpriteRenderer renderer;
+    SpriteRenderer spriteComp;
 
     public enum AnimationType
     {
@@ -51,7 +51,7 @@ public class Particle : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        renderer = GetComponent<SpriteRenderer>();
+        spriteComp = GetComponent<SpriteRenderer>();
         switch (animationType)
         {
             case AnimationType.Explosion:
@@ -59,7 +59,7 @@ public class Particle : MonoBehaviour
                 transform.Rotate(0, 0, Random.value * 360);
                 transform.localScale = Vector3.one
                     * Mathf.Sqrt(size / Mathf.PI) / 2;
-                renderer.flipX = Random.value <= 0.5f;
+                spriteComp.flipX = Random.value <= 0.5f;
 
                 velocity = new Vector3
                     (Random.value - 0.5f,
@@ -74,7 +74,7 @@ public class Particle : MonoBehaviour
                 transform.Rotate(0, 0, Random.value * 360);
                 transform.localScale = Vector3.one * Random.Range(0.5f, 1) * size
                     * Camera.main.orthographicSize / 5f;
-                renderer.flipX = Random.value <= 0.5f;
+                spriteComp.flipX = Random.value <= 0.5f;
 
                 startPos = Vector3.zero;
                 endPos = Camera.main.ScreenToWorldPoint(new Vector2(
@@ -85,14 +85,14 @@ public class Particle : MonoBehaviour
 
             case AnimationType.ArchPoint:
                 transform.localScale = Vector3.one * size;
-                renderer.flipX = flipX;
+                spriteComp.flipX = flipX;
                 CalculateArch();
                 break;
 
             case AnimationType.ArchSpin:
                 transform.Rotate(0, 0, Random.value * 360);
                 transform.localScale = Vector3.one * size;
-                renderer.flipX = Random.value <= 0.5f;
+                spriteComp.flipX = Random.value <= 0.5f;
                 CalculateArch();
                 break;
 
@@ -125,10 +125,10 @@ public class Particle : MonoBehaviour
             default:
                 break;
         }
-        renderer.color = lerp;
+        spriteComp.color = lerp;
 
         if (changeSpriteOnStart && sprites.Count > 0)
-            renderer.sprite = sprites[Random.Range(0, sprites.Count)];
+            spriteComp.sprite = sprites[Random.Range(0, sprites.Count)];
     }
 
     // Update is called once per frame
@@ -193,7 +193,7 @@ public class Particle : MonoBehaviour
                 if (spreadColor)
                 {
                     transform.localScale *= 2;
-                    renderer.sortingOrder = paintDepth++;
+                    spriteComp.sortingOrder = paintDepth++;
                     GetComponent<Rigidbody2D>().simulated = true;
                 }
                 else
@@ -202,7 +202,7 @@ public class Particle : MonoBehaviour
                     {
                         case AnimationType.SplashScreen:
                             transform.localScale *= 2;
-                            renderer.sortingOrder = paintDepth++;
+                            spriteComp.sortingOrder = paintDepth++;
                             break;
 
                         case AnimationType.ArchPoint:
@@ -214,13 +214,13 @@ public class Particle : MonoBehaviour
                             break;
 
                         default:
-                            renderer.sortingOrder = Mathf.RoundToInt(transform.position.y * -999);
+                            spriteComp.sortingOrder = Mathf.RoundToInt(transform.position.y * -999);
                             break;
                     }
                 }
 
                 if (!changeSpriteOnStart && sprites.Count > 0)
-                    renderer.sprite = sprites[Random.Range(0, sprites.Count)];
+                    spriteComp.sprite = sprites[Random.Range(0, sprites.Count)];
 
                 if (spawnObject)
                 {

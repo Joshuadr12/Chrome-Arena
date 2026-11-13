@@ -3,9 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
-using UnityEngine.UI;
 
 public class Battle : MonoBehaviour
 {
@@ -29,22 +27,22 @@ public class Battle : MonoBehaviour
     // Serialized variables for the editor.
     [Header("Battle")]
     public BattleSettings settings;
-    [SerializeField] GameObject fighter;
-    [FormerlySerializedAs("damageMarker"), SerializeField] GameObject flyingText;
+    [SerializeField] protected GameObject fighter;
+    [FormerlySerializedAs("damageMarker"), SerializeField] protected GameObject flyingText;
     [SerializeField] GameObject buffMarker;
     [SerializeField] GameObject paintParticle, shellParticle;
     [SerializeField] Fighter leftArtifactHolder, rightArtifactHolder;
     [Header("Audio")]
-    [SerializeField] GameObject damageAudioBit;
+    [SerializeField] protected GameObject damageAudioBit;
     [SerializeField] AudioClip summonSound,
-        chargeSound, victorySound, failSound, drawSound;
-    [SerializeField, Tooltip("Sounds to play based on total damage dealt, in descending order")] AudioClip[] damageSounds;
+        chargeSound;
+    [SerializeField, Tooltip("Sounds to play based on total damage dealt, in descending order")] protected AudioClip[] damageSounds;
     [SerializeField, Tooltip("The minimum damage for the corresponding sounds, in descending order")] int[] damageMinimums;
     [Header("Interface")]
     [SerializeField] DialogueScene dialoguePanel;
     [SerializeField] List<DialogueEvent> events;
-    [FormerlySerializedAs("leftMoney"), SerializeField] TMP_Text leftPaintText;
-    [FormerlySerializedAs("rightMoney"), SerializeField] TMP_Text rightPaintText;
+    [FormerlySerializedAs("leftMoney"), SerializeField] protected TMP_Text leftPaintText;
+    [FormerlySerializedAs("rightMoney"), SerializeField] protected TMP_Text rightPaintText;
     [SerializeField] TMP_Text leftArtifactPointText;
     [SerializeField] TMP_Text artifactDesc;
     [SerializeField] ScrollPanel artifactPanel;
@@ -53,19 +51,17 @@ public class Battle : MonoBehaviour
     [SerializeField] float camShakeIntensity = 0.025f;
     [SerializeField] float camShakeTime = 1;
     [Header("Outcome")]
-    [SerializeField] TMP_Text outcomeText;
-    [SerializeField] string leftWinText, rightWinText, drawText;
     [SerializeField] SquadSelect squadSelect;
 
     // Miscellaneous variables.
     // -2 = Undecided; -1 = Right Wins; 0 = Draw; 1 = Left Wins
-    int outcome;
-    int rightPaintInit;
+    protected int outcome;
+    protected int rightPaintInit;
     int triggersActive = 0;
     float totalShake = 0;
     float modShake;
     [HideInInspector] public List<Lane> lanes = new List<Lane>();
-    AudioSource source;
+    protected AudioSource source;
     Vector3 cameraPos, randomShake;
     Animator artifactAnimator;
     List<ArtifactButton> artifactButtons = new List<ArtifactButton>();
@@ -157,7 +153,6 @@ public class Battle : MonoBehaviour
         pendingTriggers.Clear();
         turnTriggers.Clear();
         lanes.Clear();
-        outcomeText.enabled = false;
         Lane newLane;
         for (int l = 0; l < settings.lanes; l++)
         {

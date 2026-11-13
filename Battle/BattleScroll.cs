@@ -14,15 +14,15 @@ public class BattleScroll : MonoBehaviour
 
     // Serialized variables for the editor.
     [SerializeField] GameObject panel;
-    [SerializeField] TMP_Text text;
-    [SerializeField] string victoryText, failText, drawText;
-    [SerializeField] AudioClip victorySound, failSound, drawSound;
+    [SerializeField] protected TMP_Text text;
+    [SerializeField] protected string victoryText, failText, drawText;
+    [SerializeField] protected AudioClip victorySound, failSound, drawSound;
 
     // Miscellaneous variables.
-    float timer = 4;
+    protected float timer = 4;
     float curve;
     RectTransform rect;
-    AudioSource audioComp;
+    protected AudioSource audioComp;
 
     // Start is called before the first frame update.
     void Start()

@@ -12,7 +12,7 @@ public class SquadOption : MonoBehaviour
 
     SquadSelect manager;
     [HideInInspector] public Colour colour;
-    TMP_Text squadText;
+    protected TMP_Text squadText;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

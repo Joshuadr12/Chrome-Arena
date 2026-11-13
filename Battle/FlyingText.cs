@@ -23,7 +23,7 @@ public class FlyingText : MonoBehaviour
     [HideInInspector] public bool isCritical = false;
     Vector3 velocity, spin;
     float fade;
-    float timer = 2;
+    protected float timer = 2;
     float time;
     Color critLerp;
 
