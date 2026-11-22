@@ -3,9 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 public class Town : MonoBehaviour
 {
@@ -15,10 +12,9 @@ public class Town : MonoBehaviour
 
     public static int menuLayer;
 
-    [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
+    [SerializeField] TMP_Text levelAndPoints;
     public Transform castle;
     [SerializeField] GameObject splashScreen, buildingParticles;
-    [SerializeField] List<Image> resourceDisplay;
     [SerializeField] List<ButtonRequirement> buttonsToEnable;
 
 
@@ -41,33 +37,18 @@ public class Town : MonoBehaviour
 
     public void RenderResources(string justUpgraded = "")
     {
-        /// <summary>Update the conditionally active buttons, then update the resources section with the current week and resources.</summary>
+        /// <summary>Update the conditionally active buttons.</summary>
         /// <param name="justUpgraded">If a new building was just built, enter the upgrade ID to create particle effects at the building.</param>
+
+        levelAndPoints.text = $"Level {Master.data.level}\n{Master.data.upgradePoints} upgrade point";
+        if (Master.data.upgradePoints != 1)
+            levelAndPoints.text += "s";
+        levelAndPoints.text += $"\n{Master.data.researchPoints} research point";
+        if (Master.data.researchPoints != 1)
+            levelAndPoints.text += "s";
 
         foreach (ButtonRequirement button in buttonsToEnable)
             RenderObject(button, justUpgraded);
-
-        Image resourceImage;
-        int index = 0;
-        weekText.text = "Week " + Master.data.week.ToString();
-
-        foreach (Player.ResourceQuantity resource in Master.data.resources)
-        {
-            if (index < resourceDisplay.Count)
-            {
-                resourceImage = resourceDisplay[index];
-                resourceImage.gameObject.SetActive(true);
-                Master.RenderResourceQuantity(resourceImage, resource);
-                index++;
-            }
-        }
-
-        while (index < resourceDisplay.Count)
-        {
-            resourceImage = resourceDisplay[index];
-            resourceImage.gameObject.SetActive(false);
-            index++;
-        }
     }
 
     public void RenderObject(ButtonRequirement obj, string justUpgraded = "")
@@ -75,13 +56,6 @@ public class Town : MonoBehaviour
         obj.obj.SetActive(obj.requirements.RequirementsMet());
         if (obj.obj.name == justUpgraded)
             Instantiate(buildingParticles, obj.obj.transform);
-    }
-
-    public void NextWeek()
-    {
-        Master.data.NextWeek();
-        Master.Save();
-        RenderResources();
     }
 
     public void CreateParticles(Transform location)

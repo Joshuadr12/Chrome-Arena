@@ -110,6 +110,7 @@ public class ResearchManager : MonoBehaviour
         researchCostText.text = "Research 1 time";
 
         unitOptions.UpdateUnitOptions("basic", Master.colourActive);
+        FindFirstObjectByType<Town>().RenderResources();
     }
 
     public void SelectColour(string colour)

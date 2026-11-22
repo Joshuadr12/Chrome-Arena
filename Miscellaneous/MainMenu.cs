@@ -22,7 +22,7 @@ public class MainMenu : MonoBehaviour
     [HideInInspector] public string deleteSelection { get; set; }
     [HideInInspector] public int menuLayer { get; set; }
 
-    Dictionary<string, PlayerData_0_3_3> saves = new Dictionary<string, PlayerData_0_3_3>();
+    Dictionary<string, PlayerData_0_3_5> saves = new Dictionary<string, PlayerData_0_3_5>();
     List<string> unitCollections = new List<string>();
     string randomCollection;
     List<Unit> collection;
@@ -148,7 +148,7 @@ public class MainMenu : MonoBehaviour
     {
         /// <summary>Update the information in the save file menu.</summary>
 
-        PlayerData_0_3_3 save;
+        PlayerData_0_3_5 save;
         Unit unit;
         for (int n = 0; n < saveFiles.Count; n++)
         {
@@ -165,7 +165,7 @@ public class MainMenu : MonoBehaviour
             deleteButtons[n].interactable = save.events.Contains("intro");
 
             if (save.events.Contains("intro"))
-                saveDescriptions[n].text = $"Week {save.week}, Level {save.level}";
+                saveDescriptions[n].text = $"Level {save.level}";
             else
                 saveDescriptions[n].text = "New Save";
         }

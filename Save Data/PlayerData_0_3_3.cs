@@ -37,13 +37,13 @@ public class PlayerData_0_3_3
         musicVolume = player.musicVolume;
         sfxVolume = player.sfxVolume;
         character = player.character.name;
-        week = player.week;
+        //week = player.week;
 
         defaultSquads.Clear();
         foreach (int i in player.defaultSquads)
             defaultSquads.Add(i);
 
-        List<ArtifactData> artifactData;
+        /*List<ArtifactData> artifactData;
         artifacts.Clear();
         foreach (ArtifactList list in player.artifacts)
         {
@@ -68,7 +68,7 @@ public class PlayerData_0_3_3
 
         resources.Clear();
         foreach (Player.ResourceQuantity colour in player.resources)
-            resources.Add(colour.colour, colour.quantity);
+            resources.Add(colour.colour, colour.quantity);*/
 
         upgrades.Clear();
         foreach (Player.UpgradeQuantity upgrade in player.upgrades)
@@ -130,7 +130,7 @@ public class PlayerData_0_3_3
         foreach (PlayerData_0_3_2.SquadData s in oldData.squads)
             squads.Add(new SquadData(s.title, s.colour, s.lines));
 
-        List<ArtifactData> list;
+        /*List<ArtifactData> list;
         artifacts.Clear();
         foreach (ArtifactList artifactList in Master.newData.artifacts)
         {
@@ -147,7 +147,7 @@ public class PlayerData_0_3_3
             foreach (Artifact a in sales.artifacts)
                 list.Add(new ArtifactData(a.type.name, a.uses));
             forgeSales.Add(sales.colour, list);
-        }
+        }*/
 
         income.Clear();
         foreach (string colour in oldData.income.Keys)

@@ -81,7 +81,6 @@ public class SquadSelect : MonoBehaviour
         foreach (SquadStatus squad in leftSquads)
         {
             squad.button.UpdateSquad(squad.squad);
-            Master.data.AddResource(squad.squad.colour, -squad.squad.startMoney / 2);
         }
         foreach (SquadStatus squad in rightSquads)
             squad.button.UpdateSquad(squad.squad);
@@ -349,30 +348,11 @@ public class SquadSelect : MonoBehaviour
             {
                 Master.data.level++;
                 Master.data.upgradePoints++;
-                foreach (Player.ResourceQuantity resource in Master.data.income)
-                    resource.quantity += (Master.data.level > 10) ? 40 : 20;
             }
         }
         levelText.text = $"Level {oldLevel[0]}";
         float levelProgress = oldLevel[1] / (float)(oldLevel[0] / 10 + 2);
         levelMeter.value = levelProgress;
-
-        // Refund unused squads.
-        foreach (SquadStatus squad in leftSquads)
-            if (squad.outcome != 0)
-                Master.data.AddResource(squad.squad.colour, -squad.squad.startMoney / 2);
-
-        // Destroy broken artifacts.
-        List<Artifact> broken = new List<Artifact>();
-        foreach (ArtifactList list in Master.data.artifacts)
-        {
-            broken.Clear();
-            foreach (Artifact artifact in list.artifacts)
-                if (artifact.uses <= 0)
-                    broken.Add(artifact);
-            foreach (Artifact artifact in broken)
-                list.artifacts.Remove(artifact);
-        }
 
         Master.Save();
 

@@ -47,7 +47,7 @@ public class ForgeManager : MonoBehaviour
 
     public void RefreshMenu()
     {
-        // Display the resources the player has.
+        /*// Display the resources the player has.
         foreach (ResourceDisplay display in resources)
         {
             display.text.color = Color.black;
@@ -99,7 +99,7 @@ public class ForgeManager : MonoBehaviour
         else
             Master.CloseMenu(artifactPanel.gameObject, limitText);
 
-        purchaseButton.interactable = false;
+        purchaseButton.interactable = false;*/
     }
 
     public void ArtifactHoverEnter(ArtifactButton artifact)
@@ -124,7 +124,7 @@ public class ForgeManager : MonoBehaviour
 
     public void SelectArtifact(ArtifactButton artifact)
     {
-        // Toggle interactability.
+        /*// Toggle interactability.
         artifactActive = artifact;
         foreach (ArtifactButton button
             in FindObjectsByType<ArtifactButton>(FindObjectsSortMode.None))
@@ -150,12 +150,12 @@ public class ForgeManager : MonoBehaviour
             else
                 display.text.color = Color.black;
             display.text.text = display.quantity.ToString();
-        }
+        }*/
     }
 
     public void MakePurchase()
     {
-        audioSource.PlayOneShot(purchaseSound);
+        /*audioSource.PlayOneShot(purchaseSound);
         Master.data.AddResource(artifactActive.colour, -artifactActive.price);
 
         // Add the artifact.
@@ -187,7 +187,7 @@ public class ForgeManager : MonoBehaviour
         Master.Save();
 
         FindFirstObjectByType<Town>().RenderResources();
-        RefreshMenu();
+        RefreshMenu();*/
     }
 
     public void CloseMenu()

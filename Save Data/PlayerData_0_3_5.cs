@@ -13,7 +13,6 @@ public class PlayerData_0_3_5
     public string saveVersion = "0.3.5";
     public float battleSpeed, musicVolume, sfxVolume;
     public string character;
-    public int week;
     public List<int> defaultSquads = new List<int>();
     public List<SquadData> squads = new List<SquadData>();
     public Dictionary<string, int> upgrades = new Dictionary<string, int>();
@@ -33,7 +32,6 @@ public class PlayerData_0_3_5
         musicVolume = player.musicVolume;
         sfxVolume = player.sfxVolume;
         character = player.character.name;
-        week = player.week;
 
         defaultSquads.Clear();
         foreach (int i in player.defaultSquads)
@@ -88,7 +86,6 @@ public class PlayerData_0_3_5
         musicVolume = oldData.musicVolume;
         sfxVolume = oldData.sfxVolume;
         character = oldData.character;
-        week = oldData.week;
 
         defaultSquads.Clear();
         foreach (int i in oldData.defaultSquads)
@@ -130,7 +127,6 @@ public class PlayerData_0_3_5
         musicVolume = oldData.musicVolume;
         sfxVolume = oldData.sfxVolume;
         character = oldData.character;
-        week = oldData.week;
 
         defaultSquads.Clear();
         foreach (int i in oldData.defaultSquads)

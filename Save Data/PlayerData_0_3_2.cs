@@ -33,19 +33,19 @@ public class PlayerData_0_3_2
         musicVolume = player.musicVolume;
         sfxVolume = player.sfxVolume;
         character = player.character.name;
-        week = player.week;
+        //week = player.week;
 
         defaultSquads.Clear();
         foreach (int i in player.defaultSquads)
             defaultSquads.Add(i);
 
-        income.Clear();
+        /*income.Clear();
         foreach (Player.ResourceQuantity colour in player.income)
             income.Add(colour.colour, colour.quantity);
 
         resources.Clear();
         foreach (Player.ResourceQuantity colour in player.resources)
-            resources.Add(colour.colour, colour.quantity);
+            resources.Add(colour.colour, colour.quantity);*/
 
         upgrades.Clear();
         foreach (Player.UpgradeQuantity upgrade in player.upgrades)

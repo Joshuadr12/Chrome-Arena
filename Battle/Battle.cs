@@ -720,7 +720,6 @@ public class Battle : MonoBehaviour
             if (squad.squad == leftSide)
             {
                 squad.outcome = outcome;
-                Master.data.AddResource(squad.squad.colour, Math.Min(leftSide.paint, leftSide.startMoney));
                 if (outcome > 0)
                     StarChallenges.tempScore.roundsWon++;
             }

@@ -14,15 +14,12 @@ public class BattleSelect : MonoBehaviour
 
     [SerializeField] List<GameObject> buttons;
     [SerializeField, FormerlySerializedAs("squadMenu")] GameObject splashScreen, battlePrepMenu;
-    [SerializeField, FormerlySerializedAs("dayText")] TMP_Text weekText;
-    [SerializeField] List<Image> resourceDisplay;
 
 
     //Start is called before the first frame update.
     void Start()
     {
         Master.battleSelected = null;
-        RenderResources();
         StartCoroutine(Master.DisableSplashScreen(splashScreen));
     }
 
@@ -36,33 +33,6 @@ public class BattleSelect : MonoBehaviour
                 BackToTown();
             else
                 CancelBattle();
-        }
-    }
-
-    public void RenderResources()
-    {
-        /// <summary>Update the resources section with the current day and resources.</summary>
-
-        Image resourceImage;
-        int index = 0;
-        weekText.text = "Week " + Master.data.week.ToString();
-
-        foreach (Player.ResourceQuantity resource in Master.data.resources)
-        {
-            if (index < resourceDisplay.Count)
-            {
-                resourceImage = resourceDisplay[index];
-                resourceImage.gameObject.SetActive(true);
-                Master.RenderResourceQuantity(resourceImage, resource);
-                index++;
-            }
-        }
-
-        while (index < resourceDisplay.Count)
-        {
-            resourceImage = resourceDisplay[index];
-            resourceImage.gameObject.SetActive(false);
-            index++;
         }
     }
 

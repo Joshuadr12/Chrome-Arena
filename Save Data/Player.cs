@@ -12,57 +12,15 @@ public class Player : ScriptableObject
     /// </summary>
 
     public float battleSpeed = 1, musicVolume = 1, sfxVolume = 1;
-    [FormerlySerializedAs("day")] public int week;
     [Tooltip("The unit representing the player that displays in battle.")] public Unit character;
     public List<int> defaultSquads = new List<int>();
     [FormerlySerializedAs("totalSquads")] public List<Squad> squads;
-    public List<ArtifactList> artifacts, forgeSales;
-    [Tooltip("The resources that the player has at the start of each day.")] public List<ResourceQuantity> income;
-    public List<ResourceQuantity> resources;
     public List<UpgradeQuantity> upgrades;
     public List<UnitColours> units;
     public List<BattleStars> stars;
     public List<string> events;
     public int level, starsLeftover,
         upgradePoints, researchPoints, artifactsPurchased;
-
-    public void AddResource(string colour, int amount)
-    {
-        if (Master.useSaves)
-            for (int i = 0; i < resources.Count; i++)
-                if (resources[i].colour == colour)
-                    resources[i].quantity += amount;
-    }
-
-    public void NextWeek()
-    {
-        week++;
-        artifactsPurchased = 0;
-
-        // Reset paint resources.
-        resources.Clear();
-        foreach (ResourceQuantity gain in income)
-            resources.Add(new ResourceQuantity(gain.colour, gain.quantity));
-
-        // Restock the Forge.
-        if (events.Contains("first_purchase"))
-        {
-            foreach (ArtifactList list in forgeSales)
-                list.artifacts.Clear();
-            ArtifactType artifactType;
-            Artifact artifact;
-            for (int a = 0; a < 3; a++)
-            {
-                artifactType = Master.artifacts
-                    [UnityEngine.Random.Range(0, Master.artifacts.Count)];
-                artifact = new Artifact
-                    (artifactType,
-                    Mathf.RoundToInt(50 / artifactType.valuePerUse));
-                forgeSales[UnityEngine.Random.Range(0, forgeSales.Count)]
-                    .artifacts.Add(artifact);
-            }
-        }
-    }
 
     public int TimesUpgraded(Upgrade upgrade)
     {

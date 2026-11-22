@@ -139,7 +139,7 @@ public class Master : MonoBehaviour
             SaveData.Save(data, saveFile);
     }
 
-    public static void LoadData(PlayerData_0_3_3 saveData)
+    public static void LoadData(PlayerData_0_3_5 saveData)
     {
         /// <summary>Load the given save data.</summary>
 
@@ -150,21 +150,10 @@ public class Master : MonoBehaviour
         data.character = FindUnit(saveData.character);
         if (data.character == null)
             data.character = newData.character;
-        data.week = saveData.week;
 
         data.defaultSquads.Clear();
         foreach (int i in saveData.defaultSquads)
             data.defaultSquads.Add(i);
-
-        data.income.Clear();
-        foreach (KeyValuePair<string, int> colour in saveData.income)
-            data.income.Add(new Player.ResourceQuantity
-                (colour.Key, colour.Value));
-
-        data.resources.Clear();
-        foreach (KeyValuePair<string, int> colour in saveData.resources)
-            data.resources.Add(new Player.ResourceQuantity
-                (colour.Key, colour.Value));
 
         data.upgrades.Clear();
         foreach (KeyValuePair<string, int> upgrade in saveData.upgrades)
@@ -189,30 +178,11 @@ public class Master : MonoBehaviour
         data.starsLeftover = saveData.starsLeftover;
         data.upgradePoints = saveData.upgradePoints;
         data.researchPoints = saveData.researchPoints;
-        data.artifactsPurchased = saveData.artifactsPurchased;
-
-        List<Artifact> list;
-        data.artifacts.Clear();
-        foreach (KeyValuePair<string, List<PlayerData_0_3_3.ArtifactData>> colour in saveData.artifacts)
-        {
-            list = new List<Artifact>();
-            foreach (PlayerData_0_3_3.ArtifactData artifact in colour.Value)
-                list.Add(new Artifact(FindArtifact(artifact.name), artifact.uses));
-            data.artifacts.Add(new ArtifactList(colour.Key, list));
-        }
-
-        data.forgeSales.Clear();
-        foreach (KeyValuePair<string, List<PlayerData_0_3_3.ArtifactData>> colour in saveData.forgeSales)
-        {
-            list = new List<Artifact>();
-            foreach (PlayerData_0_3_3.ArtifactData artifact in colour.Value)
-                list.Add(new Artifact(FindArtifact(artifact.name), artifact.uses));
-            data.forgeSales.Add(new ArtifactList(colour.Key, list));
-        }
 
         Squad squad;
-        PlayerData_0_3_3.SquadData squadData;
+        PlayerData_0_3_5.SquadData squadData;
         Line line;
+        List<ArtifactType> artifacts;
         for (int s = 0; s < data.squads.Count; s++)
         {
             squad = data.squads[s];
@@ -234,6 +204,20 @@ public class Master : MonoBehaviour
                 }
                 squad.units.Add(line);
             }
+
+            artifacts = new List<ArtifactType>();
+            foreach (string a in squadData.artifacts)
+            {
+                try
+                {
+                    artifacts.Add(FindArtifact(a));
+                }
+                catch
+                {
+                    Debug.LogWarning("Artifact not found.");
+                }
+            }
+            squad.artifacts = artifacts;
         }
     }
 
@@ -359,12 +343,6 @@ public class Master : MonoBehaviour
         return result;
     }
 
-    public static void NextWeek()
-    {
-        data.NextWeek();
-        Save();
-    }
-
     public static void RenderSquadDropdowns
         (List<TMP_Dropdown> dropdowns,
         List<string> squadsChosen,
@@ -401,11 +379,11 @@ public class Master : MonoBehaviour
                 if (squadAmounts.Count <= 0)
                     for (int i = 0; i < squadsChosen.Count; i++)
                         squadAmounts.Add(battleSelected.squadSize);
-                foreach (Player.ResourceQuantity resource in data.resources)
+                /*foreach (Player.ResourceQuantity resource in data.resources)
                     if (resource.colour == squad.colour)
                         squadAmounts[drop] = Math.Min
                             (resource.quantity,
-                            squadAmounts[drop]);
+                            squadAmounts[drop]);*/
                 squad.startMoney = squadAmounts[drop];
             }
         }
@@ -492,11 +470,8 @@ public class Master : MonoBehaviour
     }
     public static List<Artifact> GetArtifacts(string colour = "all")
     {
+        //TODO: Change
         List<Artifact> result = new List<Artifact>();
-        foreach (ArtifactList list in data.artifacts)
-            if (colour == "all" || list.colour == colour)
-                foreach (Artifact artifact in list.artifacts)
-                    result.Add(artifact);
         return result;
     }
 
